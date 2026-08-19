@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Proyek terpisah (Cloudflare Worker), di-lint sendiri di worker/.
+    "worker/**",
   ]),
   {
     rules: {
