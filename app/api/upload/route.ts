@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   }
 
   const previewId = crypto.randomUUID();
-  setPreview(previewId, {
+  await setPreview(previewId, {
     rows,
     filename: file.name,
     newBatch,

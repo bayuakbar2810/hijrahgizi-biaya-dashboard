@@ -1,8 +1,16 @@
+import { Pool } from "pg";
 import { PGlite } from "@electric-sql/pglite";
 import fs from "fs";
 import path from "path";
 
-const globalForDb = globalThis as unknown as { __pg?: PGlite };
+type QueryResult = { rows: Array<Record<string, unknown>> };
+
+export type Db = {
+  query: (text: string, params?: unknown[]) => Promise<QueryResult>;
+  exec: (text: string) => Promise<void>;
+};
+
+const globalForDb = globalThis as unknown as { __db?: Db };
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS source_files (
@@ -60,6 +68,15 @@ CREATE TABLE IF NOT EXISTS batch_notes (
   notes TEXT NOT NULL DEFAULT '',
   updated_at TEXT
 );
+
+CREATE TABLE IF NOT EXISTS previews (
+  id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  rows_json TEXT NOT NULL,
+  new_batch INTEGER NOT NULL DEFAULT 0,
+  updated_batch INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
 `;
 
 const DEFAULT_SETTINGS: Record<string, string> = {
@@ -74,20 +91,56 @@ const DEFAULT_SETTINGS: Record<string, string> = {
   exclude_name_prefixes: "RTL CST",
 };
 
-export async function getDb(): Promise<PGlite> {
-  if (globalForDb.__pg) return globalForDb.__pg;
+export async function getDb(): Promise<Db> {
+  if (globalForDb.__db) return globalForDb.__db;
+  const db = process.env.DATABASE_URL ? await initCloudDb() : await initLocalDb();
+  globalForDb.__db = db;
+  return db;
+}
+
+async function initCloudDb(): Promise<Db> {
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 5,
+    connectionTimeoutMillis: 20_000,
+    ssl: { rejectUnauthorized: false },
+  });
+  const db: Db = {
+    async query(text, params) {
+      const res = await pool.query(text, params ?? []);
+      return { rows: res.rows as Array<Record<string, unknown>> };
+    },
+    async exec(text) {
+      await pool.query(text);
+    },
+  };
+  await db.exec(SCHEMA);
+  await seedSettings(db);
+  await seedProductMaster(db);
+  return db;
+}
+
+async function initLocalDb(): Promise<Db> {
   const dir = path.join(process.cwd(), "pgdata");
   fs.mkdirSync(dir, { recursive: true });
   const db = new PGlite(dir);
   await db.exec(SCHEMA);
-  await seedSettings(db);
-  await seedProductMaster(db);
-  await migrateLegacy(db);
-  globalForDb.__pg = db;
-  return db;
+  const local: Db = {
+    async query(text, params) {
+      const res = await db.query(text, params ?? []);
+      return { rows: res.rows as Array<Record<string, unknown>> };
+    },
+    async exec(text) {
+      await db.exec(text);
+    },
+  };
+  await seedSettings(local);
+  await seedProductMaster(local);
+  await migrateLegacy(local);
+  return local;
 }
 
-async function seedSettings(db: PGlite): Promise<void> {
+async function seedSettings(db: Db): Promise<void> {
   for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
     await db.query(
       `INSERT INTO settings (key, value) VALUES ($1, $2)
@@ -97,7 +150,7 @@ async function seedSettings(db: PGlite): Promise<void> {
   }
 }
 
-async function seedProductMaster(db: PGlite): Promise<void> {
+async function seedProductMaster(db: Db): Promise<void> {
   const { rows } = await db.query(`SELECT COUNT(*) AS n FROM product_master`);
   const n = Number((rows[0] as { n?: number | string } | undefined)?.n ?? 0);
   if (n > 0) return;
@@ -176,7 +229,7 @@ function parseCsvLine(line: string): string[] {
   return out;
 }
 
-async function migrateLegacy(db: PGlite): Promise<void> {
+async function migrateLegacy(db: Db): Promise<void> {
   const hasTx = await db.query(`SELECT COUNT(*) AS n FROM production_transactions`);
   const n = Number((hasTx.rows[0] as { n?: number | string } | undefined)?.n ?? 0);
   if (n > 0) return;

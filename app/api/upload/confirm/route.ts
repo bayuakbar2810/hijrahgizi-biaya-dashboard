@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getDb, nowIso } from "@/lib/db";
 import { readAuth } from "@/lib/auth";
-import { getPreview } from "@/lib/preview";
+import { getPreview, deletePreview } from "@/lib/preview";
 import type { PrdRow } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   if (!body.preview_id) {
     return NextResponse.json({ error: "preview_id wajib diisi" }, { status: 400 });
   }
-  const preview = getPreview(body.preview_id);
+  const preview = await getPreview(body.preview_id);
   if (!preview) {
     return NextResponse.json(
       { error: "Preview kedaluwarsa. Silakan unggah ulang file." },
@@ -105,6 +105,8 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  await deletePreview(body.preview_id);
 
   return NextResponse.json({
     ok: true,
