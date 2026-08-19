@@ -42,3 +42,9 @@ next-env.d.ts
 
 # pglite database
 /pgdata/
+
+# cloudflare worker build artifacts
+/worker/node_modules/
+/worker/dist/
+/worker/.tmp-test/
+/worker/.wrangler/
