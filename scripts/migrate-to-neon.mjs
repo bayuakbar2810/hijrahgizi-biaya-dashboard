@@ -22,6 +22,59 @@ const TABLES = [
 
 const CHUNK = 500;
 
+const SCHEMA = `
+CREATE TABLE IF NOT EXISTS source_files (
+  id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  uploaded_at TEXT NOT NULL,
+  n_rows INTEGER NOT NULL DEFAULT 0,
+  n_batch INTEGER NOT NULL DEFAULT 0,
+  new_batch INTEGER NOT NULL DEFAULT 0,
+  updated_batch INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS product_master (
+  kode TEXT PRIMARY KEY,
+  nama_produk TEXT NOT NULL,
+  product_type TEXT NOT NULL,
+  is_rtl INTEGER NOT NULL DEFAULT 0,
+  is_main_output INTEGER NOT NULL DEFAULT 0,
+  is_by_product INTEGER NOT NULL DEFAULT 0,
+  is_packaging INTEGER NOT NULL DEFAULT 0,
+  active INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS production_transactions (
+  id TEXT PRIMARY KEY,
+  source_file TEXT,
+  tanggal TEXT NOT NULL,
+  batch_no TEXT NOT NULL,
+  kode TEXT,
+  bahan_biaya TEXT,
+  keterangan TEXT,
+  pengeluaran_alokasi DOUBLE PRECISION DEFAULT 0,
+  pengeluaran_biaya DOUBLE PRECISION DEFAULT 0,
+  pengeluaran_qty DOUBLE PRECISION DEFAULT 0,
+  penyelesaian_alokasi DOUBLE PRECISION DEFAULT 0,
+  penyelesaian_biaya DOUBLE PRECISION DEFAULT 0,
+  penyelesaian_qty DOUBLE PRECISION DEFAULT 0,
+  total_alokasi DOUBLE PRECISION DEFAULT 0,
+  total_biaya DOUBLE PRECISION DEFAULT 0,
+  total_qty DOUBLE PRECISION DEFAULT 0,
+  uploaded_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_ppt_batch ON production_transactions(batch_no);
+CREATE INDEX IF NOT EXISTS idx_ppt_tanggal ON production_transactions(tanggal);
+CREATE INDEX IF NOT EXISTS idx_ppt_kode ON production_transactions(kode);
+CREATE TABLE IF NOT EXISTS batch_notes (
+  batch_no TEXT PRIMARY KEY,
+  notes TEXT NOT NULL DEFAULT '',
+  updated_at TEXT
+);
+`;
+
 async function main() {
   const localDir = path.join(process.cwd(), "pgdata");
   if (!fs.existsSync(localDir)) {
@@ -33,6 +86,7 @@ async function main() {
 
   const cloud = new Client({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } });
   await cloud.connect();
+  await cloud.query(SCHEMA);
 
   for (const t of TABLES) {
     const { rows } = await local.query(`SELECT * FROM ${t.name}`);
