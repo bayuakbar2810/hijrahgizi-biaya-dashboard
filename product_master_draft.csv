@@ -1,0 +1,662 @@
+﻿Kode,nama_produk,product_type,is_rtl,is_main_output,is_by_product,is_packaging,n_input,n_output
+100009,IND - B 18 FQ 95 CL BP Amroon,RAW_MATERIAL,False,False,False,False,1,0
+100023,IND - B 65 Blade Black Gold,RAW_MATERIAL,False,False,False,False,1,0
+100024,IND - B 65 Blade Amroon,RAW_MATERIAL,False,False,False,False,0,1
+100030,IND - B 67 Cuberoll Amroon,RAW_MATERIAL,False,False,False,False,76,0
+100033,IND - B 106 FQ 95 CL Roll Amroon,RAW_MATERIAL,False,False,False,False,1,0
+100038,IND - B 31 Tenderloin Allana,RAW_MATERIAL,False,False,False,False,2,0
+100042,IND - B 31 Tenderloin Amroon,RAW_MATERIAL,False,False,False,False,1,0
+100044,IND - B 41 Topside Allana,RAW_MATERIAL,False,False,False,False,2,0
+100047,IND - B 41 Topside Black Gold,RAW_MATERIAL,False,False,False,False,0,1
+100050,IND - B 42 Knuckle Allana,RAW_MATERIAL,False,False,False,False,0,2
+100056,IND - B 44 Outside Allana,RAW_MATERIAL,False,False,False,False,2,0
+100061,IND - B 44 Outside Amroon,RAW_MATERIAL,False,False,False,False,4,0
+100063,IND - B 45 Rump Amroon,RAW_MATERIAL,False,False,False,False,2,1
+100069,IND - B 46 Striploin Amroon,RAW_MATERIAL,False,False,False,False,9,1
+100095,Lips Swift 262,RAW_MATERIAL,False,False,False,False,1,0
+100154,Brisketbone A ECT,RAW_MATERIAL,False,False,False,False,1,0
+100187,Hati Teys,RAW_MATERIAL,False,False,False,False,1,0
+100189,Hati Meramist,RAW_MATERIAL,False,False,False,False,31,0
+100212,Lips Lockyer Valley,RAW_MATERIAL,False,False,False,False,0,1
+100235,Shortrib A ECT,RAW_MATERIAL,False,False,False,False,8,0
+100254,"Ayam Karkas 0,9 - 1,0 Kg",RAW_MATERIAL,False,False,False,False,2,0
+100255,Ayam Boneless Dada,RAW_MATERIAL,False,False,False,False,42,2
+100256,Ayam Boneless Paha,RAW_MATERIAL,False,False,False,False,60,1
+100272,Cuberoll HGH,RAW_MATERIAL,False,False,False,False,2,13
+100273,Striploin HGH,RAW_MATERIAL,False,False,False,False,2,10
+100274,Oxtail HGH,BY_PRODUCT,False,False,True,False,0,3
+100275,Shank HGH,RAW_MATERIAL,False,False,False,False,2,7
+100276,Tulang Kipas,BY_PRODUCT,False,False,True,False,2,3
+100277,Leg Bone HGH,BY_PRODUCT,False,False,True,False,4,4
+100278,Neckbone HGH,BY_PRODUCT,False,False,True,False,1,3
+100279,Limpa HGH,BY_PRODUCT,False,False,True,False,1,2
+100280,Tongue Root HGH,RAW_MATERIAL,False,False,False,False,0,3
+100281,Blade HGH,RAW_MATERIAL,False,False,False,False,3,3
+100282,Kaki HGH,BY_PRODUCT,False,False,True,False,0,3
+100283,Hati HGH,BY_PRODUCT,False,False,True,False,0,3
+100284,Knuckle HGH,RAW_MATERIAL,False,False,False,False,2,3
+100285,Topside HGH,RAW_MATERIAL,False,False,False,False,3,3
+100286,Outside HGH,RAW_MATERIAL,False,False,False,False,0,17
+100287,Chucktender HGH,RAW_MATERIAL,False,False,False,False,1,3
+100288,95 CL HGH,RAW_MATERIAL,False,False,False,False,0,3
+100289,Shortrib HGH,RAW_MATERIAL,False,False,False,False,0,3
+100290,Back Bone HGH,BY_PRODUCT,False,False,True,False,35,19
+100291,Usus HGH,BY_PRODUCT,False,False,True,False,0,3
+100292,Babat Tebal,BY_PRODUCT,False,False,True,False,0,3
+100293,Babat Tipis,BY_PRODUCT,False,False,True,False,0,2
+100294,Paru HGH,BY_PRODUCT,False,False,True,False,0,2
+100295,Jantung HGH,BY_PRODUCT,False,False,True,False,0,3
+100296,Ginjal HGH,BY_PRODUCT,False,False,True,False,0,3
+100297,Chuck HGH,RAW_MATERIAL,False,False,False,False,1,3
+100298,Tenderloin HGH,RAW_MATERIAL,False,False,False,False,1,35
+100299,Rump HGH,RAW_MATERIAL,False,False,False,False,3,3
+100301,Brisket HGH,RAW_MATERIAL,False,False,False,False,0,3
+100302,Tulang Sirloin HGH,BY_PRODUCT,False,False,True,False,0,4
+100304,Tulang Bokong,BY_PRODUCT,False,False,True,False,2,3
+100305,Urat HGH,BY_PRODUCT,False,False,True,False,0,3
+100320,Paru O'Connor,RAW_MATERIAL,False,False,False,False,1,0
+100321,Kepala Sapi HGH,BY_PRODUCT,False,False,True,False,0,4
+100322,Kulit Sapi HGH,BY_PRODUCT,False,False,True,False,0,3
+100333,85 CL QBP,RAW_MATERIAL,False,False,False,False,1,0
+100334,Backrib ECT,RAW_MATERIAL,False,False,False,False,13,0
+100394,IND - B 41 Topside Amber,RAW_MATERIAL,False,False,False,False,1,0
+100402,IND - B 31 Tenderloin Amber,RAW_MATERIAL,False,False,False,False,3,0
+100404,Shortrib B ECT,RAW_MATERIAL,False,False,False,False,1,1
+100430,Fat MK Teys EST 294,RAW_MATERIAL,False,False,False,False,1,0
+100445,Backrib Midfield,RAW_MATERIAL,False,False,False,False,0,1
+100469,Brisketbone Alliance ME21,RAW_MATERIAL,False,False,False,False,1,1
+100482,IND - B 31 Tenderloin Rustam,RAW_MATERIAL,False,False,False,False,2,1
+100488,Brisketbone Meramist,RAW_MATERIAL,False,False,False,False,1,0
+100493,Brisketbone Kilcoy,RAW_MATERIAL,False,False,False,False,11,0
+100501,IND - B 18 FQ 95 CL BP Al-Aali,RAW_MATERIAL,False,False,False,False,73,0
+100508,IND - B 42 Knuckle Al-Aali,RAW_MATERIAL,False,False,False,False,2,0
+100509,IND - B 44 Outside Al-Aali,RAW_MATERIAL,False,False,False,False,5,0
+100511,IND - B 46 Striploin Al-Aali,RAW_MATERIAL,False,False,False,False,1,0
+100562,Paru Carnemax,RAW_MATERIAL,False,False,False,False,1,0
+100584,IND - B 67 Cuberoll IAF,RAW_MATERIAL,False,False,False,False,1,0
+100585,IND - B 31 Tenderloin IAF,RAW_MATERIAL,False,False,False,False,1,0
+100586,IND - B 41 Topside IAF,RAW_MATERIAL,False,False,False,False,0,1
+100592,IND - B 18 FQ 95 CL BP IAF,RAW_MATERIAL,False,False,False,False,13,1
+100596,Paru Kilcoy,RAW_MATERIAL,False,False,False,False,30,0
+100609,Serbuk Tulang HGH,RAW_MATERIAL,False,False,False,False,0,1
+100613,Neckbone A AMG,RAW_MATERIAL,False,False,False,False,0,1
+100618,BRZ - Knuckle Minerva,RAW_MATERIAL,False,False,False,False,0,1
+100621,IND - B 11 FQ Slice ALM,RAW_MATERIAL,False,False,False,False,1,0
+100630,BRZ - Chucktender Minerva,RAW_MATERIAL,False,False,False,False,1,0
+100652,Fat Cassino,RAW_MATERIAL,False,False,False,False,1,0
+100671,Shortplate IBP,RAW_MATERIAL,False,False,False,False,24,0
+100682,BRZ - Blade Friboi,RAW_MATERIAL,False,False,False,False,1,1
+100683,BRZ - Outside Flat Friboi,RAW_MATERIAL,False,False,False,False,1,0
+100689,Urat Ligamentum Swift 262,RAW_MATERIAL,False,False,False,False,0,1
+100720,IND - B 44 Outside Al-Dua,RAW_MATERIAL,False,False,False,False,84,0
+100722,IND - B 41 Topside Al-Dua,RAW_MATERIAL,False,False,False,False,1,0
+100727,IND - B 18 FQ 95 CL BP Al-Dua,RAW_MATERIAL,False,False,False,False,16,0
+100744,BRZ - Shin Minerva,RAW_MATERIAL,False,False,False,False,18,0
+100766,BRZ - Brisket PE Friboi,RAW_MATERIAL,False,False,False,False,42,0
+100784,50 CL Kilcoy,RAW_MATERIAL,False,False,False,False,1,0
+100785,Chuckrib Kilcoy,RAW_MATERIAL,False,False,False,False,46,0
+100793,Brisket NE A AMH,RAW_MATERIAL,False,False,False,False,1,0
+100807,Neckbone Kilcoy,RAW_MATERIAL,False,False,False,False,15,0
+100816,Shortrib Bone In Choice Swift US,RAW_MATERIAL,False,False,False,False,5,0
+100821,BRZ - Topside Friboi,RAW_MATERIAL,False,False,False,False,2,0
+100825,IND - B 18 FQ 95 CL BP Mash,RAW_MATERIAL,False,False,False,False,1,0
+100830,IND - B 31 Tenderloin Mash,RAW_MATERIAL,False,False,False,False,1,0
+100835,IND - B 46 Striploin Mash,RAW_MATERIAL,False,False,False,False,1,0
+100927,Karton Kecil (34x27),PACKAGING,False,False,False,True,77,0
+100928,Karton Sedang (38x36),PACKAGING,False,False,False,True,211,0
+100929,Karton Besar (53x38),PACKAGING,False,False,False,True,1448,0
+100949,"Ayam Karkas 0,8 - 0,9 Kg",RAW_MATERIAL,False,False,False,False,1,0
+100973,DMM Kilcoy,RAW_MATERIAL,False,False,False,False,13,0
+100980,BRZ - 90 VL Friboi,RAW_MATERIAL,False,False,False,False,1,0
+100981,BRZ - Chucktender Friboi,RAW_MATERIAL,False,False,False,False,1,1
+100982,BRZ - Flank Friboi,RAW_MATERIAL,False,False,False,False,2,0
+100983,BRZ - Knuckle Friboi,RAW_MATERIAL,False,False,False,False,1,0
+100985,BRZ - 80 VL Friboi,RAW_MATERIAL,False,False,False,False,1,0
+101004,Neckbone John Dee Grain Fed,RAW_MATERIAL,False,False,False,False,1,0
+101004,Neckbone Meramist,RAW_MATERIAL,False,False,False,False,34,0
+101057,Striploin US Choice IBP,RAW_MATERIAL,False,False,False,False,1,0
+101076,IND - CM-01 IAF,RAW_MATERIAL,False,False,False,False,1,0
+101089,Ayam Kulit Body,RAW_MATERIAL,False,False,False,False,19,0
+101097,IND - B 67 Cuberoll Al-Quresh,RAW_MATERIAL,False,False,False,False,1,0
+101098,IND - B 106 FQ 95 CL Roll Al-Quresh,RAW_MATERIAL,False,False,False,False,1,0
+101099,IND - B 31 Tenderloin Al-Quresh,RAW_MATERIAL,False,False,False,False,34,1
+101135,Karkas Sapi,RAW_MATERIAL,False,False,False,False,3,0
+101147,BRZ - Cuberoll Friboi,RAW_MATERIAL,False,False,False,False,2,0
+101148,BRZ - Striploin Friboi,RAW_MATERIAL,False,False,False,False,2,0
+101183,IND - CM-01 Black Gold,RAW_MATERIAL,False,False,False,False,1,0
+101196,"Ayam Karkas 1,0 - 1,1 Kg",RAW_MATERIAL,False,False,False,False,3,0
+101213,IND - CM-01 Rustam,RAW_MATERIAL,False,False,False,False,1,0
+101265,Rump Cap Picanha S Kilcoy,RAW_MATERIAL,False,False,False,False,8,0
+101280,Chuck Crest Nolan Blue,RAW_MATERIAL,False,False,False,False,1,0
+101288,BRZ - Shank Friboi,RAW_MATERIAL,False,False,False,False,7,1
+101311,Neckbone S John Dee,RAW_MATERIAL,False,False,False,False,32,0
+101342,BRZ - Chuck Friboi,RAW_MATERIAL,False,False,False,False,1,0
+101344,BRZ - Cuberoll Minerva,RAW_MATERIAL,False,False,False,False,7,0
+101397,Shortrib LP Greenham,RAW_MATERIAL,False,False,False,False,11,0
+101428,BRZ - 90 VL Friboi SIF 4333,RAW_MATERIAL,False,False,False,False,4,0
+101429,BRZ - 90 VL Friboi SIF 862,RAW_MATERIAL,False,False,False,False,3,1
+101430,BRZ - 90 VL Friboi SIF 175,RAW_MATERIAL,False,False,False,False,1,1
+101437,BRZ - 90 VL Friboi SIF 457,RAW_MATERIAL,False,False,False,False,5,1
+101476,Brisketbone A Monbeef,RAW_MATERIAL,False,False,False,False,1,1
+101478,Backrib A Monbeef,RAW_MATERIAL,False,False,False,False,27,1
+101482,65 CL Monbeef,RAW_MATERIAL,False,False,False,False,1,0
+101483,Spare Ribs A Monbeef,RAW_MATERIAL,False,False,False,False,1,0
+101541,BRZ - Shin Friboi,RAW_MATERIAL,False,False,False,False,28,3
+101550,Fat Brisket Monbeef,RAW_MATERIAL,False,False,False,False,1,0
+101552,Shortrib B Monbeef,RAW_MATERIAL,False,False,False,False,1,0
+101553,Backrib B Monbeef,RAW_MATERIAL,False,False,False,False,2,0
+101557,Backrib Swift US,RAW_MATERIAL,False,False,False,False,13,0
+101559,Backrib Alliance,RAW_MATERIAL,False,False,False,False,2,1
+101573,Brisketbone John Dee,RAW_MATERIAL,False,False,False,False,1,0
+101582,Neckbone John Dee Grain Fed,RAW_MATERIAL,False,False,False,False,30,0
+101608,Backrib HGH,RAW_MATERIAL,False,False,False,False,8,16
+101610,Lips Anzco ME78,RAW_MATERIAL,False,False,False,False,1,0
+101621,Ribcap YP Coles,RAW_MATERIAL,False,False,False,False,1,0
+101633,IND - CM-01 Allana,RAW_MATERIAL,False,False,False,False,1,0
+101658,Lidah Kibif,RAW_MATERIAL,False,False,False,False,0,1
+101702,Rib End Meat Kilcoy,RAW_MATERIAL,False,False,False,False,1,0
+101717,Striploin Premium Indocube,RAW_MATERIAL,False,False,False,False,27,0
+101721,BRZ - Tenderloin Barra Mansa,RAW_MATERIAL,False,False,False,False,1,0
+101727,Brisket NE S AMH,RAW_MATERIAL,False,False,False,False,1,3
+101733,50 CL Kilcoy @27.2 KG,RAW_MATERIAL,False,False,False,False,0,1
+101783,Mix Bone HGH,BY_PRODUCT,False,False,True,False,0,4
+101799,50 CL John Dee S,RAW_MATERIAL,False,False,False,False,1,0
+101804,Cuberoll Premium Indocube,RAW_MATERIAL,False,False,False,False,19,0
+101813,Back Bone Vertebrae Kilcoy,RAW_MATERIAL,False,False,False,False,0,1
+101815,IND - CM-01 Al-Quresh,RAW_MATERIAL,False,False,False,False,1,0
+101834,Brisket NE A AMH EST 235,RAW_MATERIAL,False,False,False,False,3,0
+101835,Brisket NE A AMH EST 4,RAW_MATERIAL,False,False,False,False,1,1
+101839,IND - B 47 Shank BP Kasila Allana,RAW_MATERIAL,False,False,False,False,1,0
+101844,BRZ - Chuck GJ Marfrig,RAW_MATERIAL,False,False,False,False,38,0
+101846,BRZ - Topside GJ MarFrig,RAW_MATERIAL,False,False,False,False,15,0
+101847,BRZ - Blade Shoulder GJ Marfrig,RAW_MATERIAL,False,False,False,False,1,1
+101850,Shortloin Angus Jacks Creek,RAW_MATERIAL,False,False,False,False,1,0
+101860,BRZ - Eyeround GJ Marfrig,RAW_MATERIAL,False,False,False,False,1,1
+101867,BRZ - Flank Friboi,RAW_MATERIAL,False,False,False,False,1,0
+101867,BRZ - Forequarter Pieces GJ Marfrig,RAW_MATERIAL,False,False,False,False,112,0
+101901,IND - B 152 H B01 Allana,RAW_MATERIAL,False,False,False,False,1,0
+101917,IND - B 19 Flank Square Black Gold,RAW_MATERIAL,False,False,False,False,35,0
+101942,IND - B 11 FQ Slice Mash @20KG,RAW_MATERIAL,False,False,False,False,0,1
+101989,BRZ - Hindquarter Pieces GJ Marfrig,RAW_MATERIAL,False,False,False,False,7,0
+102024,Fat HGH,RAW_MATERIAL,False,False,False,False,1,3
+102083,RTL Seafood Lovers Ikan Dory Premium BL 1000gr,FINISHED_PRODUCT,True,True,False,False,0,2
+102089,Chuck top blade US Prime IBP,RAW_MATERIAL,False,False,False,False,1,0
+102105,IND - CM-01 Al-Aali,RAW_MATERIAL,False,False,False,False,1,0
+102256,IND - CM-01 Amroon,RAW_MATERIAL,False,False,False,False,1,0
+102261,Serbuk Jeroan HGH,RAW_MATERIAL,False,False,False,False,1,0
+102317,Backrib S Lockyer Valley,RAW_MATERIAL,False,False,False,False,1,0
+102371,BRZ - Striploin Friboi 1953,RAW_MATERIAL,False,False,False,False,1,0
+102373,BRZ - Tenderloin Chain Off Friboi 1953,RAW_MATERIAL,False,False,False,False,2,0
+102374,BRZ - Flank Steak Friboi 1953,RAW_MATERIAL,False,False,False,False,1,0
+102376,BRZ - Oyster Blade Friboi 1953,RAW_MATERIAL,False,False,False,False,3,0
+102380,BRZ - Brisket PE Friboi 1953,RAW_MATERIAL,False,False,False,False,3,0
+102393,Brisketbone Intercostal in Kilcoy Diamond,RAW_MATERIAL,False,False,False,False,2,0
+102394,Neck Meat Meramist,RAW_MATERIAL,False,False,False,False,1,0
+102404,Lips Silver Fern,RAW_MATERIAL,False,False,False,False,1,1
+102405,Tongue Root Silver Fern,RAW_MATERIAL,False,False,False,False,5,0
+102408,IND - B 66 Trimming Amber,RAW_MATERIAL,False,False,False,False,3,0
+102414,IND - B 19 Flank Allana,RAW_MATERIAL,False,False,False,False,15,0
+102423,IND - B 15 90VL Bulkpack Allana @25 KG,RAW_MATERIAL,False,False,False,False,1,0
+102425,IND - B 66 90VL Trimming Roll Al-Hamd,RAW_MATERIAL,False,False,False,False,57,0
+102430,IND - B 45 Rump Kamil,RAW_MATERIAL,False,False,False,False,1,0
+102438,IND - B 15 Neck Al-Dua,RAW_MATERIAL,False,False,False,False,1,1
+102440,IND - B 63 Chuck Al-Dua,RAW_MATERIAL,False,False,False,False,2,0
+102443,IND - CM-001 Al-Fadeel,RAW_MATERIAL,False,False,False,False,38,0
+102444,IND - B 105 FQ 95 CL Roll Al-Dua,RAW_MATERIAL,False,False,False,False,0,1
+102448,45 CL Meramist,RAW_MATERIAL,False,False,False,False,25,0
+102467,IND - CM-001 Al-Quresh,RAW_MATERIAL,False,False,False,False,0,1
+102471,BRZ - 40 VL Friboi,RAW_MATERIAL,False,False,False,False,9,0
+102493,JPN - Shoulder Clod A5 Japan Nishiawa,RAW_MATERIAL,False,False,False,False,1,1
+102501,BRZ - 90 VL AFH Minerva,RAW_MATERIAL,False,False,False,False,8,0
+102502,IND - B 69 Trimming Amroon,RAW_MATERIAL,False,False,False,False,25,0
+102504,IND - B 19 Flank Amroon,RAW_MATERIAL,False,False,False,False,1,1
+102528,IND - B 10 Fat IAF,RAW_MATERIAL,False,False,False,False,4,1
+102568,Fat Trimming Meramist,RAW_MATERIAL,False,False,False,False,1,0
+102577,JPN - Gooseneck Round A5 Nishiawa,RAW_MATERIAL,False,False,False,False,1,0
+102593,Marrowbone A GBP,RAW_MATERIAL,False,False,False,False,4,1
+102642,"Striploin A ECT 2,7 - 3,6 Kg",RAW_MATERIAL,False,False,False,False,0,1
+102645,IND - B 19 Flank Square Amroon,RAW_MATERIAL,False,False,False,False,1,0
+102657,BRZ - Brisketbone Point Anglo,RAW_MATERIAL,False,False,False,False,29,0
+102658,BRZ - Scapula Anglo,RAW_MATERIAL,False,False,False,False,14,1
+102661,BRZ - Lidah Anglo,RAW_MATERIAL,False,False,False,False,20,0
+102662,BRZ - Oxtail Anglo,RAW_MATERIAL,False,False,False,False,27,0
+102664,BRZ - Kaki FQ Anglo,RAW_MATERIAL,False,False,False,False,23,0
+102665,BRZ - Paru Anglo,RAW_MATERIAL,False,False,False,False,15,1
+102670,BRZ - Inside Skirt Anglo,RAW_MATERIAL,False,False,False,False,1,1
+102695,BRZ - Hanging Tender Thick Skirt Barra Mansa,RAW_MATERIAL,False,False,False,False,1,0
+102705,IND - B 108 TO BP Al-Quresh,RAW_MATERIAL,False,False,False,False,36,0
+102708,BRZ - Blade Shoulder Frigol,RAW_MATERIAL,False,False,False,False,2,0
+102709,BRZ - 90 VL HQ Friboi SIF 457,RAW_MATERIAL,False,False,False,False,1,0
+102713,BRZ - Lidah Sadia,RAW_MATERIAL,False,False,False,False,1,0
+102714,BRZ - Oxtail Sadia,RAW_MATERIAL,False,False,False,False,7,1
+102717,French Fries Hungritos Shoestring 1 kg,OTHER,False,False,False,False,10,0
+102719,IND - B 152 HM Amroon,RAW_MATERIAL,False,False,False,False,4,0
+102720,BRZ - Heel Muscle Friboi,RAW_MATERIAL,False,False,False,False,1,1
+102722,BRZ - Shortrib Friboi,RAW_MATERIAL,False,False,False,False,39,0
+102724,BRZ - Industrial Trimming C Anglo SIF 504,RAW_MATERIAL,False,False,False,False,12,1
+102725,BRZ - Diaphragm Trimm Anglo,RAW_MATERIAL,False,False,False,False,5,0
+102726,BRZ - Mix Tendon Anglo,RAW_MATERIAL,False,False,False,False,1,0
+102733,BRZ - Fat KPH Sadia,RAW_MATERIAL,False,False,False,False,5,0
+102759,BRZ - Blade Shoulder Friboi,RAW_MATERIAL,False,False,False,False,2,1
+102761,BRZ - Mix Ligamentum Sinews Minerva,RAW_MATERIAL,False,False,False,False,2,0
+102778,70 CL HGH,BY_PRODUCT,False,False,True,False,52,125
+102782,BRZ - Tenderloin Chain On Friboi,RAW_MATERIAL,False,False,False,False,1,0
+102784,BRZ - Oyster Blade Friboi,RAW_MATERIAL,False,False,False,False,12,0
+102787,BRZ - Industrial Trimming F Anglo,RAW_MATERIAL,False,False,False,False,18,4
+102789,RTL Daging Giling Value 500 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+102796,Topside Wagyu MB 8-9 Jacks Creek,RAW_MATERIAL,False,False,False,False,4,0
+102797,Topside Wagyu MB 6-7 Jacks Creek,RAW_MATERIAL,False,False,False,False,1,0
+102802,BRZ - Inside Skirt Frigon,RAW_MATERIAL,False,False,False,False,1,0
+102842,IND - B 11 FQ Slice IAF @20KG,RAW_MATERIAL,False,False,False,False,1,0
+102843,Brisketbone Silverfarms ME 15,RAW_MATERIAL,False,False,False,False,1,0
+102851,BRZ - Brisketbone Minerva,RAW_MATERIAL,False,False,False,False,1,1
+102862,Neckbone Silverfarms ME 9,RAW_MATERIAL,False,False,False,False,4,0
+102865,IND - B 152 HM AOV,RAW_MATERIAL,False,False,False,False,3,0
+102867,BRZ - Chuck Hilton Friboi,RAW_MATERIAL,False,False,False,False,1,0
+102873,BRZ - Tenderloin Chain Off Friboi 4/5lb,RAW_MATERIAL,False,False,False,False,18,0
+102874,BRZ - Tenderloin Chain Off Friboi 5lb UP,RAW_MATERIAL,False,False,False,False,32,0
+102881,BRZ - Hanging Tender Thick Skirt Frigon,RAW_MATERIAL,False,False,False,False,1,0
+102889,JPN - Rib Cap Wagyu A5 Japan Nishiawa,RAW_MATERIAL,False,False,False,False,1,0
+102893,IND - B 152 HM Al-Hamd,RAW_MATERIAL,False,False,False,False,75,0
+102895,BRZ - Industrial Trimming C Anglo SIF 175,RAW_MATERIAL,False,False,False,False,2,0
+102896,BRZ - Industrial Trimming C Anglo SIF 3000,RAW_MATERIAL,False,False,False,False,5,1
+102897,BRZ - Industrial Trimming C Anglo SIF 4333,RAW_MATERIAL,False,False,False,False,28,1
+102898,BRZ - Industrial Trimming C Anglo SIF 4400,RAW_MATERIAL,False,False,False,False,6,1
+102899,BRZ - Industrial Trimming C Anglo SIF 4507,RAW_MATERIAL,False,False,False,False,1,0
+102900,BRZ - Industrial Trimming C Anglo SIF 457,RAW_MATERIAL,False,False,False,False,0,1
+102907,Brisketbone A GBP,RAW_MATERIAL,False,False,False,False,8,0
+102913,IND - B 152 HM Al-Dua,RAW_MATERIAL,False,False,False,False,90,1
+102918,BRZ - Flank Friboi SIF 175,RAW_MATERIAL,False,False,False,False,33,2
+102919,BRZ - Flank Friboi SIF 4333,RAW_MATERIAL,False,False,False,False,2,0
+102920,BRZ - Flank Friboi SIF 457,RAW_MATERIAL,False,False,False,False,6,1
+102921,BRZ - Flank Friboi SIF 862,RAW_MATERIAL,False,False,False,False,42,0
+102922,IND - CM-001 Al-Nasir,RAW_MATERIAL,False,False,False,False,1,0
+102923,IND - B 10 AOV,RAW_MATERIAL,False,False,False,False,39,0
+102925,IND - CM-001 Kamil,RAW_MATERIAL,False,False,False,False,2,0
+102929,IND - B 60 Shank BP Marhaba @25Kg,RAW_MATERIAL,False,False,False,False,1,0
+102930,BRZ - Flank Friboi SIF 4507,RAW_MATERIAL,False,False,False,False,33,2
+102939,BRZ - 40 VL Minerva,RAW_MATERIAL,False,False,False,False,2,1
+102943,BRZ - Industrial Trimming C Anglo SIF 2979,RAW_MATERIAL,False,False,False,False,2,0
+102949,BRZ - Fat KPH Anglo,RAW_MATERIAL,False,False,False,False,19,0
+102952,BRZ - Industrial Trimming C Anglo SIF 49,RAW_MATERIAL,False,False,False,False,2,0
+102953,Hati Grain Fed Meramist,RAW_MATERIAL,False,False,False,False,22,0
+102954,Tongue Root Silver Fern ME 15,RAW_MATERIAL,False,False,False,False,0,1
+102960,BRZ - Industrial Trimming F 85 VL Anglo SIF 385,RAW_MATERIAL,False,False,False,False,2,0
+102962,BRZ - Industrial Trimming C Anglo SIF 385,RAW_MATERIAL,False,False,False,False,1,0
+102968,BRZ - Industrial Meat 85 VL Anglo,RAW_MATERIAL,False,False,False,False,7,1
+102975,BRZ - Outside Flat Frigol,RAW_MATERIAL,False,False,False,False,13,0
+102976,BRZ - Striploin Frigol,RAW_MATERIAL,False,False,False,False,27,1
+102980,JPN - Shoulder Clod Wagyu A5 Japan Miyazaki SE Meat,RAW_MATERIAL,False,False,False,False,3,0
+102983,BRZ - Industrial Trimming C 85 VL Anglo SIF 4333,RAW_MATERIAL,False,False,False,False,0,1
+102987,BRZ - Industrial Trimming C 85 VL Anglo SIF 862,RAW_MATERIAL,False,False,False,False,1,0
+102990,BRZ - Industrial Trimming C 85 VL Anglo SIF 49,RAW_MATERIAL,False,False,False,False,1,0
+102994,BRZ - Blade Naturafrig,RAW_MATERIAL,False,False,False,False,1,0
+102997,IND - B 66 Trimming Amroon,RAW_MATERIAL,False,False,False,False,9,0
+103002,BRZ - Paru Frigol,RAW_MATERIAL,False,False,False,False,16,0
+103014,IND - B 42 Knuckle Pure Foodstuff,RAW_MATERIAL,False,False,False,False,0,2
+103016,BRZ - Blade Frigol,RAW_MATERIAL,False,False,False,False,0,2
+103017,IND - B 31 Tenderloin Blackgems,RAW_MATERIAL,False,False,False,False,1,0
+103025,IND - B 65 Blade Pure Foodstuff,RAW_MATERIAL,False,False,False,False,1,0
+103026,BRZ - Brisketbone E Anglo,RAW_MATERIAL,False,False,False,False,20,0
+103028,BRZ - Industrial Trimming F 85 VL Anglo SIF 175,RAW_MATERIAL,False,False,False,False,3,0
+103030,BRZ - Industrial Trimming F 85 VL Anglo SIF 4507,RAW_MATERIAL,False,False,False,False,2,1
+103031,BRZ - Industrial Trimming F 85 VL Anglo SIF 504,RAW_MATERIAL,False,False,False,False,2,1
+103033,BRZ - Jantung Trimming Anglo,RAW_MATERIAL,False,False,False,False,0,1
+103036,IND - B 45 Rump Pure Foodstuff,RAW_MATERIAL,False,False,False,False,1,1
+103055,BRZ - Shortplate Friboi,RAW_MATERIAL,False,False,False,False,49,0
+103057,"BRZ - Cuberoll Barra Mansa 2,0 Kg Up",RAW_MATERIAL,False,False,False,False,29,0
+103058,"BRZ - Striploin Barra Mansa 3,5 - 5 Kg",RAW_MATERIAL,False,False,False,False,14,0
+103059,BRZ - Striploin Barra Mansa 5 - 6 Kg,RAW_MATERIAL,False,False,False,False,1,0
+103072,BRZ - Industrial Trimming F 85 VL Anglo SIF 457,RAW_MATERIAL,False,False,False,False,1,0
+103077,BRZ - Industrial Trimming C 85 VL Anglo SIF 615,RAW_MATERIAL,False,False,False,False,1,0
+103081,BRZ - Sinews Astra,RAW_MATERIAL,False,False,False,False,0,1
+103082,"BRZ - Striploin Astra 3,5 - 5 Kg",RAW_MATERIAL,False,False,False,False,6,0
+103085,IND - B 123 Rib Meat Al-Hilal,RAW_MATERIAL,False,False,False,False,91,0
+103086,BRZ - Forequarter Supremo,RAW_MATERIAL,False,False,False,False,0,1
+103106,BRZ - Mix Tendon Frigomarca,RAW_MATERIAL,False,False,False,False,1,0
+103119,Tongue Root Silver Fern ME 84,RAW_MATERIAL,False,False,False,False,0,4
+103120,Tongue Root Silver Fern ME 9,RAW_MATERIAL,False,False,False,False,0,2
+103121,Tongue Root Silver Fern ME 125,RAW_MATERIAL,False,False,False,False,2,2
+103134,BRZ - Industrial Cheekmeat 90 VL Naturafrig,RAW_MATERIAL,False,False,False,False,1,0
+103136,BRZ - Industrial Meat Necktrim 90 VL Naturafrig,RAW_MATERIAL,False,False,False,False,0,1
+103141,"BRZ - Striploin Friboi 3,5 Kg Up 1953",RAW_MATERIAL,False,False,False,False,3,1
+103143,BRZ - Industrial Headmeat 90 VL Frigomarca,RAW_MATERIAL,False,False,False,False,0,1
+103144,BRZ - Industrial Cheekmeat 90 VL Frigomarca,RAW_MATERIAL,False,False,False,False,1,0
+103150,BRZ - Membrane Frigon,RAW_MATERIAL,False,False,False,False,1,0
+103153,BRZ - Brisket PE Frigon,RAW_MATERIAL,False,False,False,False,9,0
+103168,Brisketbone Kilcoy Diamond EST 1912,RAW_MATERIAL,False,False,False,False,16,0
+103175,BRZ - Tendon Frigomarca,RAW_MATERIAL,False,False,False,False,0,1
+103179,BRZ - Jantung Trimming Frigon,RAW_MATERIAL,False,False,False,False,0,1
+103186,BRZ - Coinbone Minerva,RAW_MATERIAL,False,False,False,False,0,1
+103187,Shortrib Alliance,RAW_MATERIAL,False,False,False,False,0,1
+103188,Chuckrib Alliance,RAW_MATERIAL,False,False,False,False,0,2
+103189,Back Bone Alliance,RAW_MATERIAL,False,False,False,False,0,1
+103197,Ribcap S Swift,RAW_MATERIAL,False,False,False,False,1,0
+5100.05,Biaya Potong,PROCESS_COST,False,False,False,False,1686,0
+GA100023,Label Yupo Hijrahfood 7.5 cm x 10 cm,PACKAGING,False,False,False,True,151,0
+GA100024,Label Yupo Hijrahfood 6 cm x 5 cm Halal Wayang,PACKAGING,False,False,False,True,68,0
+GA100025,Label Yupo Hijrahfood 6 cm x 5 cm Halal Hijau,PACKAGING,False,False,False,True,14,0
+GA100133,Label Astro Farm Hitam 3.5 cm x 3.5 cm,PACKAGING,False,False,False,True,74,0
+GA100135,Label Yupo O'save 7.5 cm x 10 cm,PACKAGING,False,False,False,True,45,0
+P100152,Bahan Giling CBT,BY_PRODUCT,False,False,True,False,0,49
+P100233,Fat Trim CBT,BY_PRODUCT,False,False,True,False,1,10
+P100416,Serbuk Daging CBT,BY_PRODUCT,False,False,True,False,2,80
+P100928,50 CL HGH CBT,BY_PRODUCT,False,False,True,False,0,1
+P102778,70 CL HGH CBT,BY_PRODUCT,False,False,True,False,11,18
+R100015,RTL CST Daging Semur Potong OSV 250 gr,FINISHED_PRODUCT,True,True,False,False,0,16
+R100152,Bahan Giling,BY_PRODUCT,False,False,True,False,11,318
+R100200,RTL Daging Dendeng 250 gr,FINISHED_PRODUCT,True,True,False,False,1,1
+R100201,RTL Daging Giling Reguler 1000 gr,FINISHED_PRODUCT,True,True,False,False,1,46
+R100202,RTL Daging Giling Reguler 500 gr,FINISHED_PRODUCT,True,True,False,False,0,32
+R100203,RTL Daging Giling Spesial 1000 gr,FINISHED_PRODUCT,True,True,False,False,1,53
+R100204,RTL Daging Giling Spesial 500 gr,FINISHED_PRODUCT,True,True,False,False,2,42
+R100205,RTL CST Tenderloin Meltique Astro 200 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R100209,RTL CST Slice AUS Shortplate Value Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,23,20
+R100212,RTL Short Rib Besar 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,11
+R100214,RTL Tulang Sop 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,14
+R100215,RTL Daging Sop 500 gr,FINISHED_PRODUCT,True,True,False,False,0,14
+R100217,RTL Slice Less Fat 250 gr,FINISHED_PRODUCT,True,True,False,False,0,18
+R100220,RTL Daging Tulang Sop 1000 gr,FINISHED_PRODUCT,True,True,False,False,1,15
+R100225,RTL CST Hati Sapi PF 500 gr,FINISHED_PRODUCT,True,True,False,False,1,7
+R100233,Fat Trim,BY_PRODUCT,False,False,True,False,4,91
+R100247,RTL Hati Sapi 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,12
+R100290,RTL Ikan Dory Fillet Reguler 1000 gr,FINISHED_PRODUCT,True,True,False,False,2,0
+R100313,RTL Kikil Bone In 500gr,FINISHED_PRODUCT,True,True,False,False,0,23
+R100396,RTL Paru Sapi 1000 gr,FINISHED_PRODUCT,True,True,False,False,1,23
+R100397,RTL Paru Sapi 500 gr,FINISHED_PRODUCT,True,True,False,False,2,17
+R100416,Serbuk Daging,BY_PRODUCT,False,False,True,False,27,489
+R100417,RTL Daging Shank Sapi 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,31
+R100418,RTL Daging Shank Sapi 500 gr,FINISHED_PRODUCT,True,True,False,False,0,13
+R100437,RTL Tenderloin Regular 500 gr,FINISHED_PRODUCT,True,True,False,False,0,12
+R100486,RTL Daging Has Paha Sapi Premium Lean 1000gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R100543,RTL Neck Bone 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,23
+R100544,RTL Daging Sop 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,19
+R100545,RTL Slice US Shortplate 500 gr,FINISHED_PRODUCT,True,True,False,False,0,16
+R100564,RTL Trimming Slice 250 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R100572,RTL Daging Ayam Giling 500 gr,FINISHED_PRODUCT,True,True,False,False,2,28
+R100580,RTL Slice Less Fat 500 gr,FINISHED_PRODUCT,True,True,False,False,2,30
+R100597,RTL Lidah Slice 500 gr,FINISHED_PRODUCT,True,True,False,False,0,4
+R100608,RTL Tenderloin Meltique 1000 gr,FINISHED_PRODUCT,True,True,False,False,1,0
+R100612,RTL Slice Sirloin 500 gr,FINISHED_PRODUCT,True,True,False,False,0,11
+R100657,RTL Fat Sapi 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,14
+R100658,RTL Serbuk DMM 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,13
+R100675,RTL Slice Ekonomis Less Fat 500 gr,FINISHED_PRODUCT,True,True,False,False,1,60
+R100687,RTL Slice Brisket 500 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R100687,RTL Slice Brisket 500gr,FINISHED_PRODUCT,True,True,False,False,0,23
+R100706,RTL Slice AUS Shortplate 500 gr,FINISHED_PRODUCT,True,True,False,False,0,44
+R100708,RTL Short Rib Kecil 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,19
+R100722,RTL Meltique Mess 1000 gr,FINISHED_PRODUCT,True,True,False,False,8,3
+R100756,RTL Ikan Gindara Fillet 500gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R100757,RTL Ikan Tuna Fillet 500gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R100790,RTL Slice US Shortplate 250 gr,FINISHED_PRODUCT,True,True,False,False,0,11
+R100798,RTL Konro Besar 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,15
+R100799,RTL Konro Kecil 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,12
+R100830,RTL Ayam Karkas 1 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R100831,"RTL Ayam Karkas 0,8 - 0,9 kg",FINISHED_PRODUCT,True,True,False,False,0,1
+R100832,RTL Tenderloin Meltique 200 gr,FINISHED_PRODUCT,True,True,False,False,2,0
+R100836,RTL Slice Ekonomis Fatty 500 gr,FINISHED_PRODUCT,True,True,False,False,1,54
+R100841,RTL Short Rib Besar 500 gr,FINISHED_PRODUCT,True,True,False,False,0,11
+R100842,RTL Short Rib Kecil 500 gr,FINISHED_PRODUCT,True,True,False,False,0,15
+R100843,RTL Daging Semur 1000gr,FINISHED_PRODUCT,True,True,False,False,0,46
+R100875,RTL Lidah Bistik 250gr,FINISHED_PRODUCT,True,True,False,False,0,9
+R100887,RTL Slice Brisket 250 gr,FINISHED_PRODUCT,True,True,False,False,0,18
+R100896,RTL Slice AUS Shortplate 250 gr,FINISHED_PRODUCT,True,True,False,False,0,24
+R100902,RTL Neck Bone 500 gr,FINISHED_PRODUCT,True,True,False,False,1,20
+R100904,RTL Daging Semur 500 gr,FINISHED_PRODUCT,True,True,False,False,1,18
+R100905,RTL Hati Sapi 500 gr,FINISHED_PRODUCT,True,True,False,False,0,13
+R100918,RTL Tulang Sop 500 gr,FINISHED_PRODUCT,True,True,False,False,0,11
+R100919,RTL Fat Sapi 500 gr,FINISHED_PRODUCT,True,True,False,False,0,15
+R100920,RTL Daging Tulang Sop 500 gr,FINISHED_PRODUCT,True,True,False,False,0,15
+R100928,50 CL HGH,BY_PRODUCT,False,False,True,False,1,4
+R100929,RTL Brisket Bone 1 kg,FINISHED_PRODUCT,True,True,False,False,1,16
+R100930,RTL CST Slice Ekonomis Fatty PF 500 gr,FINISHED_PRODUCT,True,True,False,False,1,5
+R100944,RTL Brisket Bone 500 gr,FINISHED_PRODUCT,True,True,False,False,2,12
+R100945,RTLP Anchor Butter Minidis Unsalted 7 gr x 10 pcs,FINISHED_PRODUCT,True,True,False,False,0,2
+R100968,RTL Daging Brisket Sandung Lamur 1 kg,FINISHED_PRODUCT,True,True,False,False,0,18
+R100983,RTL Ribeye Steak AUS 200 gr,FINISHED_PRODUCT,True,True,False,False,0,27
+R100985,RTL Sirloin Steak AUS 200 gr,FINISHED_PRODUCT,True,True,False,False,0,26
+R100987,RTL Tenderloin Steak AUS 200 gr,FINISHED_PRODUCT,True,True,False,False,1,22
+R100998,RTL Sirloin US Choice Steak 220 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R100999,RTL Sirloin US Choice Steak 250 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R101000,RTL Sirloin US Choice Steak 280 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R101012,RTL Yakiniku Wagyu A5 200 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R101019,RTL CST Daging Rendang Potong OSV 250 gr,FINISHED_PRODUCT,True,True,False,False,0,13
+R101020,RTL Daging Brisket Sandung Lamur 500 gr,FINISHED_PRODUCT,True,True,False,False,0,14
+R101025,RTLP Anchor Butter Minidis Salted 7 gr x 10 pcs,FINISHED_PRODUCT,True,True,False,False,0,2
+R101030,Mixed Vegetables 4 Ways Heibei 1kg,FINISHED_PRODUCT,True,True,False,False,19,0
+R101031,RTL Mixed Vegetables 4 Ways 500 gr,FINISHED_PRODUCT,True,True,False,False,0,18
+R101034,RTL Kulit Body Ayam 500 gr,FINISHED_PRODUCT,True,True,False,False,0,13
+R101078,RTL Sirloin US Choice Steak 200 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R101093,RTL Sirloin Steak AUS 250 gr,FINISHED_PRODUCT,True,True,False,False,1,21
+R101097,Broccoli Floret Heibei 1kg,FINISHED_PRODUCT,True,True,False,False,5,0
+R101098,RTL Broccoli Floret 500 gr,FINISHED_PRODUCT,True,True,False,False,0,5
+R101108,RTL Saikoro Wagyu A5 200gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R101126,RTL Topside Steak Wagyu MB8-9 200 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R101129,RTL Topside Steak Wagyu MB8-9 150 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R101130,RTL Topside Steak Wagyu MB8-9 180 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R101131,RTL Topside Steak Wagyu MB8-9 230 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R101132,RTL Topside Steak Wagyu MB8-9 250 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R101134,RTL Topside Steak Wagyu MB6+ 200 gr,FINISHED_PRODUCT,True,True,False,False,0,4
+R101171,RTL Lidah Utuh 500 gr,FINISHED_PRODUCT,True,True,False,False,1,8
+R101195,RTL Ayam Karkas 1.0 - 1.1 kg,FINISHED_PRODUCT,True,True,False,False,0,3
+R101202,RTL Slice Ekonomis Less Fat 250 gr,FINISHED_PRODUCT,True,True,False,False,1,27
+R101222,Ikan Gindara Fillet,FINISHED_PRODUCT,True,True,False,False,1,0
+R101223,RTL Lidah Slice 250 gr,FINISHED_PRODUCT,True,True,False,False,2,11
+R101233,RTL CST Oxtail Lokal Premium PF 500 gr,FINISHED_PRODUCT,True,True,False,False,1,7
+R101250,RTL Daging Sop Potong 500 gr,FINISHED_PRODUCT,True,True,False,False,0,19
+R101251,RTL Beef Strips Stir Fry / Daging Oseng 300 gr,FINISHED_PRODUCT,True,True,False,False,0,18
+R101260,RTL Rendang Potong 1 kg,FINISHED_PRODUCT,True,True,False,False,1,18
+R101261,RTL Rendang Potong 500 gr,FINISHED_PRODUCT,True,True,False,False,0,14
+R101262,McCain Redstone Canyon Skin-On Regular Fries 6x2.30 KG,FINISHED_PRODUCT,True,True,False,False,4,0
+R101263,McCain Redstone Canyon Skin-On Waffle Fries 6x2.0 KG,FINISHED_PRODUCT,True,True,False,False,3,0
+R101264,RTLP Kentang McCain Regular Cut Skin On Seasoned 1 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101265,RTLP Kentang McCain Criss Cut Skin On Seasoned 500 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R101267,RTLP Kentang McCain Regular Cut Skin On Seasoned 500 gr,FINISHED_PRODUCT,True,True,False,False,0,4
+R101272,RTL Konro Besar 500 gr,FINISHED_PRODUCT,True,True,False,False,2,12
+R101273,RTL Konro Kecil 500 gr,FINISHED_PRODUCT,True,True,False,False,0,12
+R101274,RTL Daging Sop Potong 300 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R101320,"McCain Triangle Hash Brown Patties 6x2,27 KG",FINISHED_PRODUCT,True,True,False,False,4,0
+R101321,McCain Puree Mashed Potatoes 3x3 KG,FINISHED_PRODUCT,True,True,False,False,3,0
+R101322,McCain Tator Tots 6x2.27 KG,FINISHED_PRODUCT,True,True,False,False,2,0
+R101324,RTLP McCain Tator Tots 500 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R101325,RTLP McCain Puree Mashed Potatoes 500 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R101326,RTLP McCain Triangle Hash Brown Patties 500 gr,FINISHED_PRODUCT,True,True,False,False,0,4
+R101342,RTL Sirloin Steak AUS 180 gr,FINISHED_PRODUCT,True,True,False,False,1,24
+R101343,RTL Sirloin Steak AUS 230 gr,FINISHED_PRODUCT,True,True,False,False,0,20
+R101344,RTL Ribeye Steak AUS 180 gr,FINISHED_PRODUCT,True,True,False,False,0,27
+R101345,RTL Ribeye Steak AUS 230 gr,FINISHED_PRODUCT,True,True,False,False,0,20
+R101348,McCain Redstone Canyon Skin-On Wedges 6x2.27 KG,FINISHED_PRODUCT,True,True,False,False,2,0
+R101348,McCain Redstone Canyon Skin-On Wedges 6x2.27 kg,FINISHED_PRODUCT,True,True,False,False,1,0
+R101349,RTL CST Slice Ekonomis  OSV 250 gr,FINISHED_PRODUCT,True,True,False,False,1,35
+R101349,RTL CST Slice Ekonomis OSV 250 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R101350,RTL CST Short Rib Kecil PF 500 gr,FINISHED_PRODUCT,True,True,False,False,0,7
+R101353,RTLP McCain Wedges Seasoned 1 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101354,RTLP McCain Wedges Seasoned 500 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R101356,RTL Leg Bone 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R101361,RTL Ribeye Steak AUS 250 gr,FINISHED_PRODUCT,True,True,False,False,0,21
+R101376,RTLP McCain Onion Rings 450 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R101392,McCain Onion Rings 8x907 gr,FINISHED_PRODUCT,True,True,False,False,2,0
+R101413,RTL Rendang Potong 250 gr,FINISHED_PRODUCT,True,True,False,False,0,21
+R101419,RTL Mixed Paprika Slice 500 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R101420,Mixed Paprika Slice 1kg,FINISHED_PRODUCT,True,True,False,False,3,0
+R101462,RTL Picanha Steak AUS Grade S 180 gr,FINISHED_PRODUCT,True,True,False,False,0,8
+R101463,RTL Picanha Steak AUS Grade S 200 gr,FINISHED_PRODUCT,True,True,False,False,0,8
+R101464,RTL Picanha Steak AUS Grade S 230 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R101465,RTL Picanha Steak AUS Grade S 130 gr,FINISHED_PRODUCT,True,True,False,False,0,8
+R101466,RTL Picanha Steak AUS Grade S 150 gr,FINISHED_PRODUCT,True,True,False,False,0,8
+R101489,RTL Kulit Body Ayam 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,15
+R101490,RTL Daging Has Paha Sapi Premium 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,24
+R101491,RTL Daging Has Paha Sapi Premium 500 gr,FINISHED_PRODUCT,True,True,False,False,0,10
+R101494,RTL Tenderloin Steak AUS 150 gr,FINISHED_PRODUCT,True,True,False,False,1,23
+R101495,RTL Tenderloin Steak AUS 180 gr,FINISHED_PRODUCT,True,True,False,False,1,24
+R101496,RTL Tenderloin Steak AUS Fillet Mignon 130 gr,FINISHED_PRODUCT,True,True,False,False,0,22
+R101497,RTL Tenderloin Steak AUS Fillet Mignon 150 gr,FINISHED_PRODUCT,True,True,False,False,0,21
+R101507,RTL Sirloin Steak AUS 150 gr,FINISHED_PRODUCT,True,True,False,False,0,24
+R101509,RTL Short Rib Galbi US Choice 250 gr,FINISHED_PRODUCT,True,True,False,False,0,5
+R101516,RTL Daging Giling Spesial Grass-fed 500 gr,FINISHED_PRODUCT,True,True,False,False,0,27
+R101534,Mixed Cut Corn Xiamen 1kg,FINISHED_PRODUCT,True,True,False,False,3,0
+R101535,Mixed Green Peas Xiamen 1kg,FINISHED_PRODUCT,True,True,False,False,1,0
+R101536,Mixed Cauliflower 1kg,FINISHED_PRODUCT,True,True,False,False,2,0
+R101538,RTL Mixed Cut Corn 500 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R101539,RTL Mixed Green Peas 500 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R101540,RTL Mixed Cauliflower 500 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R101545,RTL Brisket PE Loaf 3.6 kg,FINISHED_PRODUCT,True,True,False,False,0,3
+R101546,RTL Brisket PE Loaf 4.9 kg,FINISHED_PRODUCT,True,True,False,False,0,2
+R101547,RTL Brisket PE Loaf 2.8 kg,FINISHED_PRODUCT,True,True,False,False,0,2
+R101549,RTL Brisket PE Loaf 5.2 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101550,RTL Brisket PE Loaf 2.9 kg,FINISHED_PRODUCT,True,True,False,False,0,2
+R101553,RTL Head Meat 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,5
+R101560,RTL Brisket PE Loaf 2.2 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101562,RTL Brisket PE Loaf 2.6 kg,FINISHED_PRODUCT,True,True,False,False,0,2
+R101564,RTL Brisket PE Loaf 3.9 kg,FINISHED_PRODUCT,True,True,False,False,0,2
+R101565,RTL Brisket PE Loaf 3 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101571,RTL Brisket PE Loaf 3.5 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101572,RTL Brisket PE Loaf 3.2 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101573,RTL Brisket PE Loaf 4 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101574,RTL Brisket PE Loaf 4.1 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101693,RTL Ribeye Steak AUS 150 gr,FINISHED_PRODUCT,True,True,False,False,0,27
+R101704,RTL Brisket PE Loaf 3.7 kg,FINISHED_PRODUCT,True,True,False,False,0,2
+R101705,RTL Brisket PE Loaf 4.2 kg,FINISHED_PRODUCT,True,True,False,False,0,1
+R101706,RTL Brisket PE Loaf 4.6 kg,FINISHED_PRODUCT,True,True,False,False,0,2
+R101749,RTL Daging Giling Ekonomis 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,15
+R101750,RTL Daging Giling Ekonomis 500 gr,FINISHED_PRODUCT,True,True,False,False,1,5
+R101753,RTL Paru Slice Sapi 500 gr,FINISHED_PRODUCT,True,True,False,False,0,17
+R101818,RTL Daging Giling Spesial 250 gr,FINISHED_PRODUCT,True,True,False,False,1,26
+R101887,RTL Brisket PE Loaf 4.7 kg,FINISHED_PRODUCT,True,True,False,False,0,2
+R101895,RTL Boneless Paha Ayam 500 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R101964,RTL Slice Dada Ayam 500 gr,FINISHED_PRODUCT,True,True,False,False,2,12
+R102019,RTL Daging Has Paha Value 1 kg,FINISHED_PRODUCT,True,True,False,False,0,35
+R102020,RTL Daging Has Paha Value 500 gr,FINISHED_PRODUCT,True,True,False,False,0,15
+R102028,RTL Slice Sirloin 250gr,FINISHED_PRODUCT,True,True,False,False,0,12
+R102044,RTL Sirloin AUS Steak Prime Aged 180 gr,FINISHED_PRODUCT,True,True,False,False,0,27
+R102045,RTL Sirloin AUS Steak Prime Aged 200 gr,FINISHED_PRODUCT,True,True,False,False,1,26
+R102046,RTL Sirloin AUS Steak Prime Aged 250 gr,FINISHED_PRODUCT,True,True,False,False,0,24
+R102054,Ikan Tuna Fillet,FINISHED_PRODUCT,True,True,False,False,1,0
+R102090,RTL CST Daging Giling Special OSV 250 gr,FINISHED_PRODUCT,True,True,False,False,2,23
+R102091,RTL CST Hati Sapi OSV 250 gr,FINISHED_PRODUCT,True,True,False,False,1,22
+R102101,Serbuk Ayam,BY_PRODUCT,False,False,True,False,2,0
+R102177,Cumi Cendol,FINISHED_PRODUCT,True,True,False,False,1,0
+R102178,RTL Cumi Cendol 500 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102196,RTL Daging Dendeng 500gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102219,RTL Topside Steak Wagyu MB6+ 150 gr,FINISHED_PRODUCT,True,True,False,False,0,4
+R102220,RTL Topside Steak Wagyu MB6+ 180 gr,FINISHED_PRODUCT,True,True,False,False,0,4
+R102221,RTL Topside Steak Wagyu MB6+ 230 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R102222,RTL Topside Steak Wagyu MB6+ 250 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R102241,Plastik Vacuum 15 x 30 cm,PACKAGING,False,False,False,True,412,0
+R102242,Plastik Vacuum 18 x 30 cm,PACKAGING,False,False,False,True,769,0
+R102243,Plastik Vacuum 18 x 35 cm,PACKAGING,False,False,False,True,10,0
+R102244,Plastik Vacuum 18 x 30 cm,PACKAGING,False,False,False,True,1,0
+R102244,Plastik Vacuum 20 x 30 cm,PACKAGING,False,False,False,True,223,0
+R102245,Plastik Vacuum 21 x 32 cm,PACKAGING,False,False,False,True,586,0
+R102246,Plastik Vacuum Hitam 15 x 25 cm,PACKAGING,False,False,False,True,12,0
+R102247,Plastik Vacuum Hitam 20 x 30 cm,PACKAGING,False,False,False,True,21,0
+R102252,Plastik Karton Besar,PACKAGING,False,False,False,True,1584,0
+R102253,Plastik Karton Kecil,PACKAGING,False,False,False,True,103,1
+R102253X,Plastik Karton Kecil,PACKAGING,False,False,False,True,1,0
+R102253X,[Non Aktif] Plastik Karton Kecil,PACKAGING,False,False,False,True,1,0
+R102259,Plastik PE Tebal 15 x 30 cm,PACKAGING,False,False,False,True,2,0
+R102260,Plastik PE Tebal 20 x 35 cm,PACKAGING,False,False,False,True,9,0
+R102271,40 CL MHS,BY_PRODUCT,False,False,True,False,2,26
+R102295,RTL Ribeye AUS Steak Prime Aged 180 gr,FINISHED_PRODUCT,True,True,False,False,0,19
+R102296,RTL Ribeye AUS Steak Prime Aged 200 gr,FINISHED_PRODUCT,True,True,False,False,0,19
+R102297,RTL Ribeye AUS Steak Prime Aged 250 gr,FINISHED_PRODUCT,True,True,False,False,0,16
+R102322,Onion Slice 1kg,FINISHED_PRODUCT,True,True,False,False,2,0
+R102325,RTL Bawang Bombay Slice 500 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R102341,RTL Slice Meltique 250 gr,FINISHED_PRODUCT,True,True,False,False,9,1
+R102364,RTL Ikan Teri Nasi 200 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102403,RTL CST Daging Lean Shabu Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,12,17
+R102417,Plastik Vacuum 16 x 21 cm,PACKAGING,False,False,False,True,178,0
+R102422,RTL Daging Paha Ayam Giling 500 gr,FINISHED_PRODUCT,True,True,False,False,0,32
+R102427,Plastik PE Tebal 25 x 40 cm,PACKAGING,False,False,False,True,16,0
+R102436,RTL Oxtail Lokal Premium 500 gr,FINISHED_PRODUCT,True,True,False,False,0,20
+R102501,RTL CST Daging Giling Reguler Astro 500 gr,FINISHED_PRODUCT,True,True,False,False,1,0
+R102502,RTL CST Slice Teriyaki Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,30,51
+R102504,RTL CST Daging Shank Astro 500 gr,FINISHED_PRODUCT,True,True,False,False,1,5
+R102505,RTL CST Daging Semur Potong Astro 500 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102506,RTL CST Daging Oseng Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,2,22
+R102528,Sample - Daging Giling,OTHER,False,False,False,False,4,7
+R102529,Sample - Daging Slice,OTHER,False,False,False,False,2,4
+R102531,Sample - Daging Potong,OTHER,False,False,False,False,14,10
+R102535,RTL T-Bone Steak AUS 400 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102537,RTL T-Bone Steak AUS 450 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102539,RTL T-Bone Steak AUS 500 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102545,RTL Slice Ekonomis Fatty 250 gr,FINISHED_PRODUCT,True,True,False,False,6,16
+R102546,Oxymove Absorber N100,PACKAGING,False,False,False,True,1,0
+R102546,Oxymove Absorber N200,PACKAGING,False,False,False,True,218,0
+R102547,Oxymove Absorber N100,PACKAGING,False,False,False,True,119,0
+R102575,RTL CST Lidah Slice Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,7,21
+R102576,RTL CST Hati Sapi Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,1,29
+R102577,RTL CST Beef Teriyaki Astro 500 gr,FINISHED_PRODUCT,True,True,False,False,7,23
+R102578,RTL CST Daging Sop Potong Astro 500 gr,FINISHED_PRODUCT,True,True,False,False,3,31
+R102603,RTL CST Daging Rendang Potong PF 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,12
+R102647,RTL Slice Value 250 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102648,RTL Slice Value 500 gr,FINISHED_PRODUCT,True,True,False,False,2,14
+R102731,RTL T-Bone Steak AUS 350 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102753,RTL CST Brisket Bone Astro 1000 gr,FINISHED_PRODUCT,True,True,False,False,2,31
+R102754,RTL CST Meltique Mess Astro 1000 gr,FINISHED_PRODUCT,True,True,False,False,3,8
+R102755,RTL CST Lidah Bistik Astro 250gr,FINISHED_PRODUCT,True,True,False,False,3,28
+R102756,RTL CST Konro Besar Astro 500 gr,FINISHED_PRODUCT,True,True,False,False,1,26
+R102801,RTL CST Slice Ekonomis Fatty  Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,2,25
+R102801,RTL CST Slice Ekonomis Fatty Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,2,3
+R102802,RTL CST Slice Ekonomis Fatty  Astro 500 gr,FINISHED_PRODUCT,True,True,False,False,1,10
+R102802,RTL CST Slice Ekonomis Fatty Astro 500 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R102804,RTL CST Slice Meltique Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,1,9
+R102849,Mixed California Vegetables 1kg,FINISHED_PRODUCT,True,True,False,False,3,0
+R102856,RTL Mixed California Capcay 500 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R102857,RTL Mixed California Capcay 1kg,FINISHED_PRODUCT,True,True,False,False,0,2
+R103074,RTL CST Slice Dada Ayam SK 500 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R103075,RTL Slice Value SK 500 gr,FINISHED_PRODUCT,True,True,False,False,2,2
+R103102,RTL CST Slice Ekonomis Fatty SK 500 gr,FINISHED_PRODUCT,True,True,False,False,1,0
+R103104,RTL Slice Value SK 250 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R103123,RTL Mixed Vegetables 4 Ways 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R103201,RTL CST Neckbone WT Meramist,FINISHED_PRODUCT,True,True,False,False,0,4
+R103240,RTL Black Angus 1953 Brisket Slice 250 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R103242,RTL Black Angus 1953 Oyster Blade Steak 130 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R103243,RTL Black Angus 1953 Oyster Blade Steak 150 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R103247,RTL Black Angus 1953 Sirloin Steak 200 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R103248,RTL Black Angus 1953 Flank Steak 450 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103249,RTL Black Angus 1953 Tenderloin Steak 130 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R103250,RTL Black Angus 1953 Tenderloin Steak 150 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R103345,RTL Tulang Rangu Sapi 500 gr,FINISHED_PRODUCT,True,True,False,False,0,14
+R103352,RTL Black Angus 1953 Sirloin Steak 250 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R103353,RTL Black Angus 1953 Sirloin Steak 230 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R103354,RTL Black Angus 1953 Flank Steak 500 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103355,RTL Black Angus 1953 Flank Steak 550 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103357,RTL Hati Sapi 250 gr,FINISHED_PRODUCT,True,True,False,False,0,5
+R103358,RTL Black Angus 1953 Flank Steak 600 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103359,RTL Black Angus 1953 Flank Steak 650 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103360,RTL Black Angus 1953 Flank Steak 700 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103361,RTL Black Angus 1953 Flank Steak 750 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103365,RTL Black Angus 1953 Flank Steak 800 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103369,RTL CST Iga Gondrong OSV 250 gr,FINISHED_PRODUCT,True,True,False,False,0,16
+R103388,RTL CST Daging Sop Potong Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,2,11
+R103432,RTL Black Angus 1953 Sirloin Steak 180 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R103441,RTL CST Neckbone WT John Dee,FINISHED_PRODUCT,True,True,False,False,0,32
+R103444,RTL Black Angus 1953 Tenderloin Steak 180 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R103445,RTL Black Angus 1953 Tenderloin Steak 200 gr,FINISHED_PRODUCT,True,True,False,False,0,2
+R103591,RTL CST Daging Giling PF 250 gr,FINISHED_PRODUCT,True,True,False,False,0,4
+R103602,Ikan Teri Nasi,FINISHED_PRODUCT,True,True,False,False,1,0
+R103677,Sirloin Prime Aged Whole,FINISHED_PRODUCT,True,True,False,False,0,1
+R103701,RTLP Kentang Hungritos Shoestring 1 kg,FINISHED_PRODUCT,True,True,False,False,0,10
+R103739,RTL CST Daging Sop Potong Sg 500 gr,FINISHED_PRODUCT,True,True,False,False,2,11
+R103740,RTL CST Daging Giling Regular Sg 500 gr,FINISHED_PRODUCT,True,True,False,False,0,7
+R103742,RTL CST Daging Giling Spesial Sg 250 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103745,RTL CST Daging Giling Regular Sg 250 gr,FINISHED_PRODUCT,True,True,False,False,0,6
+R103845,RTL Boneless Paha Ayam Kulit 500 gr,FINISHED_PRODUCT,True,True,False,False,1,0
+R103849,RTL Daging Has Dalam Utuh Tenderloin 1000 gr,FINISHED_PRODUCT,True,True,False,False,0,22
+R103850,RTL Daging Has Dalam Utuh Tenderloin 500 gr,FINISHED_PRODUCT,True,True,False,False,8,15
+R103860,RTL Tetelan 500 gr,FINISHED_PRODUCT,True,True,False,False,0,3
+R103972,RTL CST Daging Giling Import Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,0,1
+R103983,RTL CST Daging Giling Bangor 4000 gr,FINISHED_PRODUCT,True,True,False,False,1,1
+R103995,RTL Yakiniku Karubi 250 gr,FINISHED_PRODUCT,True,True,False,False,0,7
+R103996,RTL Yakiniku Regular 250 gr,FINISHED_PRODUCT,True,True,False,False,0,11
+R103997,RTL Short Rib Galbi Regular 250 gr,FINISHED_PRODUCT,True,True,False,False,0,6
+R103998,RTL Short Rib Galbi Regular 500 gr,FINISHED_PRODUCT,True,True,False,False,0,6
+R104050,RTL CST Rendang Potong Astro 250 gr,FINISHED_PRODUCT,True,True,False,False,4,13
+R10945,RTLP Anchor Butter Minidis Unsalted 7 gr,FINISHED_PRODUCT,True,True,False,False,2,0
+R11025,RTLP Anchor Butter Minidis Salted 7 gr,FINISHED_PRODUCT,True,True,False,False,2,0
+RAW0500,RTL CST Resto GPU Oxtail Lokal Premium,FINISHED_PRODUCT,True,True,False,False,0,2
+RAW0501,RTL CST Resto GPU Lidah Utuh,FINISHED_PRODUCT,True,True,False,False,0,1
+RAW0502,RTL CST Resto GPU Slice US Shortplate,FINISHED_PRODUCT,True,True,False,False,0,1
+RAW0503,RTL CST Resto GPU Ribeye Steak AUS,FINISHED_PRODUCT,True,True,False,False,0,1
+RAW0504,RTL CST Resto GPU Sirloin Steak AUS,FINISHED_PRODUCT,True,True,False,False,0,1

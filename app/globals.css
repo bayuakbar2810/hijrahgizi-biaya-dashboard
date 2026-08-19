@@ -1,26 +1,113 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-canvas: oklch(0.965 0.006 210);
+  --color-surface: oklch(0.995 0.002 210);
+  --color-surface-2: oklch(0.945 0.008 210);
+  --color-surface-3: oklch(0.915 0.01 210);
+
+  --color-ink: oklch(0.24 0.018 225);
+  --color-ink-2: oklch(0.46 0.02 225);
+  --color-ink-3: oklch(0.6 0.02 225);
+
+  --color-line: oklch(0.885 0.012 215);
+  --color-line-strong: oklch(0.78 0.016 215);
+
+  --color-accent: oklch(0.52 0.11 205);
+  --color-accent-strong: oklch(0.45 0.11 205);
+  --color-accent-soft: oklch(0.935 0.03 205);
+
+  --color-in: oklch(0.58 0.14 235);
+  --color-in-soft: oklch(0.93 0.035 235);
+
+  --color-out: oklch(0.62 0.13 160);
+  --color-out-soft: oklch(0.93 0.04 160);
+
+  --color-total: oklch(0.5 0.13 290);
+  --color-total-soft: oklch(0.93 0.035 290);
+
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --shadow-panel: 0 1px 2px oklch(0.3 0.02 225 / 0.04),
+    0 1px 3px oklch(0.3 0.02 225 / 0.06);
+  --shadow-float: 0 12px 32px -8px oklch(0.24 0.02 225 / 0.22);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- Browser surfaces: selection, caret, scrollbars ---- */
+::selection {
+  background: var(--color-accent);
+  color: oklch(0.99 0 210);
+}
+
+input,
+textarea,
+select {
+  caret-color: var(--color-accent);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.78 0.015 215) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: oklch(0.8 0.014 215);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.7 0.016 215);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ---- Focus ---- */
+:where(button, a, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---- Data typography ---- */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "cv01" 1;
+}
+
+/* ---- Motion: single authored state transitions ---- */
+button,
+a,
+input,
+select,
+tr {
+  transition: background-color 160ms ease-out, border-color 160ms ease-out,
+    color 160ms ease-out, box-shadow 160ms ease-out, opacity 160ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
