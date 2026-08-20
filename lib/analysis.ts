@@ -229,6 +229,15 @@ function _skuAggregate(batchRows: Row[]): Array<{ kode: string; nama: string; qt
   return skus;
 }
 
+function _mainOutputSku(
+  skus: Array<{ kode: string; nama: string; qty: number }>,
+): { kode: string; nama: string } | null {
+  if (skus.length === 0) return null;
+  let best = skus[0];
+  for (const e of skus) if (e.qty > best.qty) best = e;
+  return { kode: best.kode, nama: best.nama };
+}
+
 function _metricCostPerKg(m: { cost_potong: number; rtl_output: number }): number | null {
   return m.rtl_output > 0 ? m.cost_potong / m.rtl_output : null;
 }
@@ -454,14 +463,15 @@ export function analyze(
     const histYield = histMetric(_metricYield, b);
 
     const anomalies: Array<Record<string, any>> = [];
+    const mo = _mainOutputSku(m.skus);
 
     const vc = _variancePct(costPerKg, histCost);
     const sc = _severityVar(vc, Number(cfg.cost_var_watch), Number(cfg.cost_var_anomaly));
     if (sc && sc !== "NORMAL" && m.cost_potong > 0 && (vc ?? 0) > 0) {
       anomalies.push({
         type: "HIGH_CUTTING_COST",
-        sku: null,
-        nama: null,
+        sku: mo?.kode ?? null,
+        nama: mo?.nama ?? null,
         current: costPerKg,
         historical: histCost,
         variance_pct: vc,
@@ -489,7 +499,8 @@ export function analyze(
     ) {
       anomalies.push({
         type: "LOW_YIELD",
-        sku: null,
+        sku: mo?.kode ?? null,
+        nama: mo?.nama ?? null,
         current: yieldPct,
         historical: histYield,
         variance_pct: vy,
@@ -623,6 +634,7 @@ export function detailBatch(rows: Row[], batchNo: string, settings: Record<strin
   if (batchRows.length === 0) return { error: `Batch ${batchNo} tidak ditemukan` };
 
   const skus = _skuAggregate(batchRows);
+  const mo = _mainOutputSku(skus);
   const rtlOutput = skus.reduce((a, e) => a + e.qty, 0);
   const isRtlBatch = _batchIsRtl(batchRows);
 
@@ -709,8 +721,8 @@ export function detailBatch(rows: Row[], batchNo: string, settings: Record<strin
   if (sc && sc !== "NORMAL" && costPotong > 0 && (vc ?? 0) > 0) {
     anomalies.push({
       type: "HIGH_CUTTING_COST",
-      sku: null,
-      nama: null,
+      sku: mo?.kode ?? null,
+      nama: mo?.nama ?? null,
       current: costPerKg,
       historical: histCost,
       variance_pct: vc,
@@ -738,7 +750,8 @@ export function detailBatch(rows: Row[], batchNo: string, settings: Record<strin
   ) {
     anomalies.push({
       type: "LOW_YIELD",
-      sku: null,
+      sku: mo?.kode ?? null,
+      nama: mo?.nama ?? null,
       current: yieldPct,
       historical: histYield,
       variance_pct: vy,
