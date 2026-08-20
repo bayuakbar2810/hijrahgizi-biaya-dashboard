@@ -215,8 +215,9 @@ function Header({
   pyOk: boolean;
   tab: Tab;
   onTab: (t: Tab) => void;
-  analysis: AnalysisResult | null;
+analysis: AnalysisResult | null;
 }) {
+  const [pdfBusy, setPdfBusy] = useState(false);
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "batches", label: "Item RTL" },
     { id: "anomalies", label: "Anomali", count: analysis?.anomalies.length ?? 0 },
@@ -257,6 +258,24 @@ function Header({
           />
 {pyOk ? "Service analisis aktif" : "Service analisis offline"}
         </span>
+        <button
+          onClick={async () => {
+            if (!analysis) return;
+            setPdfBusy(true);
+            try {
+              const { generateReportPdf } = await import("@/lib/report");
+              generateReportPdf(analysis);
+            } catch {
+              alert("Gagal membuat laporan PDF. Coba lagi.");
+            } finally {
+              setPdfBusy(false);
+            }
+          }}
+          disabled={!analysis || pdfBusy}
+          className="rounded-lg border border-line-strong px-3 py-1.5 text-[13px] font-medium text-ink-2 hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {pdfBusy ? "Menyiapkan…" : "Unduh Laporan PDF"}
+        </button>
         <button
           onClick={async () => {
             await fetch("/api/logout", { method: "POST" });
