@@ -2,7 +2,6 @@
 import autoTable from "jspdf-autotable";
 import type { AnalysisResult, AnomalyRow, BatchDetail } from "./types";
 import { fmtIDR, fmtNum, fmtPct, fmtDate } from "./format";
-import { INVESTIGATION_GUIDE } from "./investigation";
 
 const BRAND: [number, number, number] = [15, 125, 148];
 const BRAND_DARK: [number, number, number] = [10, 84, 100];
@@ -448,18 +447,6 @@ function drawEvidence(
   doc.setTextColor(...BRAND_DARK);
   y = drawWrapped(doc, hppText, 17, y + 5, w - 34) + 6;
   doc.setTextColor(...INK);
-
-  /* poin diskusi */
-  const bullets = INVESTIGATION_GUIDE[a.type] ?? [];
-  y = ensureSpace(doc, y, 20);
-  y = sectionTitle(doc, y, "Poin diskusi untuk divisi terkait");
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(...INK);
-  for (const b of bullets) {
-    y = ensureSpace(doc, y, 12);
-    y = drawWrapped(doc, `•  ${b}`, 17, y + 2, w - 32) + 2.5;
-  }
   return y + 4;
 }
 
