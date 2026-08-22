@@ -1,4 +1,4 @@
-# DESIGN — Dashboard Analisis Biaya Hijrah Gizihew
+﻿# DESIGN â€” Dashboard Analisis Biaya Hijrah Gizi Hewani
 
 Direktori desain visual untuk dashboard ini. Berlaku sebagai sumber kebenaran (source of
 truth) saat mengubah UI.
@@ -36,18 +36,18 @@ yang lengkap. Ekspresi berlebih dikorbankan demi kepercayaan yang langsung terbe
 | Output / pesanan selesai | `0.62 0.13 160` (emerald) | `text-out`, `bg-out-soft` |
 | Total biaya | `0.5 0.13 290` (violet) | `text-total`, `bg-total-soft` |
 
-Aksen hanya dipakai untuk aksi utama, seleksi aktif, dan indikator status — bukan dekorasi.
+Aksen hanya dipakai untuk aksi utama, seleksi aktif, dan indikator status â€” bukan dekorasi.
 Data memakai hue berbeda per makna (input biru, output hijau, total violet), dengan
 tambahan label/nilai sehingga warna bukan satu-satunya kode.
 
 ## Skala & spasi
 
-- Basis spasi **4px** (`p-1`…`p-6`); panel `rounded-xl` (12px), pil hanya untuk kontrol
+- Basis spasi **4px** (`p-1`â€¦`p-6`); panel `rounded-xl` (12px), pil hanya untuk kontrol
   kecil (badge tipe/kategori). Elevasi panel: **border 1px + shadow lembut** (bukan border
-  di bawah bayangan lebar — hindari "ghost card").
+  di bawah bayangan lebar â€” hindari "ghost card").
 - Judul panel: teks 14px semibold + titik aksen kecil. Hierarki tabel: header sticky
   `uppercase` 11px di atas permukaan sekunder.
-- Tipe: KPI angka 1.45rem/2; body 14px; tabel data 13px; meta 10–11px. Ratio antar langkah
+- Tipe: KPI angka 1.45rem/2; body 14px; tabel data 13px; meta 10â€“11px. Ratio antar langkah
   ~1.2. Ukuran label tabel naik sedikit, bukan radial.
 
 ## Komponen & keadaan
@@ -55,22 +55,22 @@ tambahan label/nilai sehingga warna bukan satu-satunya kode.
 Setiap kontrol interaktif punya: default, hover, focus-visible (ring aksen 2px + offset),
 active, disabled, loading, error.
 
-- **Tombol**: satu vokabular — `rounded-lg`, aksen untuk aksi primer (teks putih),
+- **Tombol**: satu vokabular â€” `rounded-lg`, aksen untuk aksi primer (teks putih),
   `border-line-strong` untuk sekunder.
 - **Input/select/checkbox**: border `line-strong`, fokus `border-accent`, caret aksen.
 - **Badge tipe transaksi**: INPUT = `bg-in-soft text-in`, OUTPUT = `bg-out-soft text-out`.
 - **Loading**: skeleton (bukan spinner di tengah konten). **Empty state**: judul + instruksi.
-- **Modal**: `<dialog>`-style — backdrop blur, Esc menutup, fokus awal ke tombol tutup,
+- **Modal**: `<dialog>`-style â€” backdrop blur, Esc menutup, fokus awal ke tombol tutup,
   baris total sticky di bawah.
 
 ## Motion
 
-- Hanya transisi state 150–250ms (hover/focus/active/disabled). Tidak ada animasi
+- Hanya transisi state 150â€“250ms (hover/focus/active/disabled). Tidak ada animasi
   orkestrasi masuk halaman. `prefers-reduced-motion: reduce` mematikan transisi.
 
 ## Permukaan browser
 
-Selection, caret, scrollbar (tipis, border-radius), dan focus ring di-tema dari palet —
+Selection, caret, scrollbar (tipis, border-radius), dan focus ring di-tema dari palet â€”
 detail yang membuat halaman terasa "dibangun", bukan dirakit.
 
 ## Responsif

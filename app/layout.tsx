@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -9,9 +9,9 @@ const body = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Analisis Biaya Produksi — Hijrah Gizihew",
+  title: "Analisis Biaya Produksi â€” Hijrah Gizi Hewani",
   description:
-    "Dashboard analisis pembiayaan berdasarkan histori pekerjaan pesanan PT Hijrah Gizihew",
+    "Dashboard analisis pembiayaan berdasarkan histori pekerjaan pesanan PT Hijrah Gizi Hewani",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

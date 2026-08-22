@@ -270,7 +270,7 @@ analysis: AnalysisResult | null;
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/icon.jpg"
-          alt="Logo Hijrah Gizihew"
+          alt="Logo Hijrah Gizi Hewani"
           className="h-11 w-11 rounded-xl object-cover shadow-[var(--shadow-panel)]"
         />
         <div>
@@ -278,7 +278,7 @@ analysis: AnalysisResult | null;
             Analisis Biaya & Yield Produksi
           </h1>
           <p className="text-xs text-ink-2">
-            Hijrah Gizihew · RTL batches · biaya potong · karton · HPP per SKU
+            Hijrah Gizi Hewani · RTL batches · biaya potong · karton · HPP per SKU
           </p>
         </div>
       </div>

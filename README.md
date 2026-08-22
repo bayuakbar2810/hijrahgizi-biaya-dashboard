@@ -1,7 +1,7 @@
-# Dashboard Analisis Biaya Produksi — Hijrah Gizihew
+﻿# Dashboard Analisis Biaya Produksi â€” Hijrah Gizi Hewani
 
 Aplikasi web untuk menganalisis **pembiayaan yang dikeluarkan** berdasarkan histori
-pekerjaan/pesanan (file Excel) PT Hijrah Gizihew. Fokus: rincian beban per pesanan
+pekerjaan/pesanan (file Excel) PT Hijrah Gizi Hewani. Fokus: rincian beban per pesanan
 (batch) yang selesai, komposisi material/biaya, biaya per kategori pekerjaan, dan
 perbandingan output vs input.
 
@@ -13,28 +13,28 @@ perbandingan output vs input.
 | Grafik | Chart.js (ringan) via react-chartjs-2 |
 | Database | PostgreSQL via **PGlite** (Postgres WASM, tanpa instalasi server) |
 | Mesin analisis | Python FastAPI + pandas (service terpisah, port 8000) |
-| Desain UI | Skill **Impeccable** (`.opencode/skills/impeccable`) — lihat `DESIGN.md` |
+| Desain UI | Skill **Impeccable** (`.opencode/skills/impeccable`) â€” lihat `DESIGN.md` |
 
 ## Alur Data
 
 ```
 File Excel (.xlsx)
-      │ upload
-      ▼
+      â”‚ upload
+      â–¼
 Next.js API (/api/datasets)
-      │ ──► Python service (/parse-excel)  → parse & bersihkan data (pandas)
-      ▼
-PGlite (PostgreSQL) — tabel datasets & transactions (permanen di folder /pgdata)
-      │
-      ▼
-Analisis: Next.js ambil data → Python /analyze → hasil JSON
-      ▼
+      â”‚ â”€â”€â–º Python service (/parse-excel)  â†’ parse & bersihkan data (pandas)
+      â–¼
+PGlite (PostgreSQL) â€” tabel datasets & transactions (permanen di folder /pgdata)
+      â”‚
+      â–¼
+Analisis: Next.js ambil data â†’ Python /analyze â†’ hasil JSON
+      â–¼
 Dashboard (KPI, grafik, tabel batch, drilldown detail per batch)
 ```
 
 ## Menjalankan Aplikasi
 
-Cara termudah — klik dua kali **`start-all.bat`**. Ia akan:
+Cara termudah â€” klik dua kali **`start-all.bat`**. Ia akan:
 1. Menginstal dependensi Python & web jika belum ada.
 2. Menjalankan service analisis Python di `http://127.0.0.1:8000`.
 3. Menjalankan aplikasi web di `http://localhost:3000` dan membuka browser.
@@ -42,12 +42,12 @@ Cara termudah — klik dua kali **`start-all.bat`**. Ia akan:
 Manual (dua terminal):
 
 ```bash
-# Terminal 1 — service analisis Python
+# Terminal 1 â€” service analisis Python
 cd py-service
 pip install -r requirements.txt
 python -m uvicorn main:app --host 127.0.0.1 --port 8000
 
-# Terminal 2 — aplikasi web
+# Terminal 2 â€” aplikasi web
 npm install
 npm run dev
 # buka http://localhost:3000
@@ -55,11 +55,11 @@ npm run dev
 
 ## Cara Pakai
 
-1. **Upload Excel** — klik tombol `+ Upload Excel` di panel kiri, pilih file
+1. **Upload Excel** â€” klik tombol `+ Upload Excel` di panel kiri, pilih file
    `histori_pekerjaan_pesanan_*.xlsx`. Data tersimpan permanen (Postgres/PGlite).
-2. **Pilih dataset** — centang dataset yang ingin dianalisis (bisa lebih dari satu),
+2. **Pilih dataset** â€” centang dataset yang ingin dianalisis (bisa lebih dari satu),
    atau `Pilih Semua`.
-3. **Filter** — atur rentang tanggal dan kategori pekerjaan, lalu `Terapkan & Analisis`.
+3. **Filter** â€” atur rentang tanggal dan kategori pekerjaan, lalu `Terapkan & Analisis`.
 4. **Lihat hasil**:
    - **KPI cards**: total biaya, total input (barang dikeluarkan), total output
      (pesanan selesai), rasio output/input, jumlah batch & transaksi.
@@ -68,37 +68,37 @@ npm run dev
      Proses, Kemasan, Labeling, dll.).
    - **Perbandingan Input vs Output** per kategori pekerjaan.
    - **Output vs Input** untuk 20 batch terbesar.
-   - **Tabel batch/pesanan** — klik baris batch untuk **drilldown rincian per
+   - **Tabel batch/pesanan** â€” klik baris batch untuk **drilldown rincian per
      material/biaya** dari batch tersebut.
-5. Tab **Data Transaksi** — melihat data mentah (cari berdasarkan batch/bahan/kode).
+5. Tab **Data Transaksi** â€” melihat data mentah (cari berdasarkan batch/bahan/kode).
 
 ## Struktur Proyek
 
 ```
-├── app/
-│   ├── page.tsx                 # Halaman dashboard
-│   └── api/
-│       ├── datasets/route.ts    # Upload Excel (POST) & daftar dataset (GET)
-│       ├── datasets/[id]/route.ts  # Hapus dataset
-│       ├── analysis/route.ts    # Analisis biaya (POST)
-│       ├── batch-detail/route.ts   # Rincian per batch (POST)
-│       ├── transactions/route.ts   # Data transaksi mentah (GET)
-│       └── kategori/route.ts    # Daftar kategori pekerjaan (GET)
-├── components/                  # Komponen UI dashboard
-├── lib/
-│   ├── db.ts                    # Koneksi PGlite (Postgres WASM) + skema
-│   ├── python.ts                # Klien service analisis Python
-│   ├── query.ts                 # Pembangun filter SQL
-│   ├── types.ts                 # Tipe data
-│   └── format.ts                # Format angka/IDR
-├── py-service/                  # Service analisis Python (FastAPI)
-│   ├── main.py                  # Endpoint /parse-excel, /analyze, /batch-detail
-│   ├── parser.py                # Parsing & pembersihan Excel (pandas)
-│   ├── analysis.py              # Perhitungan analisis biaya
-│   └── start.bat                # Menjalankan service Python
-├── pgdata/                      # Data PostgreSQL (PGlite) — jangan dihapus
-├── start-all.bat                # Menjalankan semuanya sekali klik
-└── next.config.ts               # serverExternalPackages utk PGlite
+â”œâ”€â”€ app/
+â”‚   â”œâ”€â”€ page.tsx                 # Halaman dashboard
+â”‚   â””â”€â”€ api/
+â”‚       â”œâ”€â”€ datasets/route.ts    # Upload Excel (POST) & daftar dataset (GET)
+â”‚       â”œâ”€â”€ datasets/[id]/route.ts  # Hapus dataset
+â”‚       â”œâ”€â”€ analysis/route.ts    # Analisis biaya (POST)
+â”‚       â”œâ”€â”€ batch-detail/route.ts   # Rincian per batch (POST)
+â”‚       â”œâ”€â”€ transactions/route.ts   # Data transaksi mentah (GET)
+â”‚       â””â”€â”€ kategori/route.ts    # Daftar kategori pekerjaan (GET)
+â”œâ”€â”€ components/                  # Komponen UI dashboard
+â”œâ”€â”€ lib/
+â”‚   â”œâ”€â”€ db.ts                    # Koneksi PGlite (Postgres WASM) + skema
+â”‚   â”œâ”€â”€ python.ts                # Klien service analisis Python
+â”‚   â”œâ”€â”€ query.ts                 # Pembangun filter SQL
+â”‚   â”œâ”€â”€ types.ts                 # Tipe data
+â”‚   â””â”€â”€ format.ts                # Format angka/IDR
+â”œâ”€â”€ py-service/                  # Service analisis Python (FastAPI)
+â”‚   â”œâ”€â”€ main.py                  # Endpoint /parse-excel, /analyze, /batch-detail
+â”‚   â”œâ”€â”€ parser.py                # Parsing & pembersihan Excel (pandas)
+â”‚   â”œâ”€â”€ analysis.py              # Perhitungan analisis biaya
+â”‚   â””â”€â”€ start.bat                # Menjalankan service Python
+â”œâ”€â”€ pgdata/                      # Data PostgreSQL (PGlite) â€” jangan dihapus
+â”œâ”€â”€ start-all.bat                # Menjalankan semuanya sekali klik
+â””â”€â”€ next.config.ts               # serverExternalPackages utk PGlite
 ```
 
 ## Catatan
@@ -119,7 +119,7 @@ npm run dev
   mengerjakan pesanan (mis. bahan baku, biaya potong, kemasan).
 - **Output (Penyelesaian Pesanan)**: nilai penyelesaian pesanan / produk jadi.
 - **Total biaya** = input + output per baris transaksi.
-- **Rasio Output/Input** = output ÷ input. Nilai ≥ 100% menandakan nilai hasil lebih
+- **Rasio Output/Input** = output Ã· input. Nilai â‰¥ 100% menandakan nilai hasil lebih
   besar daripada beban yang dikeluarkan.
 
 ## Desain UI

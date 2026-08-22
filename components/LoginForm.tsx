@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useState } from "react";
 
@@ -46,14 +46,14 @@ export default function LoginForm({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/icon.jpg"
-              alt="Logo Hijrah Gizihew"
+              alt="Logo Hijrah Gizi Hewani"
               className="h-12 w-12 rounded-xl object-cover shadow-[var(--shadow-panel)]"
             />
             <div>
               <h1 className="text-base font-bold leading-tight text-ink">
                 Analisis Biaya & Yield Produksi
               </h1>
-              <p className="text-xs text-ink-2">Hijrah Gizihew · masuk untuk mengakses</p>
+              <p className="text-xs text-ink-2">Hijrah Gizi Hewani Â· masuk untuk mengakses</p>
             </div>
           </div>
 
@@ -90,7 +90,7 @@ export default function LoginForm({
             disabled={busy}
             className="mt-4 w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {busy ? "Memeriksa…" : "Masuk"}
+            {busy ? "Memeriksaâ€¦" : "Masuk"}
           </button>
         </form>
       </div>
