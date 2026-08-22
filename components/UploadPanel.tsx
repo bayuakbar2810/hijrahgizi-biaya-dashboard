@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import type { UploadPreview } from "@/lib/types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { UploadPreview, UploadLogEntry } from "@/lib/types";
 import { fmtDate, fmtIDR, fmtNum } from "@/lib/format";
 
 export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) {
@@ -11,6 +11,18 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
   const [preview, setPreview] = useState<UploadPreview | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [uploads, setUploads] = useState<UploadLogEntry[] | null>(null);
+
+  const loadUploads = useCallback(() => {
+    fetch("/api/uploads")
+      .then((r) => (r.ok ? r.json() : { uploads: [] }))
+      .then((d) => setUploads(d.uploads ?? []))
+      .catch(() => setUploads([]));
+  }, []);
+
+  useEffect(() => {
+    loadUploads();
+  }, [loadUploads]);
 
   const pick = (file: File | null) => {
     if (!file) return;
@@ -41,8 +53,14 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
       .then(async (res) => {
         const d = await res.json();
         if (!res.ok) throw new Error(d.error ?? "Konfirmasi gagal");
-        setDone(`${d.batches} batch diproses · ${d.rows} baris tersimpan`);
+        setDone(
+          `${d.batches} batch diproses · ${d.rows} baris tersimpan` +
+            (typeof d.changed_batches === "number" && d.changed_batches > 0
+              ? ` · ${d.changed_batches} batch tercatat berubah (lihat riwayat)`
+              : ""),
+        );
         setPreview(null);
+        loadUploads();
         onUploaded();
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Konfirmasi gagal"))
@@ -121,6 +139,47 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
           Upload berhasil · {done}
         </div>
       )}
+
+      <div className="mt-4 border-t border-line pt-3">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-3">
+          Riwayat upload
+        </h3>
+        {uploads === null ? (
+          <p className="mt-2 text-[11px] text-ink-3">memuat…</p>
+        ) : uploads.length === 0 ? (
+          <p className="mt-2 text-[11px] text-ink-3">Belum ada file yang diunggah.</p>
+        ) : (
+          <ul className="mt-2 max-h-72 space-y-1.5 overflow-auto pr-1">
+            {uploads.map((u) => (
+              <li key={u.id} className="rounded-lg border border-line bg-surface-2 px-2.5 py-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-mono text-[11px] font-semibold text-ink">
+                    {u.filename}
+                  </span>
+                  <span className="tnum shrink-0 text-[10px] text-ink-3">
+                    {fmtDate(u.uploaded_at)}{" "}
+                    {new Date(u.uploaded_at).toLocaleTimeString("id-ID", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <div className="tnum mt-0.5 flex flex-wrap gap-x-2.5 text-[10px] text-ink-2">
+                  <span>{fmtNum(u.n_rows, 0)} baris</span>
+                  <span>{fmtNum(u.n_batch, 0)} batch</span>
+                  <span className="text-out">baru {fmtNum(u.new_batch, 0)}</span>
+                  <span className="text-in">diperbarui {fmtNum(u.updated_batch, 0)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="mt-2 text-[10px] leading-snug text-ink-3">
+          Upload ulang batch yang sama tidak mendouble data — versi lama diganti otomatis, dan
+          bila nilainya berubah, perubahannya tercatat di &ldquo;Riwayat perubahan data&rdquo; pada
+          rincian batch.
+        </p>
+      </div>
     </section>
   );
 }

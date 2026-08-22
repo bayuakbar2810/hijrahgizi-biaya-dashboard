@@ -525,7 +525,8 @@ export function analyze(
     for (const e of m.skus) {
       const histHpp = _histAvg(skuHistAgg.get(e.kode) ?? []);
       const vh = _variancePct(e.hpp, histHpp);
-      const sh = _severityVar(vh, Number(cfg.hpp_var_watch), Number(cfg.hpp_var_anomaly));
+      // HPP lebih mahal dari biasanya = buruk; lebih murah = kabar baik (tidak di-flag).
+      const sh = (vh ?? 0) > 0 ? _severityVar(vh, Number(cfg.hpp_var_watch), Number(cfg.hpp_var_anomaly)) : null;
       skuHpps.push({
         kode: e.kode,
         nama: e.nama,
@@ -721,7 +722,8 @@ export function detailBatch(rows: Row[], batchNo: string, settings: Record<strin
   for (const e of skus) {
     const histHpp = _histAvg(skuHist[e.kode] ?? []);
     const vh = _variancePct(e.hpp, histHpp);
-    const sh = _severityVar(vh, Number(cfg.hpp_var_watch), Number(cfg.hpp_var_anomaly));
+    // HPP lebih mahal dari biasanya = buruk; lebih murah = kabar baik (tidak di-flag).
+    const sh = (vh ?? 0) > 0 ? _severityVar(vh, Number(cfg.hpp_var_watch), Number(cfg.hpp_var_anomaly)) : null;
     skuHpps.push({
       kode: e.kode,
       nama: e.nama,

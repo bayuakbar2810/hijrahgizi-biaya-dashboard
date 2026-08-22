@@ -77,6 +77,23 @@ CREATE TABLE IF NOT EXISTS previews (
   updated_batch INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS batch_history (
+  id TEXT PRIMARY KEY,
+  batch_no TEXT NOT NULL,
+  changed_at TEXT NOT NULL,
+  source_filename TEXT NOT NULL,
+  n_rows_old INTEGER NOT NULL,
+  n_rows_new INTEGER NOT NULL,
+  total_biaya_old DOUBLE PRECISION NOT NULL,
+  total_biaya_new DOUBLE PRECISION NOT NULL,
+  total_qty_old DOUBLE PRECISION NOT NULL,
+  total_qty_new DOUBLE PRECISION NOT NULL,
+  diff_json TEXT NOT NULL,
+  rows_old_json TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_batch_history_batch ON batch_history(batch_no);
+CREATE INDEX IF NOT EXISTS idx_batch_history_time ON batch_history(changed_at);
 `;
 
 const DEFAULT_SETTINGS: Record<string, string> = {

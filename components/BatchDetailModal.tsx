@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { BatchDetail } from "@/lib/types";
+import type { BatchDetail, BatchHistoryEntry } from "@/lib/types";
 import { fmtDate, fmtIDR, fmtNum, shortIDR } from "@/lib/format";
 import { INVESTIGATION_GUIDE } from "@/lib/investigation";
 import { Panel, PTypeBadge, SkeletonRows, StatusBadge, Th, Td } from "./ui";
@@ -159,6 +159,8 @@ export default function BatchDetailModal({
                 error={notesError}
                 onSave={saveNotes}
               />
+
+              <HistoryPanel batchNo={batchNo} />
 
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <InputPanel data={data} />
@@ -647,6 +649,128 @@ function NotesPanel({
               {saving ? "Menyimpan…" : "Simpan catatan"}
             </button>
           </div>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+/* ---------------- riwayat perubahan data ---------------- */
+
+const FIELD_LABEL: Record<string, string> = {
+  tanggal: "Tanggal",
+  kode: "Kode",
+  bahan_biaya: "Bahan & biaya",
+  keterangan: "Keterangan",
+  pengeluaran_biaya: "Biaya pengeluaran",
+  pengeluaran_qty: "Qty pengeluaran",
+  penyelesaian_biaya: "Biaya penyelesaian",
+  penyelesaian_qty: "Qty penyelesaian",
+};
+
+function fmtVal(f: string, v: unknown): string {
+  if (f.includes("biaya")) return fmtIDR(Number(v) || 0);
+  if (f.includes("qty")) return fmtNum(Number(v) || 0, 2);
+  return String(v ?? "");
+}
+
+function HistoryPanel({ batchNo }: { batchNo: string }) {
+  const [entries, setEntries] = useState<BatchHistoryEntry[] | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    fetch(`/api/batch-history?batch_no=${encodeURIComponent(batchNo)}`)
+      .then((r) => (r.ok ? r.json() : { entries: [] }))
+      .then((d) => {
+        if (live) setEntries(d.entries ?? []);
+      })
+      .catch(() => {
+        if (live) setEntries([]);
+      });
+    return () => {
+      live = false;
+    };
+  }, [batchNo]);
+
+  if (entries === null) return null;
+  return (
+    <Panel
+      title="Riwayat perubahan data"
+      subtitle={`${entries.length} kali update dari upload ulang`}
+      accent="in"
+    >
+      {entries.length === 0 ? (
+        <p className="py-2 text-center text-xs text-ink-3">
+          Data batch ini belum pernah berubah dari upload ulang.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {entries.map((e) => {
+            const dBiaya = e.total_biaya_new - e.total_biaya_old;
+            const pct =
+              e.total_biaya_old > 0 ? (dBiaya / e.total_biaya_old) * 100 : null;
+            return (
+              <details
+                key={e.id}
+                className="rounded-lg border border-line bg-surface-2 px-3 py-2"
+              >
+                <summary className="cursor-pointer list-none">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                    <span className="text-[12px] font-semibold text-ink">
+                      {fmtDate(e.changed_at)}{" "}
+                      {new Date(e.changed_at).toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      · dari file <span className="font-mono text-[11px]">{e.source_filename}</span>
+                    </span>
+                    <span className="tnum text-[11px] text-ink-2">
+                      baris {fmtNum(e.n_rows_old, 0)}→{fmtNum(e.n_rows_new, 0)} · total biaya{" "}
+                      <b className={dBiaya > 0 ? "text-red-600" : dBiaya < 0 ? "text-out" : "text-ink"}>
+                        {fmtIDR(e.total_biaya_old)} → {fmtIDR(e.total_biaya_new)}
+                      </b>
+                      {pct != null && (
+                        <span className={dBiaya > 0 ? "text-red-600" : "text-out"}>
+                          {" "}
+                          ({dBiaya >= 0 ? "+" : ""}
+                          {fmtNum(pct, 1)}%)
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </summary>
+                <div className="mt-2 space-y-1.5 text-[12px]">
+                  {e.diff.changed.map((c, ci) => (
+                    <div key={ci} className="rounded-md border border-line bg-white px-2.5 py-1.5">
+                      <div className="text-[11px] font-medium text-ink-2">
+                        Baris {c.i + 1} · {c.kode} — {c.bahan}
+                      </div>
+                      {c.fields.map((fl, fi) => (
+                        <div key={fi} className="tnum mt-0.5 flex flex-wrap gap-1 text-[11px]">
+                          <span className="text-ink-3">{FIELD_LABEL[fl.f] ?? fl.f}:</span>
+                          <span className="text-ink-2 line-through">{fmtVal(fl.f, fl.old)}</span>
+                          <span className="text-ink-3">→</span>
+                          <span className="font-semibold text-ink">{fmtVal(fl.f, fl.new)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  {e.diff.added.length > 0 && (
+                    <div className="rounded-md border border-out/30 bg-out-soft px-2.5 py-1.5 text-[11px] text-out">
+                      + {e.diff.added.length} baris baru:{" "}
+                      {e.diff.added.map((a) => `${a.kode} ${a.bahan}`).join("; ")}
+                    </div>
+                  )}
+                  {e.diff.removed.length > 0 && (
+                    <div className="rounded-md border border-red-200 bg-red-50 px-2.5 py-1.5 text-[11px] text-red-700">
+                      − {e.diff.removed.length} baris dihapus:{" "}
+                      {e.diff.removed.map((a) => `${a.kode} ${a.bahan}`).join("; ")}
+                    </div>
+                  )}
+                </div>
+              </details>
+            );
+          })}
         </div>
       )}
     </Panel>

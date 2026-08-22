@@ -202,3 +202,35 @@ export type UploadPreview = {
   invalid_rows: number;
   missing_columns: string[];
 };
+
+export type BatchHistoryDiffField = { f: string; old: unknown; new: unknown };
+
+export type BatchHistoryDiff = {
+  changed: Array<{ i: number; kode: string; bahan: string; fields: BatchHistoryDiffField[] }>;
+  added: Array<{ kode: string; bahan: string }>;
+  removed: Array<{ kode: string; bahan: string }>;
+};
+
+export type BatchHistoryEntry = {
+  id: string;
+  batch_no: string;
+  changed_at: string;
+  source_filename: string;
+  n_rows_old: number;
+  n_rows_new: number;
+  total_biaya_old: number;
+  total_biaya_new: number;
+  total_qty_old: number;
+  total_qty_new: number;
+  diff: BatchHistoryDiff;
+};
+
+export type UploadLogEntry = {
+  id: string;
+  filename: string;
+  uploaded_at: string;
+  n_rows: number;
+  n_batch: number;
+  new_batch: number;
+  updated_batch: number;
+};
