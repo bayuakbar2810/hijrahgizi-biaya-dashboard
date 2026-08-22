@@ -1,8 +1,36 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { UploadPreview, UploadLogEntry, BatchHistoryEntry } from "@/lib/types";
+import type {
+  UploadPreview,
+  UploadLogEntry,
+  BatchHistoryEntry,
+  BatchHistoryDiff,
+} from "@/lib/types";
 import { fmtDate, fmtIDR, fmtNum } from "@/lib/format";
+
+/* Label satu baris perubahan: prioritas nama produk > biaya > qty > tanggal. */
+function rowChangeLabel(c: BatchHistoryDiff["changed"][number]): string | null {
+  const nameF = c.fields.find((f) => f.f === "bahan_biaya");
+  if (nameF) {
+    const o = String(nameF.old ?? "").trim() || "(kosong)";
+    const n = String(nameF.new ?? "").trim() || "(kosong)";
+    return `${o} → ${n}`;
+  }
+  const costF = c.fields.find((f) => f.f === "pengeluaran_biaya" || f.f === "penyelesaian_biaya");
+  if (costF) {
+    return `Biaya ${fmtIDR(Number(costF.old) || 0)} → ${fmtIDR(Number(costF.new) || 0)}`;
+  }
+  const qtyF = c.fields.find((f) => f.f === "pengeluaran_qty" || f.f === "penyelesaian_qty");
+  if (qtyF) {
+    return `Qty ${fmtNum(Number(qtyF.old) || 0, 1)} → ${fmtNum(Number(qtyF.new) || 0, 1)}`;
+  }
+  const tF = c.fields.find((f) => f.f === "tanggal");
+  if (tF) return `Tanggal ${String(tF.old)} → ${String(tF.new)}`;
+  const ketF = c.fields.find((f) => f.f === "keterangan");
+  if (ketF) return `Ket. ${String(ketF.old).slice(0, 20)} → ${String(ketF.new).slice(0, 20)}`;
+  return null;
+}
 
 export default function UploadPanel({
   onUploaded,
@@ -216,6 +244,16 @@ export default function UploadPanel({
             {history.map((h) => {
               const dB = h.total_biaya_new - h.total_biaya_old;
               const pct = h.total_biaya_old > 0 ? (dB / h.total_biaya_old) * 100 : null;
+              const labels = h.diff.changed
+                .map(rowChangeLabel)
+                .filter((x): x is string => x !== null);
+              if (h.diff.added.length > 0) {
+                labels.push(`+ Baris baru: ${h.diff.added[0].bahan || h.diff.added[0].kode}`);
+              }
+              if (h.diff.removed.length > 0) {
+                labels.push(`− Baris dihapus: ${h.diff.removed[0].bahan || h.diff.removed[0].kode}`);
+              }
+              const extra = labels.length - 2;
               return (
                 <li key={h.id}>
                   <button
@@ -234,6 +272,17 @@ export default function UploadPanel({
                         })}
                       </span>
                     </div>
+                    {labels.slice(0, 2).map((l, i) => (
+                      <div key={i} className="mt-1 truncate text-[10.5px] font-medium text-ink">
+                        <span className="mr-1 text-ink-3" aria-hidden="true">
+                          ↳
+                        </span>
+                        {l}
+                      </div>
+                    ))}
+                    {extra > 0 && (
+                      <div className="mt-0.5 text-[10px] text-ink-3">+{extra} perubahan lain…</div>
+                    )}
                     <div className="tnum mt-0.5 flex flex-wrap gap-x-2 text-[10px] text-ink-2">
                       <span>
                         baris {fmtNum(h.n_rows_old, 0)}→{fmtNum(h.n_rows_new, 0)}
@@ -251,13 +300,6 @@ export default function UploadPanel({
                           </span>
                         )}
                       </span>
-                    </div>
-                    <div className="mt-0.5 truncate text-[10px] text-ink-3">
-                      {h.diff.changed.length > 0 &&
-                        `${h.diff.changed.length} baris berubah · `}
-                      {h.diff.added.length > 0 && `${h.diff.added.length} baru · `}
-                      {h.diff.removed.length > 0 && `${h.diff.removed.length} hilang · `}
-                      dari {h.source_filename} · klik untuk detail
                     </div>
                   </button>
                 </li>

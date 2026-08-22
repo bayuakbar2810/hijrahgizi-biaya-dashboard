@@ -740,21 +740,37 @@ function HistoryPanel({ batchNo }: { batchNo: string }) {
                   </div>
                 </summary>
                 <div className="mt-2 space-y-1.5 text-[12px]">
-                  {e.diff.changed.map((c, ci) => (
-                    <div key={ci} className="rounded-md border border-line bg-white px-2.5 py-1.5">
-                      <div className="text-[11px] font-medium text-ink-2">
-                        Baris {c.i + 1} · {c.kode} — {c.bahan}
-                      </div>
-                      {c.fields.map((fl, fi) => (
-                        <div key={fi} className="tnum mt-0.5 flex flex-wrap gap-1 text-[11px]">
-                          <span className="text-ink-3">{FIELD_LABEL[fl.f] ?? fl.f}:</span>
-                          <span className="text-ink-2 line-through">{fmtVal(fl.f, fl.old)}</span>
-                          <span className="text-ink-3">→</span>
-                          <span className="font-semibold text-ink">{fmtVal(fl.f, fl.new)}</span>
+                  {e.diff.changed.map((c, ci) => {
+                    const nameF = c.fields.find((fl) => fl.f === "bahan_biaya");
+                    const otherFields = c.fields.filter((fl) => fl.f !== "bahan_biaya");
+                    return (
+                      <div key={ci} className="rounded-md border border-line bg-white px-2.5 py-1.5">
+                        <div className="text-[11px] font-medium text-ink-2">
+                          Baris {c.i + 1} · {c.kode} —{" "}
+                          {nameF ? (
+                            <>
+                              <span className="text-ink-3 line-through">{String(nameF.old ?? "") || "(kosong)"}</span>
+                              <span className="mx-1 text-accent">→</span>
+                              <b className="text-ink">{String(nameF.new ?? "")}</b>
+                            </>
+                          ) : (
+                            c.bahan
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  ))}
+                        {otherFields.map((fl, fi) => (
+                          <div key={fi} className="tnum mt-0.5 flex flex-wrap gap-1 text-[11px]">
+                            <span className="text-ink-3">{FIELD_LABEL[fl.f] ?? fl.f}:</span>
+                            <span className="text-ink-2 line-through">{fmtVal(fl.f, fl.old)}</span>
+                            <span className="text-ink-3">→</span>
+                            <span className="font-semibold text-ink">{fmtVal(fl.f, fl.new)}</span>
+                          </div>
+                        ))}
+                        {otherFields.length === 0 && !nameF && (
+                          <div className="mt-0.5 text-[10px] text-ink-3">—</div>
+                        )}
+                      </div>
+                    );
+                  })}
                   {e.diff.added.length > 0 && (
                     <div className="rounded-md border border-out/30 bg-out-soft px-2.5 py-1.5 text-[11px] text-out">
                       + {e.diff.added.length} baris baru:{" "}
