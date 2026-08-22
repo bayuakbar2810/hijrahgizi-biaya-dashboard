@@ -8,7 +8,42 @@ import type { PrdRow } from "@/lib/types";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const CHUNK = 400;
+const CHUNK = 800;
+const HIST_CHUNK = 20;
+
+const DIFF_FIELDS = [
+  "tanggal",
+  "kode",
+  "bahan_biaya",
+  "keterangan",
+  "pengeluaran_biaya",
+  "pengeluaran_qty",
+  "penyelesaian_biaya",
+  "penyelesaian_qty",
+] as const;
+
+const NUMERIC_FIELDS = new Set<string>([
+  "pengeluaran_biaya",
+  "pengeluaran_qty",
+  "penyelesaian_biaya",
+  "penyelesaian_qty",
+]);
+
+const biayaOf = (r: Partial<PrdRow>) =>
+  (Number(r.pengeluaran_biaya) || 0) + (Number(r.penyelesaian_biaya) || 0);
+const qtyOf = (r: Partial<PrdRow>) =>
+  (Number(r.pengeluaran_qty) || 0) + (Number(r.penyelesaian_qty) || 0);
+
+/* Kunci identitas baris: baris lama & baru dengan kunci sama dianggap baris yang sama. */
+function rowKey(r: Partial<PrdRow>): string {
+  return [String(r.tanggal ?? ""), String(r.kode ?? ""), String(r.bahan_biaya ?? ""), String(r.keterangan ?? "")].join("|");
+}
+
+/* Nilai pembanding: angka dibandingkan sebagai angka, teks sebagai teks ternormalisasi. */
+function cmpVal(f: string, a: unknown, b: unknown): boolean {
+  if (NUMERIC_FIELDS.has(f)) return Number(a) === Number(b);
+  return String(a ?? "") === String(b ?? "");
+}
 
 export async function POST(request: Request) {
   if (!readAuth(request)) {
@@ -30,134 +65,121 @@ export async function POST(request: Request) {
   const db = await getDb();
   const uploadedAt = nowIso();
   const sourceId = crypto.randomUUID();
-  const batches = new Set(rows.map((r) => r.batch_no));
+  const batchList = Array.from(new Set(rows.map((r) => r.batch_no)));
 
-  // Snapshot versi lama tiap batch + hitung diff terhadap data baru (untuk riwayat).
-  const DIFF_FIELDS = [
-    "tanggal",
-    "kode",
-    "bahan_biaya",
-    "keterangan",
-    "pengeluaran_biaya",
-    "pengeluaran_qty",
-    "penyelesaian_biaya",
-    "penyelesaian_qty",
-  ] as const;
-  const biayaOf = (r: Partial<PrdRow>) =>
-    (Number(r.pengeluaran_biaya) || 0) + (Number(r.penyelesaian_biaya) || 0);
-  const qtyOf = (r: Partial<PrdRow>) =>
-    (Number(r.pengeluaran_qty) || 0) + (Number(r.penyelesaian_qty) || 0);
+  /* --- Ambil seluruh versi lama SEMUA batch dalam SATU query, kelompokkan di memori --- */
+  const newByBatch = new Map<string, PrdRow[]>();
+  for (const r of rows) {
+    const arr = newByBatch.get(r.batch_no) ?? [];
+    arr.push(r);
+    newByBatch.set(r.batch_no, arr);
+  }
 
-  const batchHistoryInserts: Array<{
-    id: string;
-    batch_no: string;
-    changed_at: string;
-    source_filename: string;
-    n_rows_old: number;
-    n_rows_new: number;
-    total_biaya_old: number;
-    total_biaya_new: number;
-    total_qty_old: number;
-    total_qty_new: number;
-    diff_json: string;
-    rows_old_json: string;
-  }> = [];
+  const oldRes = await db.query(
+    `SELECT batch_no, tanggal, kode, bahan_biaya, keterangan,
+            pengeluaran_biaya, pengeluaran_qty, penyelesaian_biaya, penyelesaian_qty
+     FROM production_transactions WHERE batch_no = ANY($1::text[])
+     ORDER BY batch_no, tanggal, kode`,
+    [batchList],
+  );
+  const oldByBatch = new Map<string, Array<Partial<PrdRow>>>();
+  for (const o of oldRes.rows as unknown as Array<Partial<PrdRow> & { batch_no: string }>) {
+    const arr = oldByBatch.get(o.batch_no) ?? [];
+    arr.push(o);
+    oldByBatch.set(o.batch_no, arr);
+  }
 
-  for (const b of batches) {
-    const oldRes = await db.query(
-      `SELECT tanggal, kode, bahan_biaya, keterangan,
-              pengeluaran_biaya, pengeluaran_qty, penyelesaian_biaya, penyelesaian_qty
-       FROM production_transactions WHERE batch_no = $1 ORDER BY tanggal, kode`,
-      [b],
-    );
-    const oldRows = oldRes.rows as unknown as Array<Partial<PrdRow>>;
-    if (oldRows.length === 0) continue; // batch baru — tidak ada versi lama
-    const newRows = rows.filter((r) => r.batch_no === b);
+  /* --- Diff tiap batch yang punya versi lama (pencocokan berbasis kunci, bukan posisi) --- */
+  const historyRows: Array<unknown[]> = [];
+  let changedBatches = 0;
+  for (const [b, oldRows] of oldByBatch) {
+    const newRows = newByBatch.get(b) ?? [];
+
+    // Antrian baris lama per kunci (mengakomodasi kunci ganda dalam satu batch).
+    const oldQueues = new Map<string, Array<Partial<PrdRow>>>();
+    for (const o of oldRows) {
+      const k = rowKey(o);
+      const q = oldQueues.get(k) ?? [];
+      q.push(o);
+      oldQueues.set(k, q);
+    }
 
     const changed: Array<Record<string, unknown>> = [];
-    const n = Math.max(oldRows.length, newRows.length);
-    let identical = oldRows.length === newRows.length;
-    for (let i = 0; i < n; i++) {
-      const o = oldRows[i];
-      const nw = newRows[i];
-      if (!o || !nw) {
-        identical = false;
+    const added: Array<{ kode: string; bahan: string }> = [];
+    const matchedOld = new Set<Partial<PrdRow>>();
+    for (const nw of newRows) {
+      const q = oldQueues.get(rowKey(nw));
+      const o = q?.shift();
+      if (!o) {
+        added.push({ kode: String(nw.kode ?? ""), bahan: String(nw.bahan_biaya ?? "") });
         continue;
       }
+      matchedOld.add(o);
       const fields: Array<Record<string, unknown>> = [];
       for (const f of DIFF_FIELDS) {
-        const ov = String(o[f] ?? "");
-        const nv = String(nw[f] ?? "");
-        if (ov !== nv) fields.push({ f, old: o[f] ?? "", new: nw[f] ?? "" });
+        if (!cmpVal(f, o[f], nw[f])) fields.push({ f, old: o[f] ?? "", new: nw[f] ?? "" });
       }
       if (fields.length > 0) {
-        identical = false;
         changed.push({
-          i,
-          kode: nw.kode ?? o.kode ?? "",
-          bahan: nw.bahan_biaya ?? o.bahan_biaya ?? "",
+          i: changed.length + 1,
+          kode: String(nw.kode ?? ""),
+          bahan: String(nw.bahan_biaya ?? ""),
           fields,
         });
       }
     }
-    if (identical) continue; // tidak ada perubahan nilai — tidak perlu riwayat
+    const removed = oldRows
+      .filter((o) => !matchedOld.has(o))
+      .map((o) => ({ kode: String(o.kode ?? ""), bahan: String(o.bahan_biaya ?? "") }));
 
-    const diff = {
-      changed,
-      added: newRows.slice(oldRows.length).map((r) => ({
-        kode: r.kode ?? "",
-        bahan: r.bahan_biaya ?? "",
-      })),
-      removed: oldRows.slice(newRows.length).map((r) => ({
-        kode: r.kode ?? "",
-        bahan: r.bahan_biaya ?? "",
-      })),
-    };
-    batchHistoryInserts.push({
-      id: crypto.randomUUID(),
-      batch_no: b,
-      changed_at: uploadedAt,
-      source_filename: preview.filename,
-      n_rows_old: oldRows.length,
-      n_rows_new: newRows.length,
-      total_biaya_old: oldRows.reduce((s, r) => s + biayaOf(r), 0),
-      total_biaya_new: newRows.reduce((s, r) => s + biayaOf(r), 0),
-      total_qty_old: oldRows.reduce((s, r) => s + qtyOf(r), 0),
-      total_qty_new: newRows.reduce((s, r) => s + qtyOf(r), 0),
-      diff_json: JSON.stringify(diff),
-      rows_old_json: JSON.stringify(oldRows),
-    });
+    if (changed.length === 0 && added.length === 0 && removed.length === 0) continue;
+
+    const diff = { changed, added, removed };
+    historyRows.push([
+      crypto.randomUUID(),
+      b,
+      uploadedAt,
+      preview.filename,
+      oldRows.length,
+      newRows.length,
+      oldRows.reduce((s, r) => s + biayaOf(r), 0),
+      newRows.reduce((s, r) => s + biayaOf(r), 0),
+      oldRows.reduce((s, r) => s + qtyOf(r), 0),
+      newRows.reduce((s, r) => s + qtyOf(r), 0),
+      JSON.stringify(diff),
+      JSON.stringify(oldRows),
+    ]);
+    changedBatches++;
   }
 
   try {
     await db.exec("BEGIN");
 
-    for (const h of batchHistoryInserts) {
+    // Insert riwayat dalam sedikit query (20 baris × 12 param per query).
+    for (let i = 0; i < historyRows.length; i += HIST_CHUNK) {
+      const chunk = historyRows.slice(i, i + HIST_CHUNK);
+      const placeholders: string[] = [];
+      const values: unknown[] = [];
+      let p = 1;
+      for (const h of chunk) {
+        placeholders.push(
+          `($${p++},$${p++},$${p++},$${p++},$${p++},$${p++},$${p++},$${p++},$${p++},$${p++},$${p++},$${p++})`,
+        );
+        values.push(...h);
+      }
       await db.query(
         `INSERT INTO batch_history
           (id, batch_no, changed_at, source_filename, n_rows_old, n_rows_new,
            total_biaya_old, total_biaya_new, total_qty_old, total_qty_new, diff_json, rows_old_json)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-        [
-          h.id,
-          h.batch_no,
-          h.changed_at,
-          h.source_filename,
-          h.n_rows_old,
-          h.n_rows_new,
-          h.total_biaya_old,
-          h.total_biaya_new,
-          h.total_qty_old,
-          h.total_qty_new,
-          h.diff_json,
-          h.rows_old_json,
-        ],
+         VALUES ${placeholders.join(",")}`,
+        values,
       );
     }
 
-    for (const b of batches) {
-      await db.query(`DELETE FROM production_transactions WHERE batch_no = $1`, [b]);
-    }
+    // Hapus seluruh batch lama file ini dalam SATU query.
+    await db.query(`DELETE FROM production_transactions WHERE batch_no = ANY($1::text[])`, [
+      batchList,
+    ]);
 
     for (let i = 0; i < rows.length; i += CHUNK) {
       const chunk = rows.slice(i, i + CHUNK);
@@ -202,15 +224,7 @@ export async function POST(request: Request) {
     await db.query(
       `INSERT INTO source_files (id, filename, uploaded_at, n_rows, n_batch, new_batch, updated_batch)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [
-        sourceId,
-        preview.filename,
-        uploadedAt,
-        rows.length,
-        batches.size,
-        preview.newBatch,
-        preview.updatedBatch,
-      ],
+      [sourceId, preview.filename, uploadedAt, rows.length, batchList.length, preview.newBatch, preview.updatedBatch],
     );
 
     await db.exec("COMMIT");
@@ -232,10 +246,10 @@ export async function POST(request: Request) {
     ok: true,
     filename: preview.filename,
     rows: rows.length,
-    batches: batches.size,
+    batches: batchList.length,
     new_batch: preview.newBatch,
     updated_batch: preview.updatedBatch,
-    changed_batches: batchHistoryInserts.length,
+    changed_batches: changedBatches,
     uploaded_at: uploadedAt,
   });
 }

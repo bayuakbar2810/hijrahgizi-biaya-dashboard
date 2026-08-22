@@ -12,6 +12,43 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploads, setUploads] = useState<UploadLogEntry[] | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const cancelPreview = () => {
+    if (!preview) return;
+    const pid = preview.preview_id;
+    setPreview(null);
+    setDone(null);
+    if (inputRef.current) inputRef.current.value = "";
+    fetch("/api/upload/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ preview_id: pid }),
+    }).catch(() => {});
+  };
+
+  const deleteUpload = (u: UploadLogEntry) => {
+    if (deletingId) return;
+    const ok = window.confirm(
+      `Hapus data dari file "${u.filename}"?\n\n${fmtNum(u.n_rows, 0)} baris dari file ini akan dihapus dari analisis. Riwayat upload juga dihapus.`,
+    );
+    if (!ok) return;
+    setDeletingId(u.id);
+    fetch("/api/uploads", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: u.id }),
+    })
+      .then(async (res) => {
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error ?? "Hapus gagal");
+        setDone(`Data file ${u.filename} dihapus (${fmtNum(d.rows_deleted, 0)} baris)`);
+        loadUploads();
+        onUploaded();
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : "Hapus gagal"))
+      .finally(() => setDeletingId(null));
+  };
 
   const loadUploads = useCallback(() => {
     fetch("/api/uploads")
@@ -131,6 +168,13 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
           >
             {confirming ? "Menyimpan…" : "Konfirmasi & simpan"}
           </button>
+          <button
+            onClick={cancelPreview}
+            disabled={confirming}
+            className="w-full rounded-lg border border-line-strong py-2 text-sm font-medium text-ink-2 hover:border-red-300 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Batalkan upload ini
+          </button>
         </div>
       )}
 
@@ -164,11 +208,21 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
                     })}
                   </span>
                 </div>
-                <div className="tnum mt-0.5 flex flex-wrap gap-x-2.5 text-[10px] text-ink-2">
-                  <span>{fmtNum(u.n_rows, 0)} baris</span>
-                  <span>{fmtNum(u.n_batch, 0)} batch</span>
-                  <span className="text-out">baru {fmtNum(u.new_batch, 0)}</span>
-                  <span className="text-in">diperbarui {fmtNum(u.updated_batch, 0)}</span>
+                <div className="mt-0.5 flex items-center justify-between gap-2">
+                  <div className="tnum flex flex-wrap gap-x-2.5 text-[10px] text-ink-2">
+                    <span>{fmtNum(u.n_rows, 0)} baris</span>
+                    <span>{fmtNum(u.n_batch, 0)} batch</span>
+                    <span className="text-out">baru {fmtNum(u.new_batch, 0)}</span>
+                    <span className="text-in">diperbarui {fmtNum(u.updated_batch, 0)}</span>
+                  </div>
+                  <button
+                    onClick={() => deleteUpload(u)}
+                    disabled={deletingId === u.id}
+                    title="Hapus data dari file ini"
+                    className="shrink-0 rounded-md border border-line-strong px-2 py-0.5 text-[10px] font-semibold text-ink-3 hover:border-red-300 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {deletingId === u.id ? "Menghapus…" : "Hapus"}
+                  </button>
                 </div>
               </li>
             ))}

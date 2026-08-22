@@ -1,5 +1,6 @@
 import { getDb } from "./db";
 import type { PrdRow } from "./types";
+import zlib from "zlib";
 
 type StoredPreview = {
   rows: PrdRow[];
@@ -10,6 +11,15 @@ type StoredPreview = {
 };
 
 const TTL_MS = 30 * 60 * 1000;
+
+/* Preview di-gzip agar transfer ke DB cepat (2,5 MB JSON → ±300 KB). */
+function encodeRows(rows: PrdRow[]): string {
+  return zlib.gzipSync(Buffer.from(JSON.stringify(rows), "utf8")).toString("base64");
+}
+
+function decodeRows(encoded: string): PrdRow[] {
+  return JSON.parse(zlib.gunzipSync(Buffer.from(encoded, "base64")).toString("utf8")) as PrdRow[];
+}
 
 export async function setPreview(id: string, data: StoredPreview): Promise<void> {
   const db = await getDb();
@@ -28,7 +38,7 @@ export async function setPreview(id: string, data: StoredPreview): Promise<void>
     [
       id,
       data.filename,
-      JSON.stringify(data.rows),
+      encodeRows(data.rows),
       data.newBatch,
       data.updatedBatch,
       new Date(data.createdAt).toISOString(),
@@ -59,7 +69,7 @@ export async function getPreview(id: string): Promise<StoredPreview | null> {
     return null;
   }
   return {
-    rows: JSON.parse(r.rows_json) as PrdRow[],
+    rows: decodeRows(r.rows_json),
     filename: r.filename,
     newBatch: Number(r.new_batch),
     updatedBatch: Number(r.updated_batch),
