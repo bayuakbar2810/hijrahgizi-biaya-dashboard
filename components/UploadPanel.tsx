@@ -1,10 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { UploadPreview, UploadLogEntry } from "@/lib/types";
+import type { UploadPreview, UploadLogEntry, BatchHistoryEntry } from "@/lib/types";
 import { fmtDate, fmtIDR, fmtNum } from "@/lib/format";
 
-export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) {
+export default function UploadPanel({
+  onUploaded,
+  onOpenBatch,
+}: {
+  onUploaded: () => void;
+  onOpenBatch: (batchNo: string) => void;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [parsing, setParsing] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -12,7 +18,27 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploads, setUploads] = useState<UploadLogEntry[] | null>(null);
+  const [history, setHistory] = useState<BatchHistoryEntry[] | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const loadUploads = useCallback(() => {
+    fetch("/api/uploads")
+      .then((r) => (r.ok ? r.json() : { uploads: [] }))
+      .then((d) => setUploads(d.uploads ?? []))
+      .catch(() => setUploads([]));
+  }, []);
+
+  const loadHistory = useCallback(() => {
+    fetch("/api/batch-history")
+      .then((r) => (r.ok ? r.json() : { entries: [] }))
+      .then((d) => setHistory((d.entries ?? []).slice(0, 12)))
+      .catch(() => setHistory([]));
+  }, []);
+
+  useEffect(() => {
+    loadUploads();
+    loadHistory();
+  }, [loadUploads, loadHistory]);
 
   const cancelPreview = () => {
     if (!preview) return;
@@ -50,17 +76,6 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
       .finally(() => setDeletingId(null));
   };
 
-  const loadUploads = useCallback(() => {
-    fetch("/api/uploads")
-      .then((r) => (r.ok ? r.json() : { uploads: [] }))
-      .then((d) => setUploads(d.uploads ?? []))
-      .catch(() => setUploads([]));
-  }, []);
-
-  useEffect(() => {
-    loadUploads();
-  }, [loadUploads]);
-
   const pick = (file: File | null) => {
     if (!file) return;
     setError(null);
@@ -93,11 +108,12 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
         setDone(
           `${d.batches} batch diproses · ${d.rows} baris tersimpan` +
             (typeof d.changed_batches === "number" && d.changed_batches > 0
-              ? ` · ${d.changed_batches} batch tercatat berubah (lihat riwayat)`
+              ? ` · ${d.changed_batches} batch berubah (lihat log di bawah)`
               : ""),
         );
         setPreview(null);
         loadUploads();
+        loadHistory();
         onUploaded();
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Konfirmasi gagal"))
@@ -109,7 +125,8 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
       <h2 className="text-sm font-semibold text-ink">Upload data Excel</h2>
       <p className="mt-0.5 text-[11px] leading-snug text-ink-3">
         File histori pekerjaan pesanan dari Accurate (.xlsx). Batch yang sudah ada akan{" "}
-        <b>diganti</b> dengan data terbaru.
+        <b>diganti</b> dengan data terbaru — setiap perubahan nilai otomatis tercatat di log
+        perubahan.
       </p>
 
       <input
@@ -183,6 +200,72 @@ export default function UploadPanel({ onUploaded }: { onUploaded: () => void }) 
           Upload berhasil · {done}
         </div>
       )}
+
+      <div className="mt-4 border-t border-line pt-3">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-3">
+          Log perubahan data (batch ter-update)
+        </h3>
+        {history === null ? (
+          <p className="mt-2 text-[11px] text-ink-3">memuat…</p>
+        ) : history.length === 0 ? (
+          <p className="mt-2 text-[11px] text-ink-3">
+            Belum ada perubahan data — batch yang diupload ulang masih sama nilainya.
+          </p>
+        ) : (
+          <ul className="mt-2 max-h-72 space-y-1.5 overflow-auto pr-1">
+            {history.map((h) => {
+              const dB = h.total_biaya_new - h.total_biaya_old;
+              const pct = h.total_biaya_old > 0 ? (dB / h.total_biaya_old) * 100 : null;
+              return (
+                <li key={h.id}>
+                  <button
+                    onClick={() => onOpenBatch(h.batch_no)}
+                    className="w-full rounded-lg border border-line bg-surface-2 px-2.5 py-1.5 text-left hover:border-accent"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="tnum truncate font-mono text-[11px] font-semibold text-accent">
+                        {h.batch_no}
+                      </span>
+                      <span className="tnum shrink-0 text-[10px] text-ink-3">
+                        {fmtDate(h.changed_at)}{" "}
+                        {new Date(h.changed_at).toLocaleTimeString("id-ID", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                    <div className="tnum mt-0.5 flex flex-wrap gap-x-2 text-[10px] text-ink-2">
+                      <span>
+                        baris {fmtNum(h.n_rows_old, 0)}→{fmtNum(h.n_rows_new, 0)}
+                      </span>
+                      <span>
+                        biaya {fmtIDR(h.total_biaya_old)} →{" "}
+                        <b className={dB > 0 ? "text-red-600" : "text-out"}>
+                          {fmtIDR(h.total_biaya_new)}
+                        </b>
+                        {pct != null && (
+                          <span className={dB > 0 ? "text-red-600" : "text-out"}>
+                            {" "}
+                            ({dB >= 0 ? "+" : ""}
+                            {fmtNum(pct, 1)}%)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 truncate text-[10px] text-ink-3">
+                      {h.diff.changed.length > 0 &&
+                        `${h.diff.changed.length} baris berubah · `}
+                      {h.diff.added.length > 0 && `${h.diff.added.length} baru · `}
+                      {h.diff.removed.length > 0 && `${h.diff.removed.length} hilang · `}
+                      dari {h.source_filename} · klik untuk detail
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
 
       <div className="mt-4 border-t border-line pt-3">
         <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-3">

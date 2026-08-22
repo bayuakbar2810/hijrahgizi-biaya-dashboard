@@ -98,7 +98,6 @@ function _settings(s: Record<string, any> | null | undefined): Record<string, nu
     yield_var_anomaly: 20,
     hpp_var_watch: 10,
     hpp_var_anomaly: 20,
-    exclude_name_prefixes: "RTL CST",
   };
   if (s) {
     for (const k of Object.keys(d)) {
@@ -106,8 +105,6 @@ function _settings(s: Record<string, any> | null | undefined): Record<string, nu
       if (v === null || v === undefined) continue;
       if (typeof v === "number") {
         d[k] = v;
-      } else if (k === "exclude_name_prefixes") {
-        d[k] = String(v);
       } else {
         const n = Number(v);
         if (!Number.isNaN(n)) d[k] = n;
@@ -117,31 +114,13 @@ function _settings(s: Record<string, any> | null | undefined): Record<string, nu
   return d;
 }
 
-function _excluded_prefixes(cfg: Record<string, any>): string[] {
-  const raw = String(cfg.exclude_name_prefixes ?? "");
-  return raw
-    .split(",")
-    .map((p) => p.trim().toUpperCase())
-    .filter((p) => p);
-}
-
-function _exclude_output_rows(rows: Row[], prefixes: string[]): Row[] {
-  if (prefixes.length === 0) return rows;
-  const out: Row[] = [];
-  for (const br of _groupRows(rows).values()) {
-    let batchRows = br;
-    const rtlOut = br.filter((r) => r.is_rtl && _f(r.penyelesaian_qty) > 0);
-    const allExcluded =
-      rtlOut.length > 0 &&
-      rtlOut.every((r) =>
-        prefixes.some((p) => String(r.bahan_biaya ?? "").toUpperCase().startsWith(p)),
-      );
-    if (allExcluded) {
-      batchRows = br.filter((r) => !(r.is_rtl && _f(r.penyelesaian_qty) > 0));
-    }
-    out.push(...batchRows);
-  }
-  return out;
+// Kategori produk output berdasarkan awalan nama:
+// RTLP = bumbu/lainnya · RTL CST = custom/special · RTL = produk daging (sisanya).
+function _outputCategory(nama: unknown): "RTL" | "RTL_CST" | "RTLP" {
+  const n = String(nama ?? "").trim().toUpperCase();
+  if (n.startsWith("RTLP")) return "RTLP";
+  if (n.startsWith("RTL CST")) return "RTL_CST";
+  return "RTL";
 }
 
 function _variancePct(current: number | null | undefined, hist: number | null | undefined): number | null {
@@ -389,7 +368,6 @@ export function analyze(
 ) {
   const cfg = _settings(settings);
   rows = _enrich(rows);
-  rows = _exclude_output_rows(rows, _excluded_prefixes(cfg));
 
   const fFrom = params.from;
   const fTo = params.to;
@@ -403,16 +381,14 @@ export function analyze(
   if (fTo) rows = rows.filter((r) => String(r.tanggal ?? "") <= fTo);
   if (fBatch) rows = rows.filter((r) => String(r.batch_no ?? "") === fBatch);
 
-  // Filter kategori produk output: RTL = produk daging (non-RTLP), RTLP = bumbu/lainnya.
+  // Filter kategori produk output: RTL / RTL_CST / RTLP.
   // Baris input tetap; batch tanpa output kategori terpilih otomatis keluar dari analisis.
   const fCat = String(params.category ?? "");
-  if (fCat === "RTL" || fCat === "RTLP") {
+  if (fCat === "RTL" || fCat === "RTL_CST" || fCat === "RTLP") {
     rows = rows.filter((r) => {
       const isOutput = r.is_rtl && _f(r.penyelesaian_qty) > 0;
       if (!isOutput) return true;
-      const nama = String(r.bahan_biaya ?? "").trim().toUpperCase();
-      const isRtlp = nama.startsWith("RTLP");
-      return fCat === "RTLP" ? isRtlp : !isRtlp;
+      return _outputCategory(r.bahan_biaya) === fCat;
     });
   }
 
@@ -649,7 +625,6 @@ export function analyze(
 export function detailBatch(rows: Row[], batchNo: string, settings: Record<string, any> | null = null) {
   const cfg = _settings(settings);
   rows = _enrich(rows);
-  rows = _exclude_output_rows(rows, _excluded_prefixes(cfg));
   const batchRows = rows.filter((r) => String(r.batch_no ?? "") === batchNo);
   if (batchRows.length === 0) return { error: `Batch ${batchNo} tidak ditemukan` };
 

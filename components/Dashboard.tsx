@@ -192,7 +192,7 @@ const applyFilters = useCallback(async () => {
 
       {tab === "upload" && (
         <div className="mx-auto w-full max-w-md">
-          <UploadPanel onUploaded={applyFilters} />
+          <UploadPanel onUploaded={applyFilters} onOpenBatch={setOpenBatch} />
         </div>
       )}
 
@@ -475,8 +475,9 @@ function FilterBar({
             onChange={(e) => onCategory(e.target.value)}
             className="mt-1 rounded-lg border border-line-strong bg-surface px-2 py-1.5 text-[13px] text-ink focus:border-accent"
           >
-            <option value="">Semua (RTL + RTLP)</option>
+            <option value="">Semua (RTL + RTL CST + RTLP)</option>
             <option value="RTL">RTL — produk daging</option>
+            <option value="RTL_CST">RTL CST — custom/special</option>
             <option value="RTLP">RTLP — bumbu & lainnya</option>
           </select>
         </div>

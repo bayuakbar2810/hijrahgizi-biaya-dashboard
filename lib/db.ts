@@ -105,7 +105,6 @@ const DEFAULT_SETTINGS: Record<string, string> = {
   yield_var_anomaly: "20",
   hpp_var_watch: "10",
   hpp_var_anomaly: "20",
-  exclude_name_prefixes: "RTL CST",
 };
 
 export async function getDb(): Promise<Db> {
