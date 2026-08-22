@@ -37,7 +37,8 @@ const [from, setFrom] = useState("");
   const [q, setQ] = useState("");
   const [anomalyTypes, setAnomalyTypes] = useState<string[]>(ANOM_TYPES.map((t) => t.value));
   const [severity, setSeverity] = useState("");
-  const filtersRef = useRef({ from, to, batch, q, anomalyTypes, severity });
+  const [category, setCategory] = useState("");
+  const filtersRef = useRef({ from, to, batch, q, anomalyTypes, severity, category });
 
   const runAnalysis = useCallback(async (f: AnalysisParams) => {
     setLoading(true);
@@ -71,12 +72,13 @@ const applyFilters = useCallback(async () => {
       q: f.q || undefined,
       anomaly_type: anomFilter,
       severity: f.severity || undefined,
+      category: f.category || undefined,
     });
   }, [runAnalysis]);
 
   useEffect(() => {
-    filtersRef.current = { from, to, batch, q, anomalyTypes, severity };
-  }, [from, to, batch, q, anomalyTypes, severity]);
+    filtersRef.current = { from, to, batch, q, anomalyTypes, severity, category };
+  }, [from, to, batch, q, anomalyTypes, severity, category]);
 
   useEffect(() => {
     pythonHealth().then(setPyOk);
@@ -118,6 +120,7 @@ const applyFilters = useCallback(async () => {
             batch={batch}
             q={q}
             anomalyTypes={anomalyTypes}
+            category={category}
             severity={severity}
             loading={loading}
             onFrom={setFrom}
@@ -125,6 +128,7 @@ const applyFilters = useCallback(async () => {
             onBatch={setBatch}
             onQ={setQ}
             onAnomalyTypes={setAnomalyTypes}
+            onCategory={setCategory}
             onSeverity={setSeverity}
             onApply={applyFilters}
           />
@@ -161,6 +165,7 @@ const applyFilters = useCallback(async () => {
             batch={batch}
             q={q}
             anomalyTypes={anomalyTypes}
+            category={category}
             severity={severity}
             loading={loading}
             onFrom={setFrom}
@@ -168,6 +173,7 @@ const applyFilters = useCallback(async () => {
             onBatch={setBatch}
             onQ={setQ}
             onAnomalyTypes={setAnomalyTypes}
+            onCategory={setCategory}
             onSeverity={setSeverity}
             onApply={applyFilters}
           />
@@ -390,6 +396,7 @@ function FilterBar({
   batch,
   q,
   anomalyTypes,
+  category,
   severity,
   loading,
   onFrom,
@@ -397,6 +404,7 @@ function FilterBar({
   onBatch,
   onQ,
   onAnomalyTypes,
+  onCategory,
   onSeverity,
   onApply,
 }: {
@@ -405,6 +413,7 @@ function FilterBar({
   batch: string;
   q: string;
   anomalyTypes: string[];
+  category: string;
   severity: string;
   loading: boolean;
   onFrom: (v: string) => void;
@@ -412,6 +421,7 @@ function FilterBar({
   onBatch: (v: string) => void;
   onQ: (v: string) => void;
   onAnomalyTypes: (v: string[]) => void;
+  onCategory: (v: string) => void;
   onSeverity: (v: string) => void;
   onApply: () => void;
 }) {
@@ -457,6 +467,20 @@ function FilterBar({
           />
         </div>
 <div>
+          <label className="block text-[10px] font-semibold uppercase text-ink-3">
+            Kategori produk
+          </label>
+          <select
+            value={category}
+            onChange={(e) => onCategory(e.target.value)}
+            className="mt-1 rounded-lg border border-line-strong bg-surface px-2 py-1.5 text-[13px] text-ink focus:border-accent"
+          >
+            <option value="">Semua (RTL + RTLP)</option>
+            <option value="RTL">RTL — produk daging</option>
+            <option value="RTLP">RTLP — bumbu & lainnya</option>
+          </select>
+        </div>
+        <div>
           <label className="block text-[10px] font-semibold uppercase text-ink-3">
             Jenis anomali (ceklis)
           </label>

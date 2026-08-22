@@ -403,6 +403,19 @@ export function analyze(
   if (fTo) rows = rows.filter((r) => String(r.tanggal ?? "") <= fTo);
   if (fBatch) rows = rows.filter((r) => String(r.batch_no ?? "") === fBatch);
 
+  // Filter kategori produk output: RTL = produk daging (non-RTLP), RTLP = bumbu/lainnya.
+  // Baris input tetap; batch tanpa output kategori terpilih otomatis keluar dari analisis.
+  const fCat = String(params.category ?? "");
+  if (fCat === "RTL" || fCat === "RTLP") {
+    rows = rows.filter((r) => {
+      const isOutput = r.is_rtl && _f(r.penyelesaian_qty) > 0;
+      if (!isOutput) return true;
+      const nama = String(r.bahan_biaya ?? "").trim().toUpperCase();
+      const isRtlp = nama.startsWith("RTLP");
+      return fCat === "RTLP" ? isRtlp : !isRtlp;
+    });
+  }
+
   const batches = _groupRows(rows);
   const rtlBatches = new Map<string, Row[]>();
   for (const [b, br] of batches) {

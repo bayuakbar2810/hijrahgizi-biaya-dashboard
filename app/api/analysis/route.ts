@@ -42,6 +42,7 @@ export async function POST(request: Request) {
       q: body.q,
       anomaly_type: body.anomaly_type,
       severity: body.severity,
+      category: body.category,
     },
     settings,
   });

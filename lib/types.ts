@@ -183,6 +183,7 @@ export type AnalysisParams = {
   q?: string;
   anomaly_type?: string;
   severity?: string;
+  category?: string;
   limit?: number;
 };
 
