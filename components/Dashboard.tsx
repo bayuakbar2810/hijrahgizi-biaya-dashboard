@@ -263,8 +263,24 @@ analysis: AnalysisResult | null;
             if (!analysis) return;
             setPdfBusy(true);
             try {
-              const { generateReportPdf } = await import("@/lib/report");
-              generateReportPdf(analysis);
+              const { generateReportPdf, selectTopAnomalies } = await import("@/lib/report");
+              const top = selectTopAnomalies(analysis, 5);
+              const evidence = await Promise.all(
+                top.map(async (a) => {
+                  try {
+                    const res = await fetch("/api/batch-detail", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ batch_no: a.batch_no }),
+                    });
+                    if (!res.ok) return { anomaly: a, detail: null };
+                    return { anomaly: a, detail: await res.json() };
+                  } catch {
+                    return { anomaly: a, detail: null };
+                  }
+                }),
+              );
+              generateReportPdf(analysis, evidence);
             } catch {
               alert("Gagal membuat laporan PDF. Coba lagi.");
             } finally {

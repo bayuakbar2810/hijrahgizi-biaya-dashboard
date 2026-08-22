@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BatchDetail } from "@/lib/types";
 import { fmtDate, fmtIDR, fmtNum, shortIDR } from "@/lib/format";
+import { INVESTIGATION_GUIDE } from "@/lib/investigation";
 import { Panel, PTypeBadge, SkeletonRows, StatusBadge, Th, Td } from "./ui";
 
 export default function BatchDetailModal({
@@ -226,30 +227,6 @@ function SummaryStrip({ data }: { data: BatchDetail }) {
 
 /* ---------------- anomaly callout ---------------- */
 
-const INVESTIGATION_GUIDE: Record<string, string[]> = {
-  HIGH_CUTTING_COST: [
-    "Tarif jasa potong / vendor naik dibanding periode lain.",
-    "Efisiensi potong menurun (banyak sisa / potongan tidak optimal).",
-    "Output RTL batch ini kecil padahal biaya potong tetap (penyebut kecil).",
-    "Ada biaya proses yang salah dialokasikan ke batch ini.",
-    "Cek: panel Biaya proses (baris PROCESS_COST) & validasi tarif vendor.",
-  ],
-  LOW_YIELD: [
-    "Input daging lebih besar dari standar (berat kotor, es/air, bahan beku).",
-    "Susut saat proses (kebocoran, overcook, trimming berlebihan).",
-    "Ada output yang tidak tercatat / tidak di-SKU-kan (buang, contoh, sisa).",
-    "Penimbangan input/output kurang akurat.",
-    "Cek: perbandingan input daging vs output, dan kelengkapan pencatatan output.",
-  ],
-  HIGH_HPP: [
-    "Harga bahan baku naik (harga daging / bahan penolong).",
-    "Yield rendah di batch ini (otomatis menaikkan HPP per KG).",
-    "Alokasi biaya bersama tidak proporsional antar SKU.",
-    "Komposisi produk (berat isi) tidak sesuai standar.",
-    "Cek: harga beli bahan, rasio yield, dan alokasi biaya ke tiap SKU.",
-  ],
-};
-
 function AnomalyCallout({ data }: { data: BatchDetail }) {
   if (data.anomalies.length === 0) return null;
   const types = Array.from(new Set(data.anomalies.map((a) => a.type)));
@@ -372,57 +349,85 @@ function MainOutput({ data }: { data: BatchDetail }) {
 /* ---------------- C. inputs ---------------- */
 
 function InputPanel({ data }: { data: BatchDetail }) {
+  const totalBiaya = data.inputs.reduce((s, x) => s + x.biaya, 0);
+  const totalQty = data.inputs.reduce((s, x) => s + x.qty, 0);
+  const hppGabungan =
+    data.total_rtl_output_kg > 0 ? totalBiaya / data.total_rtl_output_kg : null;
   return (
     <Panel title="Input bahan & biaya" subtitle="seluruh baris pengeluaran" accent="in">
       {data.inputs.length === 0 ? (
         <p className="py-4 text-center text-xs text-ink-3">Tidak ada baris pengeluaran.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead className="bg-surface-2/95">
-              <tr>
-                <Th>Item</Th>
-                <Th>Jenis</Th>
-                <Th align="right">Qty</Th>
-                <Th align="right">Biaya</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.inputs.map((i, idx) => (
-                <tr key={idx} className="border-t border-line/60">
-                  <td className="max-w-[200px] px-3 py-1.5">
-                    <span className="tnum block font-mono text-[11px] text-ink-3">{i.kode}</span>
-                    <span className="block truncate text-[13px] text-ink" title={i.nama}>
-                      {i.nama}
-                    </span>
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead className="bg-surface-2/95">
+                <tr>
+                  <Th>Item</Th>
+                  <Th>Jenis</Th>
+                  <Th align="right">Qty</Th>
+                  <Th align="right">Biaya</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.inputs.map((i, idx) => (
+                  <tr key={idx} className="border-t border-line/60">
+                    <td className="max-w-[200px] px-3 py-1.5">
+                      <span className="tnum block font-mono text-[11px] text-ink-3">{i.kode}</span>
+                      <span className="block truncate text-[13px] text-ink" title={i.nama}>
+                        {i.nama}
+                      </span>
+                    </td>
+                    <td className="px-3 py-1.5">
+                      <PTypeBadge product_type={i.product_type} />
+                    </td>
+                    <Td align="right">{i.qty > 0 ? fmtNum(i.qty, 1) : "-"}</Td>
+                    <Td align="right" tone={i.product_type === "PROCESS_COST" ? "total" : undefined}>
+                      {i.biaya > 0 ? shortIDR(i.biaya) : "-"}
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="bg-surface-2/60">
+                <tr className="border-t border-line-strong">
+                  <td colSpan={4} className="px-3 py-1.5">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <span className="text-[10px] font-semibold uppercase text-ink-3">
+                        Subtotal per jenis:
+                      </span>
+                      {data.input_summary.map((s) => (
+                        <span key={s.product_type} className="tnum text-[11px] text-ink-2">
+                          {s.product_type.replace("_", " ")}
+                          <b className="text-ink">{shortIDR(s.biaya)}</b>
+                          {s.qty > 0 ? ` · ${fmtNum(s.qty, 1)}` : ""}
+                        </span>
+                      ))}
+                    </div>
                   </td>
-                  <td className="px-3 py-1.5">
-                    <PTypeBadge product_type={i.product_type} />
-                  </td>
-                  <Td align="right">{i.qty > 0 ? fmtNum(i.qty, 1) : "-"}</Td>
-                  <Td align="right" tone={i.product_type === "PROCESS_COST" ? "total" : undefined}>
-                    {i.biaya > 0 ? shortIDR(i.biaya) : "-"}
+                </tr>
+                <tr className="border-t border-line-strong">
+                  <Td strong>TOTAL INPUT</Td>
+                  <td className="px-3 py-2" />
+                  <Td align="right" strong>
+                    {fmtNum(totalQty, 1)}
+                  </Td>
+                  <Td align="right" strong>
+                    {fmtIDR(totalBiaya)}
                   </Td>
                 </tr>
-              ))}
-            </tbody>
-            <tfoot className="bg-surface-2/60">
-              <tr className="border-t border-line-strong">
-                {data.input_summary.map((s) => (
-                  <td key={s.product_type} className="px-2 py-2 text-center">
-                    <div className="text-[10px] font-semibold uppercase text-ink-3">
-                      {s.product_type.replace("_", " ")}
-                    </div>
-                    <div className="tnum text-[11px] text-ink-2">
-                      {shortIDR(s.biaya)}
-                      {s.qty > 0 ? ` · ${fmtNum(s.qty, 1)}` : ""}
-                    </div>
-                  </td>
-                ))}
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+              </tfoot>
+            </table>
+          </div>
+          <p className="mt-2 rounded-lg bg-surface-2 px-3 py-2 text-[11px] leading-relaxed text-ink-2">
+            Asal HPP: total biaya input{" "}
+            <b className="tnum text-ink">{fmtIDR(totalBiaya)}</b> ÷ output RTL{" "}
+            <b className="tnum text-ink">{fmtNum(data.total_rtl_output_kg, 1)} kg</b> ={" "}
+            <b className="tnum text-total">
+              {hppGabungan != null ? `${fmtIDR(hppGabungan)}/kg` : "-"}
+            </b>{" "}
+            (HPP gabungan seluruh SKU batch ini — rincian per SKU ada di tabel Main output).
+          </p>
+        </>
       )}
     </Panel>
   );

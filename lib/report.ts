@@ -1,7 +1,8 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import type { AnalysisResult, AnomalyRow } from "./types";
+import type { AnalysisResult, AnomalyRow, BatchDetail } from "./types";
 import { fmtIDR, fmtNum, fmtPct, fmtDate } from "./format";
+import { INVESTIGATION_GUIDE } from "./investigation";
 
 const BRAND: [number, number, number] = [15, 125, 148];
 const BRAND_DARK: [number, number, number] = [10, 84, 100];
@@ -26,6 +27,37 @@ const SEV_LABEL: Record<string, string> = {
 };
 
 const SEV_RANK: Record<string, number> = { ANOMALY: 0, WATCH: 1, NORMAL: 2 };
+
+const PTYPE_LABEL: Record<string, string> = {
+  RAW_MATERIAL: "Bahan baku",
+  PACKAGING: "Kemasan",
+  PROCESS_COST: "Biaya proses",
+  BY_PRODUCT: "Produk sampingan",
+  FINISHED_PRODUCT: "Produk jadi",
+  OTHER: "Lainnya",
+};
+
+export type ReportEvidence = {
+  anomaly: AnomalyRow;
+  detail: BatchDetail | null;
+};
+
+export function selectTopAnomalies(result: AnalysisResult, n = 5): AnomalyRow[] {
+  const sorted = [...result.anomalies].sort((a, b) => {
+    const r = (SEV_RANK[a.severity] ?? 1) - (SEV_RANK[b.severity] ?? 1);
+    if (r !== 0) return r;
+    return Math.abs(b.variance_pct ?? 0) - Math.abs(a.variance_pct ?? 0);
+  });
+  const out: AnomalyRow[] = [];
+  const seenBatches = new Set<string>();
+  for (const a of sorted) {
+    if (seenBatches.has(a.batch_no)) continue;
+    seenBatches.add(a.batch_no);
+    out.push(a);
+    if (out.length >= n) break;
+  }
+  return out;
+}
 
 function sevColor(sev: string | undefined): [number, number, number] {
   if (sev === "ANOMALY") return RED;
@@ -110,7 +142,246 @@ function sectionTitle(doc: jsPDF, y: number, label: string): number {
   return y + 7;
 }
 
-export function generateReportPdf(result: AnalysisResult) {
+function lastY(doc: jsPDF, fallback: number): number {
+  return (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? fallback;
+}
+
+function ensureSpace(doc: jsPDF, y: number, needed: number): number {
+  const h = doc.internal.pageSize.getHeight();
+  if (y + needed > h - 18) {
+    doc.addPage();
+    return 22;
+  }
+  return y;
+}
+
+function kpiBox(
+  doc: jsPDF,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  label: string,
+  value: string,
+) {
+  doc.setDrawColor(...LINE);
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(x, y, w, h, 1.5, 1.5, "FD");
+  doc.setTextColor(...GRAY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.text(label.toUpperCase(), x + 4, y + 6.5);
+  doc.setTextColor(...INK);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text(value, x + 4, y + 14);
+}
+
+function drawEvidence(
+  doc: jsPDF,
+  yStart: number,
+  idx: number,
+  a: AnomalyRow,
+  detail: BatchDetail | null,
+): number {
+  const w = doc.internal.pageSize.getWidth();
+  const bw = (w - 28 - 8) / 3;
+  let y = yStart;
+
+  /* header strip */
+  doc.setFillColor(...sevColor(a.severity));
+  doc.roundedRect(14, y, w - 28, 8.5, 1.2, 1.2, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text(
+    `#${idx}  ${ANOM_LABEL[a.type] ?? a.type} — ${SEV_LABEL[a.severity] ?? a.severity}`,
+    17,
+    y + 5.7,
+  );
+  y += 12;
+
+  /* info line */
+  doc.setTextColor(...INK);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.text(
+    doc.splitTextToSize(
+      `Batch ${a.batch_no} · ${fmtDate(a.tanggal)} · SKU ${a.sku ?? "-"} — ${a.nama ?? "-"}`,
+      w - 28,
+    ),
+    14,
+    y,
+  );
+  y += 5.5;
+
+  /* metric boxes: aktual / historis / deviasi */
+  kpiBox(doc, 14, y, bw, 18, "Nilai aktual", fmtMetric(a.type, a.current));
+  kpiBox(doc, 14 + bw + 4, y, bw, 18, "Rata-rata historis", fmtMetric(a.type, a.historical));
+  kpiBox(
+    doc,
+    14 + 2 * (bw + 4),
+    y,
+    bw,
+    18,
+    "Deviasi",
+    a.variance_pct != null ? fmtPct(a.variance_pct) : "-",
+  );
+  y += 22;
+
+  if (!detail) {
+    doc.setFontSize(8);
+    doc.setTextColor(...GRAY);
+    doc.text("Rincian komposisi batch tidak tersedia (batch-detail gagal dimuat).", 14, y);
+    return y + 8;
+  }
+
+  /* boxes row 2: konteks batch */
+  const totalInputBiaya = detail.inputs.reduce((s, x) => s + x.biaya, 0);
+  const totalInputQty = detail.inputs.reduce((s, x) => s + x.qty, 0);
+  const hppGabungan =
+    detail.total_rtl_output_kg > 0 ? totalInputBiaya / detail.total_rtl_output_kg : null;
+  kpiBox(doc, 14, y, bw, 18, "Yield batch", detail.yield_pct != null ? fmtPct(detail.yield_pct) : "-");
+  kpiBox(
+    doc,
+    14 + bw + 4,
+    y,
+    bw,
+    18,
+    "Output RTL",
+    `${fmtNum(detail.total_rtl_output_kg, 1)} kg`,
+  );
+  kpiBox(
+    doc,
+    14 + 2 * (bw + 4),
+    y,
+    bw,
+    18,
+    "Biaya potong / kg",
+    detail.cost_potong_per_kg != null ? fmtIDR(detail.cost_potong_per_kg) : "-",
+  );
+  y += 24;
+
+  /* bukti 1: output RTL */
+  y = sectionTitle(doc, y, `Bukti 1 — Output RTL batch (asal HPP)`);
+  autoTable(doc, {
+    startY: y + 3,
+    head: [["SKU", "Nama Produk", "Qty (kg)", "Biaya", "HPP / kg", "vs Historis"]],
+    body: detail.main_output.map((s) => [
+      s.kode,
+      s.nama,
+      fmtNum(s.qty, 1),
+      fmtIDR(s.biaya),
+      fmtIDR(s.hpp),
+      s.variance_pct != null ? fmtPct(s.variance_pct) : "-",
+    ]),
+    foot: [
+      [
+        "",
+        "TOTAL OUTPUT RTL",
+        fmtNum(detail.total_rtl_output_kg, 1),
+        fmtIDR(detail.main_output.reduce((s, x) => s + x.biaya, 0)),
+        "",
+        "",
+      ],
+    ],
+    theme: "grid",
+    styles: { fontSize: 7, cellPadding: 1.5, textColor: INK },
+    headStyles: { fillColor: BRAND, fontSize: 7, fontStyle: "bold" },
+    footStyles: { fillColor: BAND, textColor: INK, fontStyle: "bold", fontSize: 7 },
+    alternateRowStyles: { fillColor: BAND },
+    columnStyles: {
+      2: { halign: "right" },
+      3: { halign: "right" },
+      4: { halign: "right" },
+      5: { halign: "right" },
+    },
+    margin: { left: 14, right: 14, bottom: 16 },
+  });
+  y = lastY(doc, y) + 8;
+
+  /* bukti 2: input bahan & biaya */
+  y = ensureSpace(doc, y, 30);
+  y = sectionTitle(doc, y, "Bukti 2 — Input bahan & biaya (komponen terbesar HPP)");
+  const inputsSorted = [...detail.inputs].sort((a2, b2) => b2.biaya - a2.biaya);
+  const topInputs = inputsSorted.slice(0, 12);
+  const rest = inputsSorted.slice(12);
+  const restBiaya = rest.reduce((s, x) => s + x.biaya, 0);
+  const restQty = rest.reduce((s, x) => s + x.qty, 0);
+  const inputBody = topInputs.map((i) => [
+    i.kode || "-",
+    i.nama,
+    PTYPE_LABEL[i.product_type] ?? i.product_type,
+    i.qty > 0 ? fmtNum(i.qty, 1) : "-",
+    fmtIDR(i.biaya),
+  ]);
+  if (rest.length > 0) {
+    inputBody.push(["", `Lainnya (${rest.length} item)`, "", fmtNum(restQty, 1), fmtIDR(restBiaya)]);
+  }
+  autoTable(doc, {
+    startY: y + 3,
+    head: [["Kode", "Nama Item", "Jenis", "Qty", "Biaya"]],
+    body: inputBody,
+    foot: [["", "TOTAL INPUT", "", fmtNum(totalInputQty, 1), fmtIDR(totalInputBiaya)]],
+    theme: "grid",
+    styles: { fontSize: 7, cellPadding: 1.5, textColor: INK },
+    headStyles: { fillColor: BRAND, fontSize: 7, fontStyle: "bold" },
+    footStyles: { fillColor: BAND, textColor: INK, fontStyle: "bold", fontSize: 7 },
+    alternateRowStyles: { fillColor: BAND },
+    columnStyles: { 3: { halign: "right" }, 4: { halign: "right" } },
+    margin: { left: 14, right: 14, bottom: 16 },
+  });
+  y = lastY(doc, y) + 8;
+
+  /* bukti 3: ringkasan per jenis + HPP gabungan */
+  y = ensureSpace(doc, y, 22);
+  y = sectionTitle(doc, y, "Bukti 3 — Ringkasan per jenis input & HPP gabungan");
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...INK);
+  const jenisLine = detail.input_summary
+    .map(
+      (s) =>
+        `${PTYPE_LABEL[s.product_type] ?? s.product_type}: ${fmtIDR(s.biaya)}${
+          s.qty > 0 ? ` (${fmtNum(s.qty, 1)})` : ""
+        }`,
+    )
+    .join("   ·   ");
+  doc.text(doc.splitTextToSize(jenisLine, w - 28), 14, y + 2);
+  y += 8;
+  doc.setFillColor(...BAND);
+  doc.roundedRect(14, y, w - 28, 11, 1.5, 1.5, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.text(
+    doc.splitTextToSize(
+      `Asal HPP: total biaya input ${fmtIDR(totalInputBiaya)} ÷ output RTL ${fmtNum(
+        detail.total_rtl_output_kg,
+        1,
+      )} kg = ${hppGabungan != null ? `${fmtIDR(hppGabungan)}/kg` : "-"} (HPP gabungan batch).`,
+      w - 34,
+    ),
+    17,
+    y + 4,
+  );
+  y += 16;
+
+  /* fokus diskusi */
+  y = ensureSpace(doc, y, 26);
+  y = sectionTitle(doc, y, "Fokus diskusi / investigasi");
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  const bullets = INVESTIGATION_GUIDE[a.type] ?? [];
+  for (const b of bullets) {
+    const lines = doc.splitTextToSize(`- ${b}`, w - 30);
+    y = ensureSpace(doc, y, lines.length * 4 + 2);
+    doc.text(lines, 17, y + 2);
+    y += lines.length * 4 + 2.5;
+  }
+  return y + 4;
+}
+
+export function generateReportPdf(result: AnalysisResult, evidence: ReportEvidence[] = []) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const w = doc.internal.pageSize.getWidth();
   const { meta } = result;
@@ -121,13 +392,13 @@ export function generateReportPdf(result: AnalysisResult) {
   drawBand(
     doc,
     "LAPORAN RINCIAN TEMUAN ANALISIS BIAYA & YIELD",
-    "Hijrah Gizihew · Penyebab anomali per batch & SKU · Bahan diskusi",
+    "Hijrah Gizihew · Ringkasan umum + Top 5 anomali (bahan diskusi divisi terkait)",
     `Periode: ${rangeLabel}\nDibuat: ${now}`,
   );
 
-  /* ---- Ringkasan singkat ---- */
+  /* ---- Ringkasan umum ---- */
   let y = 40;
-  y = sectionTitle(doc, y, "Ringkasan");
+  y = sectionTitle(doc, y, "Ringkasan Umum");
 
   const anomalies = [...result.anomalies].sort((a, b) => {
     const batchCmp = a.batch_no.localeCompare(b.batch_no);
@@ -145,17 +416,16 @@ export function generateReportPdf(result: AnalysisResult) {
     doc.splitTextToSize(
       `Ditemukan ${fmtNum(anomalies.length, 0)} temuan anomali pada ${fmtNum(nBatchAnom, 0)} batch ` +
         `dari ${fmtNum(meta?.n_rtl_batch ?? 0, 0)} batch RTL untuk periode ${rangeLabel}. ` +
-        `Temuan dihitung terhadap rata-rata historis per SKU (biaya potong per kg, yield, dan HPP).`,
+        `Laporan ini terdiri dari ringkasan umum, 5 anomali teratas dengan bukti pendukung untuk bahan diskusi, ` +
+        `serta lampiran rincian seluruh temuan.`,
       w - 28,
     ),
     14,
     y + 2,
   );
 
-  /* ---- Legenda jenis temuan ---- */
   y += 12;
   y = sectionTitle(doc, y, "Legenda Jenis Temuan");
-
   const legend = [
     "Biaya potong tinggi — biaya potong per kg batch melebihi rata-rata historis biaya potong per kg.",
     "Yield rendah — output RTL (kg) per batch di bawah rata-rata historis yield batch RTL.",
@@ -167,9 +437,33 @@ export function generateReportPdf(result: AnalysisResult) {
   doc.setTextColor(...INK);
   doc.text(doc.splitTextToSize(legend.join("  "), w - 28), 14, y + 2);
 
-  /* ---- Rincian temuan ---- */
-  y += 12;
-  y = sectionTitle(doc, y, `Rincian Temuan (${fmtNum(anomalies.length, 0)})`);
+  /* ---- Top 5 anomali + bukti ---- */
+  if (evidence.length > 0) {
+    doc.addPage();
+    let ey = 24;
+    ey = sectionTitle(doc, ey, "Top 5 Anomali — Bahan Diskusi (dengan bukti)");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...INK);
+    doc.text(
+      doc.splitTextToSize(
+        "Lima anomali paling signifikan (satu per batch, diurutkan severity & besar deviasi) berikut disertai bukti komposisi biaya batch untuk dibahas bersama divisi terkait.",
+        w - 28,
+      ),
+      14,
+      ey + 2,
+    );
+    ey += 10;
+    for (let i = 0; i < evidence.length; i++) {
+      ey = ensureSpace(doc, ey, 46);
+      ey = drawEvidence(doc, ey, i + 1, evidence[i].anomaly, evidence[i].detail);
+    }
+  }
+
+  /* ---- Lampiran: rincian semua temuan ---- */
+  doc.addPage();
+  y = 24;
+  y = sectionTitle(doc, y, `Lampiran — Rincian Semua Temuan (${fmtNum(anomalies.length, 0)})`);
 
   autoTable(doc, {
     startY: y + 4,
@@ -200,23 +494,22 @@ export function generateReportPdf(result: AnalysisResult) {
     },
     margin: { left: 14, right: 14, bottom: 16 },
   });
-  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable?.finalY ?? y + 10;
-  y += 6;
+  y = lastY(doc, y) + 6;
 
-  /* ---- Catatan metodologi ---- */
+  /* ---- Catatan ---- */
   if (y > doc.internal.pageSize.getHeight() - 40) {
     doc.addPage();
     y = 24;
   }
   y = sectionTitle(doc, y, "Catatan");
-
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...INK);
   const notes = doc.splitTextToSize(
     "1. Nilai pembanding (rata-rata historis) dihitung dari batch RTL periode sebelumnya untuk SKU yang sama.  " +
       "2. Deviasi adalah selisih nilai saat ini terhadap rata-rata historis dalam persen.  " +
-      "3. Untuk rincian input biaya, komposisi kemasan, dan data lengkap per batch, lihat aplikasi dashboard (tab Item RTL / Data mentah).",
+      "3. HPP gabungan = total biaya input batch ÷ total output RTL batch; HPP per SKU memperhitungkan alokasi biaya masing-masing.  " +
+      "4. Untuk rincian lengkap per batch, lihat aplikasi dashboard (tab Item RTL / Anomali / Data mentah).",
     w - 28,
   );
   doc.text(notes, 14, y + 2);
