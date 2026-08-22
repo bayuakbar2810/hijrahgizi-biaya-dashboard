@@ -42,19 +42,79 @@ export type ReportEvidence = {
   detail: BatchDetail | null;
 };
 
+export type ReportMode = "diskusi" | "lengkap";
+
+/* Kunci famil produk: 4 kata pertama nama (upper) — varian ukuran/rasa dihitung satu. */
+function familyKey(a: AnomalyRow): string {
+  const n = String(a.nama ?? "").trim().toUpperCase();
+  if (n) {
+    const words = n.split(/\s+/).slice(0, 4).join(" ");
+    if (words) return words;
+  }
+  return String(a.sku ?? a.batch_no);
+}
+
+/*
+ * Pilihan Top-N untuk bahan diskusi: diseimbangkan antar JENIS anomali
+ * (round-robin per jenis, urut severity & besar deviasi) dan bebas duplikasi
+ * batch maupun famil produk, agar tiap jenis terwakili.
+ */
 export function selectTopAnomalies(result: AnalysisResult, n = 5): AnomalyRow[] {
-  const sorted = [...result.anomalies].sort((a, b) => {
-    const r = (SEV_RANK[a.severity] ?? 1) - (SEV_RANK[b.severity] ?? 1);
+  const byType = new Map<string, AnomalyRow[]>();
+  for (const a of result.anomalies) {
+    if (!byType.has(a.type)) byType.set(a.type, []);
+    byType.get(a.type)!.push(a);
+  }
+
+  const queues: AnomalyRow[][] = [];
+  for (const list of byType.values()) {
+    const sorted = [...list].sort((a, b) => {
+      const r = (SEV_RANK[a.severity] ?? 1) - (SEV_RANK[b.severity] ?? 1);
+      if (r !== 0) return r;
+      return Math.abs(b.variance_pct ?? 0) - Math.abs(a.variance_pct ?? 0);
+    });
+    const seenBatch = new Set<string>();
+    const seenFamily = new Set<string>();
+    const q: AnomalyRow[] = [];
+    for (const a of sorted) {
+      const fam = familyKey(a);
+      if (seenBatch.has(a.batch_no) || seenFamily.has(fam)) continue;
+      seenBatch.add(a.batch_no);
+      seenFamily.add(fam);
+      q.push(a);
+    }
+    queues.push(q);
+  }
+  // Urutkan antrean berdasarkan temuan terkuatnya.
+  queues.sort((qa, qb) => {
+    const ea = qa[0];
+    const eb = qb[0];
+    if (!ea) return 1;
+    if (!eb) return -1;
+    const r = (SEV_RANK[ea.severity] ?? 1) - (SEV_RANK[eb.severity] ?? 1);
     if (r !== 0) return r;
-    return Math.abs(b.variance_pct ?? 0) - Math.abs(a.variance_pct ?? 0);
+    return Math.abs(eb.variance_pct ?? 0) - Math.abs(ea.variance_pct ?? 0);
   });
+
   const out: AnomalyRow[] = [];
-  const seenBatches = new Set<string>();
-  for (const a of sorted) {
-    if (seenBatches.has(a.batch_no)) continue;
-    seenBatches.add(a.batch_no);
-    out.push(a);
-    if (out.length >= n) break;
+  const usedBatches = new Set<string>();
+  const usedFamilies = new Set<string>();
+  let added = true;
+  while (out.length < n && added) {
+    added = false;
+    for (const q of queues) {
+      if (out.length >= n) break;
+      while (q.length > 0) {
+        const a = q.shift()!;
+        const fam = familyKey(a);
+        if (usedBatches.has(a.batch_no) || usedFamilies.has(fam)) continue;
+        usedBatches.add(a.batch_no);
+        usedFamilies.add(fam);
+        out.push(a);
+        added = true;
+        break;
+      }
+    }
   }
   return out;
 }
@@ -381,7 +441,11 @@ function drawEvidence(
   return y + 4;
 }
 
-export function generateReportPdf(result: AnalysisResult, evidence: ReportEvidence[] = []) {
+export function generateReportPdf(
+  result: AnalysisResult,
+  evidence: ReportEvidence[] = [],
+  mode: ReportMode = "lengkap",
+) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const w = doc.internal.pageSize.getWidth();
   const { meta } = result;
@@ -414,10 +478,15 @@ export function generateReportPdf(result: AnalysisResult, evidence: ReportEviden
   doc.setTextColor(...INK);
   doc.text(
     doc.splitTextToSize(
-      `Ditemukan ${fmtNum(anomalies.length, 0)} temuan anomali pada ${fmtNum(nBatchAnom, 0)} batch ` +
-        `dari ${fmtNum(meta?.n_rtl_batch ?? 0, 0)} batch RTL untuk periode ${rangeLabel}. ` +
-        `Laporan ini terdiri dari ringkasan umum, 5 anomali teratas dengan bukti pendukung untuk bahan diskusi, ` +
-        `serta lampiran rincian seluruh temuan.`,
+      mode === "diskusi"
+        ? `Ditemukan ${fmtNum(anomalies.length, 0)} temuan anomali pada ${fmtNum(nBatchAnom, 0)} batch ` +
+            `dari ${fmtNum(meta?.n_rtl_batch ?? 0, 0)} batch RTL untuk periode ${rangeLabel}. ` +
+            `Versi ringkas ini memuat ringkasan umum dan 5 anomali terpilih (mewakili tiap jenis) beserta bukti pendukung, ` +
+            `sebagai bahan diskusi dengan divisi terkait.`
+        : `Ditemukan ${fmtNum(anomalies.length, 0)} temuan anomali pada ${fmtNum(nBatchAnom, 0)} batch ` +
+            `dari ${fmtNum(meta?.n_rtl_batch ?? 0, 0)} batch RTL untuk periode ${rangeLabel}. ` +
+            `Laporan ini terdiri dari ringkasan umum, 5 anomali teratas dengan bukti pendukung untuk bahan diskusi, ` +
+            `serta lampiran rincian seluruh temuan.`,
       w - 28,
     ),
     14,
@@ -440,61 +509,63 @@ export function generateReportPdf(result: AnalysisResult, evidence: ReportEviden
   /* ---- Top 5 anomali + bukti ---- */
   if (evidence.length > 0) {
     doc.addPage();
-    let ey = 24;
-    ey = sectionTitle(doc, ey, "Top 5 Anomali — Bahan Diskusi (dengan bukti)");
+    y = 24;
+    y = sectionTitle(doc, y, "Top 5 Anomali — Bahan Diskusi (dengan bukti)");
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...INK);
     doc.text(
       doc.splitTextToSize(
-        "Lima anomali paling signifikan (satu per batch, diurutkan severity & besar deviasi) berikut disertai bukti komposisi biaya batch untuk dibahas bersama divisi terkait.",
+        "Lima anomali terpilih — diseimbangkan antar jenis (biaya potong, yield, HPP), tanpa duplikasi batch/famil produk, diurutkan severity & besar deviasi — berikut disertai bukti komposisi biaya batch untuk dibahas bersama divisi terkait.",
         w - 28,
       ),
       14,
-      ey + 2,
+      y + 2,
     );
-    ey += 10;
+    y += 10;
     for (let i = 0; i < evidence.length; i++) {
-      ey = ensureSpace(doc, ey, 46);
-      ey = drawEvidence(doc, ey, i + 1, evidence[i].anomaly, evidence[i].detail);
+      y = ensureSpace(doc, y, 46);
+      y = drawEvidence(doc, y, i + 1, evidence[i].anomaly, evidence[i].detail);
     }
   }
 
-  /* ---- Lampiran: rincian semua temuan ---- */
-  doc.addPage();
-  y = 24;
-  y = sectionTitle(doc, y, `Lampiran — Rincian Semua Temuan (${fmtNum(anomalies.length, 0)})`);
+  /* ---- Lampiran: rincian semua temuan (hanya mode lengkap) ---- */
+  if (mode === "lengkap") {
+    doc.addPage();
+    y = 24;
+    y = sectionTitle(doc, y, `Lampiran — Rincian Semua Temuan (${fmtNum(anomalies.length, 0)})`);
 
-  autoTable(doc, {
-    startY: y + 4,
-    head: [["Batch No.", "Tanggal", "SKU", "Nama Produk", "Jenis Temuan", "Penyebab", "Status"]],
-    body: anomalies.map((a: AnomalyRow) => [
-      a.batch_no,
-      fmtDate(a.tanggal),
-      a.sku ?? "-",
-      a.nama ?? "-",
-      ANOM_LABEL[a.type] ?? a.type,
-      penyebab(a),
-      SEV_LABEL[a.severity] ?? a.severity,
-    ]),
-    theme: "grid",
-    styles: { fontSize: 7, cellPadding: 1.6, textColor: INK },
-    headStyles: { fillColor: BRAND, fontSize: 7.2, fontStyle: "bold" },
-    alternateRowStyles: { fillColor: BAND },
-    columnStyles: {
-      1: { halign: "center" },
-      6: { halign: "center" },
-    },
-    didParseCell: (data) => {
-      if (data.section === "body" && data.column.index === 6) {
-        const sev = anomalies[data.row.index]?.severity;
-        data.cell.styles.textColor = sevColor(sev);
-        data.cell.styles.fontStyle = "bold";
-      }
-    },
-    margin: { left: 14, right: 14, bottom: 16 },
-  });
-  y = lastY(doc, y) + 6;
+    autoTable(doc, {
+      startY: y + 4,
+      head: [["Batch No.", "Tanggal", "SKU", "Nama Produk", "Jenis Temuan", "Penyebab", "Status"]],
+      body: anomalies.map((a: AnomalyRow) => [
+        a.batch_no,
+        fmtDate(a.tanggal),
+        a.sku ?? "-",
+        a.nama ?? "-",
+        ANOM_LABEL[a.type] ?? a.type,
+        penyebab(a),
+        SEV_LABEL[a.severity] ?? a.severity,
+      ]),
+      theme: "grid",
+      styles: { fontSize: 7, cellPadding: 1.6, textColor: INK },
+      headStyles: { fillColor: BRAND, fontSize: 7.2, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: BAND },
+      columnStyles: {
+        1: { halign: "center" },
+        6: { halign: "center" },
+      },
+      didParseCell: (data) => {
+        if (data.section === "body" && data.column.index === 6) {
+          const sev = anomalies[data.row.index]?.severity;
+          data.cell.styles.textColor = sevColor(sev);
+          data.cell.styles.fontStyle = "bold";
+        }
+      },
+      margin: { left: 14, right: 14, bottom: 16 },
+    });
+    y = lastY(doc, y) + 6;
+  }
 
   /* ---- Catatan ---- */
   if (y > doc.internal.pageSize.getHeight() - 40) {
@@ -506,16 +577,24 @@ export function generateReportPdf(result: AnalysisResult, evidence: ReportEviden
   doc.setFontSize(7.5);
   doc.setTextColor(...INK);
   const notes = doc.splitTextToSize(
-    "1. Nilai pembanding (rata-rata historis) dihitung dari batch RTL periode sebelumnya untuk SKU yang sama.  " +
-      "2. Deviasi adalah selisih nilai saat ini terhadap rata-rata historis dalam persen.  " +
-      "3. HPP gabungan = total biaya input batch ÷ total output RTL batch; HPP per SKU memperhitungkan alokasi biaya masing-masing.  " +
-      "4. Untuk rincian lengkap per batch, lihat aplikasi dashboard (tab Item RTL / Anomali / Data mentah).",
+    mode === "diskusi"
+      ? "1. Nilai pembanding (rata-rata historis) dihitung dari batch RTL periode sebelumnya untuk SKU yang sama.  " +
+          "2. Deviasi adalah selisih nilai saat ini terhadap rata-rata historis dalam persen.  " +
+          "3. HPP gabungan = total biaya input batch ÷ total output RTL batch.  " +
+          "4. Rincian seluruh temuan tersedia pada versi lengkap laporan / aplikasi dashboard."
+      : "1. Nilai pembanding (rata-rata historis) dihitung dari batch RTL periode sebelumnya untuk SKU yang sama.  " +
+          "2. Deviasi adalah selisih nilai saat ini terhadap rata-rata historis dalam persen.  " +
+          "3. HPP gabungan = total biaya input batch ÷ total output RTL batch; HPP per SKU memperhitungkan alokasi biaya masing-masing.  " +
+          "4. Untuk rincian lengkap per batch, lihat aplikasi dashboard (tab Item RTL / Anomali / Data mentah).",
     w - 28,
   );
   doc.text(notes, 14, y + 2);
 
   drawFooter(doc);
 
-  const fname = `laporan-rincian-temuan-${(meta?.from ?? "awal").slice(0, 10)}-${(meta?.to ?? "akhir").slice(0, 10)}.pdf`;
+  const fname =
+    mode === "diskusi"
+      ? `laporan-diskusi-top5-${(meta?.from ?? "awal").slice(0, 10)}-${(meta?.to ?? "akhir").slice(0, 10)}.pdf`
+      : `laporan-lengkap-${(meta?.from ?? "awal").slice(0, 10)}-${(meta?.to ?? "akhir").slice(0, 10)}.pdf`;
   doc.save(fname);
 }

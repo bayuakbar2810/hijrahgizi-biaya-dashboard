@@ -571,8 +571,14 @@ export function analyze(
       ),
     );
   }
-  if (fAnom) {
-    resultsFiltered = resultsFiltered.filter((x) => x.anomalies.some((a: any) => a.type === fAnom));
+  const anomTypes = fAnom
+    ? String(fAnom)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+  if (anomTypes.length > 0) {
+    resultsFiltered = resultsFiltered.filter((x) => x.anomalies.some((a: any) => anomTypes.includes(a.type)));
   }
   if (fSev) {
     const rank = SEVERITY_RANK[fSev] ?? 0;
@@ -589,7 +595,7 @@ export function analyze(
       allAnomalies.push({ ...a, batch_no: x.batch_no, tanggal: x.tanggal });
     }
   }
-  if (fAnom) allAnomalies = allAnomalies.filter((a) => a.type === fAnom);
+  if (anomTypes.length > 0) allAnomalies = allAnomalies.filter((a) => anomTypes.includes(a.type));
   if (fSev) allAnomalies = allAnomalies.filter((a) => a.severity === fSev);
 
   const totalOut = resultsFiltered.reduce((a, x) => a + x.rtl_output_kg, 0);

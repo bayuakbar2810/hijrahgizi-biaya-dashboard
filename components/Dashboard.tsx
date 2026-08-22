@@ -16,6 +16,12 @@ import UploadPanel from "./UploadPanel";
 
 type Tab = "batches" | "anomalies" | "raw" | "products" | "upload";
 
+const ANOM_TYPES: { value: string; label: string }[] = [
+  { value: "HIGH_CUTTING_COST", label: "Biaya potong tinggi" },
+  { value: "LOW_YIELD", label: "Yield rendah" },
+  { value: "HIGH_HPP", label: "HPP tinggi" },
+];
+
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("batches");
   const [pyOk, setPyOk] = useState(false);
@@ -25,13 +31,13 @@ export default function Dashboard() {
   const [openBatch, setOpenBatch] = useState<string | null>(null);
   const [openItem, setOpenItem] = useState<string | null>(null);
 
-  const [from, setFrom] = useState("");
+const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [batch, setBatch] = useState("");
   const [q, setQ] = useState("");
-  const [anomalyType, setAnomalyType] = useState("");
+  const [anomalyTypes, setAnomalyTypes] = useState<string[]>(ANOM_TYPES.map((t) => t.value));
   const [severity, setSeverity] = useState("");
-  const filtersRef = useRef({ from, to, batch, q, anomalyType, severity });
+  const filtersRef = useRef({ from, to, batch, q, anomalyTypes, severity });
 
   const runAnalysis = useCallback(async (f: AnalysisParams) => {
     setLoading(true);
@@ -52,21 +58,25 @@ export default function Dashboard() {
     }
   }, []);
 
-  const applyFilters = useCallback(async () => {
+const applyFilters = useCallback(async () => {
     const f = filtersRef.current;
+    const anomFilter =
+      f.anomalyTypes.length > 0 && f.anomalyTypes.length < ANOM_TYPES.length
+        ? f.anomalyTypes.join(",")
+        : undefined;
     await runAnalysis({
       from: f.from || undefined,
       to: f.to || undefined,
       batch: f.batch || undefined,
       q: f.q || undefined,
-      anomaly_type: f.anomalyType || undefined,
+      anomaly_type: anomFilter,
       severity: f.severity || undefined,
     });
   }, [runAnalysis]);
 
   useEffect(() => {
-    filtersRef.current = { from, to, batch, q, anomalyType, severity };
-  }, [from, to, batch, q, anomalyType, severity]);
+    filtersRef.current = { from, to, batch, q, anomalyTypes, severity };
+  }, [from, to, batch, q, anomalyTypes, severity]);
 
   useEffect(() => {
     pythonHealth().then(setPyOk);
@@ -102,19 +112,19 @@ export default function Dashboard() {
 
       {tab === "batches" && (
         <>
-          <FilterBar
+<FilterBar
             from={from}
             to={to}
             batch={batch}
             q={q}
-            anomalyType={anomalyType}
+            anomalyTypes={anomalyTypes}
             severity={severity}
             loading={loading}
             onFrom={setFrom}
             onTo={setTo}
             onBatch={setBatch}
             onQ={setQ}
-            onAnomalyType={setAnomalyType}
+            onAnomalyTypes={setAnomalyTypes}
             onSeverity={setSeverity}
             onApply={applyFilters}
           />
@@ -145,19 +155,19 @@ export default function Dashboard() {
 
       {tab === "anomalies" && (
         <div className="space-y-4">
-          <FilterBar
+<FilterBar
             from={from}
             to={to}
             batch={batch}
             q={q}
-            anomalyType={anomalyType}
+            anomalyTypes={anomalyTypes}
             severity={severity}
             loading={loading}
             onFrom={setFrom}
             onTo={setTo}
             onBatch={setBatch}
             onQ={setQ}
-            onAnomalyType={setAnomalyType}
+            onAnomalyTypes={setAnomalyTypes}
             onSeverity={setSeverity}
             onApply={applyFilters}
           />
@@ -218,6 +228,35 @@ function Header({
 analysis: AnalysisResult | null;
 }) {
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfMenu, setPdfMenu] = useState(false);
+  const downloadPdf = async (mode: "diskusi" | "lengkap") => {
+    if (!analysis) return;
+    setPdfBusy(true);
+    try {
+      const { generateReportPdf, selectTopAnomalies } = await import("@/lib/report");
+      const top = selectTopAnomalies(analysis, 5);
+      const evidence = await Promise.all(
+        top.map(async (a) => {
+          try {
+            const res = await fetch("/api/batch-detail", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ batch_no: a.batch_no }),
+            });
+            if (!res.ok) return { anomaly: a, detail: null };
+            return { anomaly: a, detail: await res.json() };
+          } catch {
+            return { anomaly: a, detail: null };
+          }
+        }),
+      );
+      generateReportPdf(analysis, evidence, mode);
+    } catch {
+      alert("Gagal membuat laporan PDF. Coba lagi.");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "batches", label: "Item RTL" },
     { id: "anomalies", label: "Anomali", count: analysis?.anomalies.length ?? 0 },
@@ -258,40 +297,47 @@ analysis: AnalysisResult | null;
           />
 {pyOk ? "Service analisis aktif" : "Service analisis offline"}
         </span>
-        <button
-          onClick={async () => {
-            if (!analysis) return;
-            setPdfBusy(true);
-            try {
-              const { generateReportPdf, selectTopAnomalies } = await import("@/lib/report");
-              const top = selectTopAnomalies(analysis, 5);
-              const evidence = await Promise.all(
-                top.map(async (a) => {
-                  try {
-                    const res = await fetch("/api/batch-detail", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ batch_no: a.batch_no }),
-                    });
-                    if (!res.ok) return { anomaly: a, detail: null };
-                    return { anomaly: a, detail: await res.json() };
-                  } catch {
-                    return { anomaly: a, detail: null };
-                  }
-                }),
-              );
-              generateReportPdf(analysis, evidence);
-            } catch {
-              alert("Gagal membuat laporan PDF. Coba lagi.");
-            } finally {
-              setPdfBusy(false);
-            }
-          }}
-          disabled={!analysis || pdfBusy}
-          className="rounded-lg border border-line-strong px-3 py-1.5 text-[13px] font-medium text-ink-2 hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {pdfBusy ? "Menyiapkan…" : "Unduh Laporan PDF"}
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setPdfMenu((m) => !m)}
+            disabled={!analysis || pdfBusy}
+            className="rounded-lg border border-line-strong px-3 py-1.5 text-[13px] font-medium text-ink-2 hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {pdfBusy ? "Menyiapkan…" : "Unduh Laporan PDF ▾"}
+          </button>
+          {pdfMenu && (
+            <div className="absolute right-0 z-30 mt-1 w-64 rounded-xl border border-line bg-surface p-1.5 shadow-[var(--shadow-float)]">
+              <button
+                onClick={() => {
+                  setPdfMenu(false);
+                  downloadPdf("diskusi");
+                }}
+                disabled={pdfBusy}
+                className="block w-full rounded-lg px-3 py-2 text-left hover:bg-accent-soft/60 disabled:opacity-50"
+              >
+                <span className="block text-[13px] font-semibold text-ink">
+                  PDF Diskusi (ringkas)
+                </span>
+                <span className="block text-[11px] leading-snug text-ink-3">
+                  Ringkasan + Top 5 anomali per jenis dengan bukti — hemat lembar
+                </span>
+              </button>
+              <button
+                onClick={() => {
+                  setPdfMenu(false);
+                  downloadPdf("lengkap");
+                }}
+                disabled={pdfBusy}
+                className="block w-full rounded-lg px-3 py-2 text-left hover:bg-accent-soft/60 disabled:opacity-50"
+              >
+                <span className="block text-[13px] font-semibold text-ink">PDF Lengkap</span>
+                <span className="block text-[11px] leading-snug text-ink-3">
+                  Ditambah lampiran rincian seluruh temuan ({analysis?.anomalies.length ?? 0})
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
         <button
           onClick={async () => {
             await fetch("/api/logout", { method: "POST" });
@@ -341,31 +387,31 @@ analysis: AnalysisResult | null;
 function FilterBar({
   from,
   to,
-batch,
+  batch,
   q,
-  anomalyType,
+  anomalyTypes,
   severity,
   loading,
   onFrom,
   onTo,
   onBatch,
   onQ,
-  onAnomalyType,
+  onAnomalyTypes,
   onSeverity,
   onApply,
 }: {
-from: string;
+  from: string;
   to: string;
   batch: string;
   q: string;
-  anomalyType: string;
+  anomalyTypes: string[];
   severity: string;
   loading: boolean;
   onFrom: (v: string) => void;
   onTo: (v: string) => void;
   onBatch: (v: string) => void;
   onQ: (v: string) => void;
-  onAnomalyType: (v: string) => void;
+  onAnomalyTypes: (v: string[]) => void;
   onSeverity: (v: string) => void;
   onApply: () => void;
 }) {
@@ -410,20 +456,32 @@ from: string;
             className="mt-1 w-48 rounded-lg border border-line-strong bg-surface px-2 py-1.5 text-[12px] text-ink placeholder:text-ink-3 focus:border-accent"
           />
         </div>
-        <div>
+<div>
           <label className="block text-[10px] font-semibold uppercase text-ink-3">
-            Jenis anomali
+            Jenis anomali (ceklis)
           </label>
-          <select
-            value={anomalyType}
-            onChange={(e) => onAnomalyType(e.target.value)}
-            className="mt-1 rounded-lg border border-line-strong bg-surface px-2 py-1.5 text-[13px] text-ink focus:border-accent"
-          >
-            <option value="">Semua</option>
-            <option value="HIGH_CUTTING_COST">Biaya potong tinggi</option>
-            <option value="LOW_YIELD">Yield rendah</option>
-            <option value="HIGH_HPP">HPP tinggi</option>
-          </select>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+            {ANOM_TYPES.map((t) => (
+              <label
+                key={t.value}
+                className="inline-flex cursor-pointer items-center gap-1.5 text-[12px] font-medium text-ink"
+              >
+                <input
+                  type="checkbox"
+                  checked={anomalyTypes.includes(t.value)}
+                  onChange={(e) =>
+                    onAnomalyTypes(
+                      e.target.checked
+                        ? [...anomalyTypes, t.value]
+                        : anomalyTypes.filter((v) => v !== t.value),
+                    )
+                  }
+                  className="h-3.5 w-3.5 cursor-pointer accent-accent"
+                />
+                {t.label}
+              </label>
+            ))}
+          </div>
         </div>
         <div>
           <label className="block text-[10px] font-semibold uppercase text-ink-3">Severity</label>
