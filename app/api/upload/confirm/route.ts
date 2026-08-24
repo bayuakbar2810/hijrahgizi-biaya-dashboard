@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getDb, nowIso } from "@/lib/db";
-import { readAuth } from "@/lib/auth";
+import { readAdminAuth } from "@/lib/auth";
 import { getPreview, deletePreview } from "@/lib/preview";
 import type { PrdRow } from "@/lib/types";
 
@@ -46,8 +46,8 @@ function cmpVal(f: string, a: unknown, b: unknown): boolean {
 }
 
 export async function POST(request: Request) {
-  if (!readAuth(request)) {
-    return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
+  if (!readAdminAuth(request)) {
+    return NextResponse.json({ error: "Hanya admin yang dapat melakukan aksi ini" }, { status: 403 });
   }
   const body = (await request.json()) as { preview_id?: string };
   if (!body.preview_id) {
@@ -155,7 +155,7 @@ export async function POST(request: Request) {
   try {
     await db.exec("BEGIN");
 
-    // Insert riwayat dalam sedikit query (20 baris × 12 param per query).
+    // Insert riwayat dalam sedikit query (20 baris Ã— 12 param per query).
     for (let i = 0; i < historyRows.length; i += HIST_CHUNK) {
       const chunk = historyRows.slice(i, i + HIST_CHUNK);
       const placeholders: string[] = [];

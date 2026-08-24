@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { readAuth } from "@/lib/auth";
+import { readAdminAuth, readAuth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -18,8 +18,8 @@ export async function GET(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!readAuth(request)) {
-    return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
+  if (!readAdminAuth(request)) {
+    return NextResponse.json({ error: "Hanya admin yang dapat menghapus data" }, { status: 403 });
   }
   const body = (await request.json()) as { id?: string };
   if (!body.id) {

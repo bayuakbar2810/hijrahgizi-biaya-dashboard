@@ -25,6 +25,7 @@ const ANOM_TYPES: { value: string; label: string }[] = [
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("batches");
   const [pyOk, setPyOk] = useState(false);
+  const [role, setRole] = useState<"admin" | "viewer" | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +83,10 @@ const applyFilters = useCallback(async () => {
 
   useEffect(() => {
     pythonHealth().then(setPyOk);
+    fetch("/api/me", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setRole(d?.role === "viewer" ? "viewer" : "admin"))
+      .catch(() => setRole("admin"));
     runAnalysis({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -96,6 +101,7 @@ const applyFilters = useCallback(async () => {
         tab={tab}
         onTab={setTab}
         analysis={analysis}
+        role={role}
       />
 
       {error && (
@@ -208,7 +214,13 @@ const applyFilters = useCallback(async () => {
           ) : null;
         })()}
 
-      {openBatch && <BatchDetailModal batchNo={openBatch} onClose={() => setOpenBatch(null)} />}
+      {openBatch && (
+        <BatchDetailModal
+          batchNo={openBatch}
+          onClose={() => setOpenBatch(null)}
+          readOnly={role === "viewer"}
+        />
+      )}
 
       {meta && (
         <p className="tnum mt-4 pb-4 text-center text-[11px] text-ink-3">
@@ -227,12 +239,22 @@ function Header({
   tab,
   onTab,
   analysis,
+  role,
 }: {
   pyOk: boolean;
   tab: Tab;
   onTab: (t: Tab) => void;
-analysis: AnalysisResult | null;
+  analysis: AnalysisResult | null;
+  role: "admin" | "viewer" | null;
 }) {
+  const isViewer = role === "viewer";
+  const tabs: { id: Tab; label: string; count?: number }[] = [
+    { id: "batches", label: "Item RTL" },
+    { id: "anomalies", label: "Anomali", count: analysis?.anomalies.length ?? 0 },
+    { id: "raw", label: "Data mentah" },
+    { id: "products", label: "Master produk" },
+    ...(isViewer ? [] : [{ id: "upload" as Tab, label: "Upload", count: undefined as number | undefined }]),
+  ];
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfMenu, setPdfMenu] = useState(false);
   const downloadPdf = async (mode: "diskusi" | "lengkap") => {
@@ -263,13 +285,6 @@ analysis: AnalysisResult | null;
       setPdfBusy(false);
     }
   };
-  const tabs: { id: Tab; label: string; count?: number }[] = [
-    { id: "batches", label: "Item RTL" },
-    { id: "anomalies", label: "Anomali", count: analysis?.anomalies.length ?? 0 },
-    { id: "raw", label: "Data mentah" },
-    { id: "products", label: "Master produk" },
-    { id: "upload", label: "Upload" },
-  ];
   return (
     <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
 <div className="flex items-center gap-3">
@@ -303,6 +318,12 @@ analysis: AnalysisResult | null;
           />
 {pyOk ? "Service analisis aktif" : "Service analisis offline"}
         </span>
+        {isViewer && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-in/30 bg-in-soft px-2.5 py-1 text-[11px] font-medium text-in">
+            <span className="h-1.5 w-1.5 rounded-full bg-in" aria-hidden="true" />
+            Tim Produksi · lihat saja
+          </span>
+        )}
         <div className="relative">
           <button
             onClick={() => setPdfMenu((m) => !m)}

@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { readAuth } from "@/lib/auth";
+import { readAdminAuth } from "@/lib/auth";
 import type { ProductMaster, ProductType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ const TYPES: ProductType[] = [
 ];
 
 export async function GET(request: NextRequest) {
-  if (!readAuth(request)) {
+  if (!readAdminAuth(request)) {
     return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
   }
   const sp = request.nextUrl.searchParams;
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: Request) {
-  if (!readAuth(request)) {
+  if (!readAdminAuth(request)) {
     return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
   }
   const body = (await request.json()) as Partial<ProductMaster> & { kode: string };

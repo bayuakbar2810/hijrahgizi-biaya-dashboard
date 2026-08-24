@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { readAuth } from "@/lib/auth";
+import { readAdminAuth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(request: Request) {
-  if (!readAuth(request)) {
-    return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
+  if (!readAdminAuth(request)) {
+    return NextResponse.json({ error: "Hanya admin yang dapat melakukan aksi ini" }, { status: 403 });
   }
   const { searchParams } = new URL(request.url);
   const batchNo = searchParams.get("batch_no")?.trim() ?? "";
@@ -28,8 +28,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!readAuth(request)) {
-    return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
+  if (!readAdminAuth(request)) {
+    return NextResponse.json({ error: "Hanya admin yang dapat melakukan aksi ini" }, { status: 403 });
   }
   const body = (await request.json()) as { batch_no?: string; notes?: string };
   const batchNo = body.batch_no?.trim() ?? "";

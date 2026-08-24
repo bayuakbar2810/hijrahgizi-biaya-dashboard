@@ -9,9 +9,11 @@ import { Panel, PTypeBadge, SkeletonRows, StatusBadge, Th, Td } from "./ui";
 export default function BatchDetailModal({
   batchNo,
   onClose,
+  readOnly = false,
 }: {
   batchNo: string;
   onClose: () => void;
+  readOnly?: boolean;
 }) {
   const [data, setData] = useState<BatchDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +160,7 @@ export default function BatchDetailModal({
                 savedAt={notesSavedAt}
                 error={notesError}
                 onSave={saveNotes}
+                readOnly={readOnly}
               />
 
               <HistoryPanel batchNo={batchNo} />
@@ -597,6 +600,7 @@ function NotesPanel({
   savedAt,
   error,
   onSave,
+  readOnly = false,
 }: {
   needsInvestigation: boolean;
   notes: string;
@@ -606,14 +610,17 @@ function NotesPanel({
   savedAt: string | null;
   error: string | null;
   onSave: () => void;
+  readOnly?: boolean;
 }) {
   return (
     <Panel
       title="Catatan investigasi"
       subtitle={
-        needsInvestigation
-          ? "batch perlu diinvestigasi · isi alasan/jawaban untuk divisi terkait"
-          : "catatan tambahan untuk divisi terkait"
+        readOnly
+          ? "hanya admin yang dapat mengubah catatan"
+          : needsInvestigation
+            ? "batch perlu diinvestigasi · isi alasan/jawaban untuk divisi terkait"
+            : "catatan tambahan untuk divisi terkait"
       }
       accent={needsInvestigation ? "red" : "accent"}
     >
@@ -625,30 +632,35 @@ function NotesPanel({
             value={notes}
             onChange={(e) => onNotes(e.target.value)}
             rows={4}
+            disabled={readOnly}
             placeholder={
-              needsInvestigation
-                ? "Contoh: penyusutan tinggi karena bahan mentah beku tidak ditimbang ulang…"
-                : "Tulis catatan di sini…"
+              readOnly
+                ? "Mode lihat saja — catatan hanya bisa diubah oleh admin."
+                : needsInvestigation
+                  ? "Contoh: penyusutan tinggi karena bahan mentah beku tidak ditimbang ulang…"
+                  : "Tulis catatan di sini…"
             }
-            className="w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-[13px] text-ink placeholder:text-ink-3 focus:border-accent"
+            className="w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-[13px] text-ink placeholder:text-ink-3 focus:border-accent disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-ink-2"
           />
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="text-[11px] text-ink-3">
-              {savedAt && (
-                <span className="tnum">
-                  Tersimpan {fmtDate(savedAt)} {new Date(savedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-                </span>
-              )}
-              {error && <span className="ml-2 text-red-600">{error}</span>}
+          {!readOnly && (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="text-[11px] text-ink-3">
+                {savedAt && (
+                  <span className="tnum">
+                    Tersimpan {fmtDate(savedAt)} {new Date(savedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                )}
+                {error && <span className="ml-2 text-red-600">{error}</span>}
+              </div>
+              <button
+                onClick={onSave}
+                disabled={saving}
+                className="rounded-lg bg-accent px-3.5 py-1.5 text-[13px] font-semibold text-white hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? "Menyimpan…" : "Simpan catatan"}
+              </button>
             </div>
-            <button
-              onClick={onSave}
-              disabled={saving}
-              className="rounded-lg bg-accent px-3.5 py-1.5 text-[13px] font-semibold text-white hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving ? "Menyimpan…" : "Simpan catatan"}
-            </button>
-          </div>
+          )}
         </div>
       )}
     </Panel>

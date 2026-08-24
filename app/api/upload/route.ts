@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getDb } from "@/lib/db";
-import { readAuth } from "@/lib/auth";
+import { readAdminAuth } from "@/lib/auth";
 import { pythonParse } from "@/lib/python";
 import { setPreview } from "@/lib/preview";
 import type { UploadPreview } from "@/lib/types";
@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function POST(request: Request) {
-  if (!readAuth(request)) {
-    return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
+  if (!readAdminAuth(request)) {
+    return NextResponse.json({ error: "Hanya admin yang dapat melakukan aksi ini" }, { status: 403 });
   }
   let form: FormData;
   try {
