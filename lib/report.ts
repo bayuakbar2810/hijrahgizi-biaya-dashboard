@@ -1,7 +1,13 @@
 ﻿import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { AnalysisResult, AnomalyRow, BatchDetail } from "./types";
-import { fmtIDR, fmtNum, fmtPct, fmtDate } from "./format";
+import { fmtIDR, fmtNum, fmtDate } from "./format";
+
+/* Yield dari analisis sudah dalam satuan persen (mis. 100 = 100%) — jangan dikali lagi. */
+function fmtPctVal(v: number | null | undefined, digits = 1): string {
+  if (v === null || v === undefined || Number.isNaN(v)) return "-";
+  return `${fmtNum(v, digits)}%`;
+}
 
 const BRAND: [number, number, number] = [15, 125, 148];
 const BRAND_DARK: [number, number, number] = [10, 84, 100];
@@ -125,7 +131,7 @@ function sevColor(sev: string | undefined): [number, number, number] {
 
 function fmtMetric(type: string, v: number | null | undefined): string {
   if (v === null || v === undefined || Number.isNaN(v)) return "-";
-  if (type === "LOW_YIELD") return fmtPct(v);
+  if (type === "LOW_YIELD") return fmtPctVal(v);
   return fmtIDR(v);
 }
 
@@ -137,7 +143,7 @@ function penyebab(a: AnomalyRow): string {
   const dev = a.variance_pct;
   const devAbs = dev == null ? "" : `${fmtNum(Math.abs(dev), 1)}%`;
   if (a.type === "LOW_YIELD") {
-    return `Yield sekarang ${fmtPct(a.current)}, rata-rata biasanya ${fmtPct(a.historical)}${devAbs ? ` — lebih rendah ${devAbs}` : ""}.`;
+    return `Yield sekarang ${fmtPctVal(a.current)}, rata-rata biasanya ${fmtPctVal(a.historical)}${devAbs ? ` — lebih rendah ${devAbs}` : ""}.`;
   }
   if (a.type === "HIGH_CUTTING_COST") {
     return `Biaya potong per kg sekarang ${fmtIDR(a.current)}, rata-rata biasanya ${fmtIDR(a.historical)}${devAbs ? ` — lebih mahal ${devAbs}` : ""}.`;
@@ -331,7 +337,7 @@ function drawEvidence(
   }
 
   /* kotak konteks batch */
-  kpiBox(doc, 14, y, bw, 20, "Yield batch ini", detail.yield_pct != null ? fmtPct(detail.yield_pct) : "-");
+  kpiBox(doc, 14, y, bw, 20, "Yield batch ini", fmtPctVal(detail.yield_pct));
   kpiBox(doc, 14 + bw + 4, y, bw, 20, "Hasil produksi", `${fmtNum(detail.total_rtl_output_kg, 1)} kg`);
   kpiBox(
     doc,
