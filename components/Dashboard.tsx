@@ -214,13 +214,7 @@ const applyFilters = useCallback(async () => {
           ) : null;
         })()}
 
-      {openBatch && (
-        <BatchDetailModal
-          batchNo={openBatch}
-          onClose={() => setOpenBatch(null)}
-          readOnly={role === "viewer"}
-        />
-      )}
+      {openBatch && <BatchDetailModal batchNo={openBatch} onClose={() => setOpenBatch(null)} />}
 
       {meta && (
         <p className="tnum mt-4 pb-4 text-center text-[11px] text-ink-3">
@@ -318,12 +312,6 @@ function Header({
           />
 {pyOk ? "Service analisis aktif" : "Service analisis offline"}
         </span>
-        {isViewer && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-in/30 bg-in-soft px-2.5 py-1 text-[11px] font-medium text-in">
-            <span className="h-1.5 w-1.5 rounded-full bg-in" aria-hidden="true" />
-            Tim Produksi · lihat saja
-          </span>
-        )}
         <div className="relative">
           <button
             onClick={() => setPdfMenu((m) => !m)}
