@@ -11,20 +11,32 @@ export async function GET(request: Request) {
   }
   const { searchParams } = new URL(request.url);
   const batchNo = searchParams.get("batch_no")?.trim() ?? "";
-  if (!batchNo) {
-    return NextResponse.json({ error: "batch_no wajib diisi" }, { status: 400 });
-  }
   const db = await getDb();
+
+  if (batchNo) {
+    const { rows } = await db.query(
+      `SELECT batch_no, notes, updated_at FROM batch_notes WHERE batch_no = $1`,
+      [batchNo],
+    );
+    const row = (rows[0] as { notes?: string; updated_at?: string } | undefined) ?? {};
+    return NextResponse.json({
+      batch_no: batchNo,
+      notes: row.notes ?? "",
+      updated_at: row.updated_at ?? null,
+    });
+  }
+
+  // Log alasan: semua batch yang punya catatan investigasi, terbaru dulu.
   const { rows } = await db.query(
-    `SELECT batch_no, notes, updated_at FROM batch_notes WHERE batch_no = $1`,
-    [batchNo],
+    `SELECT n.batch_no, n.notes, n.updated_at,
+            (SELECT MIN(t.tanggal) FROM production_transactions t WHERE t.batch_no = n.batch_no) AS tanggal,
+            (SELECT COUNT(*)::int FROM production_transactions t WHERE t.batch_no = n.batch_no) AS n_rows
+     FROM batch_notes n
+     WHERE NULLIF(n.notes, '') IS NOT NULL
+     ORDER BY n.updated_at DESC
+     LIMIT 200`,
   );
-  const row = (rows[0] as { notes?: string; updated_at?: string } | undefined) ?? {};
-  return NextResponse.json({
-    batch_no: batchNo,
-    notes: row.notes ?? "",
-    updated_at: row.updated_at ?? null,
-  });
+  return NextResponse.json({ notes: rows });
 }
 
 /* Catatan investigasi bisa diisi admin maupun tim produksi. */

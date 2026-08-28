@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BatchAnalytics, ItemSummary } from "@/lib/types";
 import { fmtDate, fmtIDR, fmtNum } from "@/lib/format";
-import { SkeletonRows, StatusBadge, Th, Td } from "./ui";
+import { SkeletonRows, StatusBadge, NoteBadge, Th, Td } from "./ui";
 
 type BatchWithSku = BatchAnalytics & {
   sku_qty: number;
@@ -16,10 +16,12 @@ export default function ItemHistoryModal({
   item,
   onClose,
   onOpenBatch,
+  noteMap,
 }: {
   item: ItemSummary;
   onClose: () => void;
   onOpenBatch: (batchNo: string) => void;
+  noteMap: Map<string, boolean>;
 }) {
   const [batches, setBatches] = useState<BatchWithSku[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -145,6 +147,11 @@ export default function ItemHistoryModal({
                           <span className="text-[10px] text-ink-3">
                             {fmtNum(b.n_rows, 0)} baris
                           </span>
+                          {noteMap.get(b.batch_no) && (
+                            <span className="ml-1 align-middle">
+                              <NoteBadge />
+                            </span>
+                          )}
                         </td>
                         <Td mono muted>
                           {fmtDate(b.tanggal)}

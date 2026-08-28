@@ -2,7 +2,7 @@
 
 import type { AnomalyRow } from "@/lib/types";
 import { fmtDate, fmtNum } from "@/lib/format";
-import { StatusBadge, Th, Td } from "./ui";
+import { StatusBadge, NoteBadge, Th, Td } from "./ui";
 
 const ANOMALY_LABEL: Record<string, string> = {
   HIGH_CUTTING_COST: "Biaya potong tinggi",
@@ -13,9 +13,11 @@ const ANOMALY_LABEL: Record<string, string> = {
 export default function AnomalyView({
   anomalies,
   onOpenBatch,
+  noteMap,
 }: {
   anomalies: AnomalyRow[];
   onOpenBatch: (batchNo: string) => void;
+  noteMap: Map<string, boolean>;
 }) {
   if (anomalies.length === 0) {
     return (
@@ -51,6 +53,11 @@ export default function AnomalyView({
                   <span className="tnum font-mono text-xs font-semibold text-accent">
                     {a.batch_no}
                   </span>
+                  {noteMap.get(a.batch_no) && (
+                    <span className="ml-1.5 align-middle">
+                      <NoteBadge />
+                    </span>
+                  )}
                 </td>
                 <Td mono muted>
                   {fmtDate(a.tanggal)}

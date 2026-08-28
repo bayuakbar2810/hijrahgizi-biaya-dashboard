@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { BatchDetail, BatchHistoryEntry } from "@/lib/types";
 import { fmtDate, fmtIDR, fmtNum, shortIDR } from "@/lib/format";
 import { INVESTIGATION_GUIDE } from "@/lib/investigation";
-import { Panel, PTypeBadge, SkeletonRows, StatusBadge, Th, Td } from "./ui";
+import { Panel, PTypeBadge, SkeletonRows, StatusBadge, NoteBadge, Th, Td } from "./ui";
 
 export default function BatchDetailModal({
   batchNo,
@@ -113,6 +113,7 @@ export default function BatchDetailModal({
                 <>
                   <span>{fmtDate(data.tanggal)}</span>
                   <StatusBadge severity={data.status} />
+                  {notes.trim() !== "" && <NoteBadge />}
                   <span className="text-ink-3">{fmtNum(data.raw_rows.length, 0)} baris</span>
                 </>
               ) : (

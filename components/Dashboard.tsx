@@ -13,8 +13,9 @@ import AnomalyView from "./AnomalyView";
 import RawDataView from "./RawDataView";
 import ProductMaster from "./ProductMaster";
 import UploadPanel from "./UploadPanel";
+import NotesView, { type BatchNoteEntry } from "./NotesView";
 
-type Tab = "batches" | "anomalies" | "raw" | "products" | "upload";
+type Tab = "batches" | "anomalies" | "notes" | "raw" | "products" | "upload";
 
 const ANOM_TYPES: { value: string; label: string }[] = [
   { value: "HIGH_CUTTING_COST", label: "Biaya potong tinggi" },
@@ -26,6 +27,8 @@ export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("batches");
   const [pyOk, setPyOk] = useState(false);
   const [role, setRole] = useState<"admin" | "viewer" | null>(null);
+  const [noteMap, setNoteMap] = useState<Map<string, boolean>>(new Map());
+  const [notes, setNotes] = useState<BatchNoteEntry[]>([]);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,6 +90,14 @@ const applyFilters = useCallback(async () => {
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setRole(d?.role === "viewer" ? "viewer" : "admin"))
       .catch(() => setRole("admin"));
+    fetch("/api/batch-notes")
+      .then((r) => (r.ok ? r.json() : { notes: [] }))
+      .then((d) => {
+        const list = (d.notes ?? []) as BatchNoteEntry[];
+        setNotes(list);
+        setNoteMap(new Map(list.map((n) => [n.batch_no, true])));
+      })
+      .catch(() => {});
     runAnalysis({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -102,6 +113,7 @@ const applyFilters = useCallback(async () => {
         onTab={setTab}
         analysis={analysis}
         role={role}
+        notes={notes}
       />
 
       {error && (
@@ -165,7 +177,7 @@ const applyFilters = useCallback(async () => {
 
       {tab === "anomalies" && (
         <div className="space-y-4">
-<FilterBar
+          <FilterBar
             from={from}
             to={to}
             batch={batch}
@@ -185,14 +197,20 @@ const applyFilters = useCallback(async () => {
           />
           {loading && !hasData && <SkeletonRows n={8} h="h-10" />}
           {hasData ? (
-            <AnomalyView anomalies={analysis.anomalies} onOpenBatch={setOpenBatch} />
+            <AnomalyView
+              anomalies={analysis.anomalies}
+              onOpenBatch={setOpenBatch}
+              noteMap={noteMap}
+            />
           ) : (
             <EmptyState title="Belum ada hasil analisis" hint="Upload file Excel terlebih dahulu." />
           )}
         </div>
       )}
 
-      {tab === "raw" && <RawDataView onOpenBatch={setOpenBatch} />}
+      {tab === "notes" && <NotesView notes={notes} onOpenBatch={setOpenBatch} />}
+
+      {tab === "raw" && <RawDataView onOpenBatch={setOpenBatch} noteMap={noteMap} />}
 
       {tab === "products" && <ProductMaster />}
 
@@ -210,6 +228,7 @@ const applyFilters = useCallback(async () => {
               item={item}
               onClose={() => setOpenItem(null)}
               onOpenBatch={(b) => setOpenBatch(b)}
+              noteMap={noteMap}
             />
           ) : null;
         })()}
@@ -234,17 +253,20 @@ function Header({
   onTab,
   analysis,
   role,
+  notes,
 }: {
   pyOk: boolean;
   tab: Tab;
   onTab: (t: Tab) => void;
   analysis: AnalysisResult | null;
   role: "admin" | "viewer" | null;
+  notes: BatchNoteEntry[];
 }) {
   const isViewer = role === "viewer";
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "batches", label: "Item RTL" },
     { id: "anomalies", label: "Anomali", count: analysis?.anomalies.length ?? 0 },
+    { id: "notes", label: "Catatan", count: notes.length },
     { id: "raw", label: "Data mentah" },
     { id: "products", label: "Master produk" },
     ...(isViewer ? [] : [{ id: "upload" as Tab, label: "Upload", count: undefined as number | undefined }]),
