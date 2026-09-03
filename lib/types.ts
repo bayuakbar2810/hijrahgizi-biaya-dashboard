@@ -234,14 +234,3 @@ export type UploadLogEntry = {
   new_batch: number;
   updated_batch: number;
 };
-
-export type SurveyEntry = {
-  id: string;
-  tanggal: string;
-  kompetitor: string;
-  produk: string;
-  harga_kompetitor: number;
-  harga_hijrah: number;
-  created_by?: string;
-  created_at: string;
-};

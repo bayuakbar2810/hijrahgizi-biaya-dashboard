@@ -14,9 +14,8 @@ import RawDataView from "./RawDataView";
 import ProductMaster from "./ProductMaster";
 import UploadPanel from "./UploadPanel";
 import NotesView, { type BatchNoteEntry } from "./NotesView";
-import SurveyPanel from "./SurveyPanel";
 
-type Tab = "batches" | "anomalies" | "notes" | "survey" | "raw" | "products" | "upload";
+type Tab = "batches" | "anomalies" | "notes" | "raw" | "products" | "upload";
 
 const ANOM_TYPES: { value: string; label: string }[] = [
   { value: "HIGH_CUTTING_COST", label: "Biaya potong tinggi" },
@@ -115,8 +114,6 @@ const applyFilters = useCallback(async () => {
         analysis={analysis}
         role={role}
         notes={notes}
-        from={from}
-        to={to}
       />
 
       {error && (
@@ -213,8 +210,6 @@ const applyFilters = useCallback(async () => {
 
       {tab === "notes" && <NotesView notes={notes} onOpenBatch={setOpenBatch} />}
 
-      {tab === "survey" && <SurveyPanel role={role} />}
-
       {tab === "raw" && <RawDataView onOpenBatch={setOpenBatch} noteMap={noteMap} />}
 
       {tab === "products" && <ProductMaster />}
@@ -259,8 +254,6 @@ function Header({
   analysis,
   role,
   notes,
-  from,
-  to,
 }: {
   pyOk: boolean;
   tab: Tab;
@@ -268,71 +261,44 @@ function Header({
   analysis: AnalysisResult | null;
   role: "admin" | "viewer" | null;
   notes: BatchNoteEntry[];
-  from: string;
-  to: string;
 }) {
   const isViewer = role === "viewer";
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "batches", label: "Item RTL" },
     { id: "anomalies", label: "Anomali", count: analysis?.anomalies.length ?? 0 },
     { id: "notes", label: "Catatan", count: notes.length },
-    { id: "survey", label: "Survey" },
     { id: "raw", label: "Data mentah" },
     { id: "products", label: "Master produk" },
     ...(isViewer ? [] : [{ id: "upload" as Tab, label: "Upload", count: undefined as number | undefined }]),
   ];
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfMenu, setPdfMenu] = useState(false);
-  const [xlsBusy, setXlsBusy] = useState(false);
-  const fetchSurveyForFilter = async () => {
-    const sp = new URLSearchParams();
-    if (from) sp.set("from", from);
-    if (to) sp.set("to", to);
-    const res = await fetch(`/api/survey?${sp.toString()}`);
-    return res.ok ? ((await res.json()).entries ?? []) : [];
-  };
   const downloadPdf = async (mode: "diskusi" | "lengkap") => {
     if (!analysis) return;
     setPdfBusy(true);
     try {
       const { generateReportPdf, selectTopAnomalies } = await import("@/lib/report");
       const top = selectTopAnomalies(analysis, 5);
-      const [evidence, survey] = await Promise.all([
-        Promise.all(
-          top.map(async (a) => {
-            try {
-              const res = await fetch("/api/batch-detail", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ batch_no: a.batch_no }),
-              });
-              if (!res.ok) return { anomaly: a, detail: null };
-              return { anomaly: a, detail: await res.json() };
-            } catch {
-              return { anomaly: a, detail: null };
-            }
-          }),
-        ),
-        fetchSurveyForFilter(),
-      ]);
-      generateReportPdf(analysis, evidence, mode, survey);
+      const evidence = await Promise.all(
+        top.map(async (a) => {
+          try {
+            const res = await fetch("/api/batch-detail", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ batch_no: a.batch_no }),
+            });
+            if (!res.ok) return { anomaly: a, detail: null };
+            return { anomaly: a, detail: await res.json() };
+          } catch {
+            return { anomaly: a, detail: null };
+          }
+        }),
+      );
+      generateReportPdf(analysis, evidence, mode);
     } catch {
       alert("Gagal membuat laporan PDF. Coba lagi.");
     } finally {
       setPdfBusy(false);
-    }
-  };
-  const downloadExcel = async () => {
-    if (!analysis) return;
-    setXlsBusy(true);
-    try {
-      const survey = await fetchSurveyForFilter();
-      const { downloadExcelReport } = await import("@/lib/excel");
-      downloadExcelReport(analysis, survey);
-    } catch {
-      alert("Gagal membuat file Excel. Coba lagi.");
-    } finally {
-      setXlsBusy(false);
     }
   };
   return (
@@ -368,13 +334,6 @@ function Header({
           />
 {pyOk ? "Service analisis aktif" : "Service analisis offline"}
         </span>
-        <button
-          onClick={downloadExcel}
-          disabled={!analysis || xlsBusy}
-          className="rounded-lg border border-line-strong px-3 py-1.5 text-[13px] font-medium text-ink-2 hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {xlsBusy ? "Menyiapkan…" : "Unduh Excel"}
-        </button>
         <div className="relative">
           <button
             onClick={() => setPdfMenu((m) => !m)}

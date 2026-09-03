@@ -1,6 +1,6 @@
 ﻿import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import type { AnalysisResult, AnomalyRow, BatchDetail, SurveyEntry } from "./types";
+import type { AnalysisResult, AnomalyRow, BatchDetail } from "./types";
 import { fmtIDR, fmtNum, fmtDate } from "./format";
 
 /* Yield dari analisis sudah dalam satuan persen (mis. 100 = 100%) — jangan dikali lagi. */
@@ -460,7 +460,6 @@ export function generateReportPdf(
   result: AnalysisResult,
   evidence: ReportEvidence[] = [],
   mode: ReportMode = "lengkap",
-  survey: SurveyEntry[] = [],
 ) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const w = doc.internal.pageSize.getWidth();
@@ -538,70 +537,6 @@ export function generateReportPdf(
       y = ensureSpace(doc, y, 50);
       y = drawEvidence(doc, y, i + 1, evidence[i].anomaly, evidence[i].detail);
     }
-  }
-
-  /* ---- Survey harga kompetitor ---- */
-  if (survey.length > 0) {
-    doc.addPage();
-    y = 22;
-    y = sectionTitle(doc, y, `Survey Harga Kompetitor (${fmtNum(survey.length, 0)} data)`);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...INK);
-    y =
-      drawWrapped(
-        doc,
-        "Harga pasar dari pemantauan tim. Gap = harga kompetitor - harga Hijrah; gap positif berarti Hijrah lebih murah.",
-        14,
-        y + 2,
-        w - 28,
-      ) + 5;
-
-    const svSorted = [...survey].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
-    const avgHk = svSorted.reduce((s, x) => s + x.harga_kompetitor, 0) / svSorted.length;
-    const avgHh = svSorted.reduce((s, x) => s + x.harga_hijrah, 0) / svSorted.length;
-    autoTable(doc, {
-      startY: y + 2,
-      head: [["Tanggal", "Kompetitor", "Produk", "Harga Kompetitor", "Harga Hijrah", "Gap (Rp)", "Gap (%)"]],
-      body: svSorted.map((s) => {
-        const gap = s.harga_kompetitor - s.harga_hijrah;
-        const pct = s.harga_kompetitor > 0 ? (gap / s.harga_kompetitor) * 100 : null;
-        return [
-          fmtDate(s.tanggal),
-          s.kompetitor,
-          s.produk,
-          fmtIDR(s.harga_kompetitor),
-          fmtIDR(s.harga_hijrah),
-          `${gap >= 0 ? "+" : "−"}${fmtIDR(Math.abs(gap))}`,
-          pct != null ? `${gap >= 0 ? "+" : "−"}${fmtNum(Math.abs(pct), 1)}%` : "-",
-        ];
-      }),
-      foot: [
-        [
-          "",
-          "RATA-RATA",
-          "",
-          fmtIDR(avgHk),
-          fmtIDR(avgHh),
-          `${avgHk - avgHh >= 0 ? "+" : "−"}${fmtIDR(Math.abs(avgHk - avgHh))}`,
-          `${avgHk - avgHh >= 0 ? "+" : "−"}${fmtNum(Math.abs(avgHk !== 0 ? ((avgHk - avgHh) / avgHk) * 100 : 0), 1)}%`,
-        ],
-      ],
-      theme: "grid",
-      styles: { fontSize: 7, cellPadding: 1.5, textColor: INK },
-      headStyles: { fillColor: BRAND, fontSize: 7, fontStyle: "bold" },
-      footStyles: { fillColor: BAND, textColor: INK, fontStyle: "bold", fontSize: 7 },
-      alternateRowStyles: { fillColor: BAND },
-      columnStyles: { 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" }, 6: { halign: "right" } },
-      didParseCell: (data) => {
-        if (data.section === "body" && (data.column.index === 5 || data.column.index === 6)) {
-          const s = svSorted[data.row.index];
-          if (s) data.cell.styles.textColor = s.harga_kompetitor - s.harga_hijrah >= 0 ? GREEN : RED;
-        }
-      },
-      margin: { left: 14, right: 14, bottom: 16 },
-    });
-    y = lastY(doc, y) + 6;
   }
 
   /* ---- Lampiran: semua temuan (hanya mode lengkap) ---- */
