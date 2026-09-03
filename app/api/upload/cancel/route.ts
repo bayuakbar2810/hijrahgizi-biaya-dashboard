@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { readAdminAuth } from "@/lib/auth";
 import { deletePreview } from "@/lib/preview";
 

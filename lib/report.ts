@@ -1,4 +1,4 @@
-﻿import { jsPDF } from "jspdf";
+import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { AnalysisResult, AnomalyRow, BatchDetail, BahanStokSku } from "./types";
 import { fmtIDR, fmtNum, fmtDate } from "./format";

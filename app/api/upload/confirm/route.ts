@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getDb, nowIso } from "@/lib/db";
 import { readAdminAuth } from "@/lib/auth";
@@ -155,7 +155,7 @@ export async function POST(request: Request) {
   try {
     await db.exec("BEGIN");
 
-    // Insert riwayat dalam sedikit query (20 baris Ã— 12 param per query).
+    // Insert riwayat dalam sedikit query (20 baris × 12 param per query).
     for (let i = 0; i < historyRows.length; i += HIST_CHUNK) {
       const chunk = historyRows.slice(i, i + HIST_CHUNK);
       const placeholders: string[] = [];

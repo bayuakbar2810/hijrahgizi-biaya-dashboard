@@ -176,13 +176,13 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
       {/* daftar SKU multi-pilih */}
       <Panel
         title="Pilih SKU RTL"
-        subtitle={`${checked.size} dipilih Â· ${fmtNum(filtered.length, 0)} item${q ? " (hasil cari)" : ""}`}
+        subtitle={`${checked.size} dipilih  -  ${fmtNum(filtered.length, 0)} item${q ? " (hasil cari)" : ""}`}
         accent="out"
       >
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Cari kode / nama SKUâ€¦"
+          placeholder="Cari kode / nama SKU..."
           className="mb-2 w-full rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm text-ink placeholder:text-ink-3 focus:border-accent"
           aria-label="Cari SKU"
         />
@@ -198,7 +198,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
         )}
         {items.length === 0 ? (
           <p className="py-4 text-center text-xs text-ink-3">
-            Data SKU belum termuat â€” terapkan analisis terlebih dahulu.
+            Data SKU belum termuat — terapkan analisis terlebih dahulu.
           </p>
         ) : (
           <ul className="max-h-[520px] space-y-1 overflow-auto pr-1">
@@ -222,7 +222,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                       {i.nama}
                     </span>
                     <span className="tnum block text-[10px] text-ink-3">
-                      {i.kode} Â· {fmtNum(i.n_batch, 0)} batch Â· {fmtNum(i.total_qty, 0)} kg
+                      {i.kode}  -  {fmtNum(i.n_batch, 0)} batch  -  {fmtNum(i.total_qty, 0)} kg
                     </span>
                   </span>
                 </label>
@@ -235,7 +235,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
           disabled={checked.size === 0 || loading}
           className="mt-2 w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Memuatâ€¦" : `Tampilkan bahan (${checked.size} SKU)`}
+          {loading ? "Memuat..." : `Tampilkan bahan (${checked.size} SKU)`}
         </button>
       </Panel>
 
@@ -245,7 +245,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
           title="Bahan per SKU & stok"
           subtitle={
             skus
-              ? `${skus.length} SKU Â· hanya bahan yang terdaftar di sheet stok Â· dipisah per SKU`
+              ? `${skus.length} SKU  -  hanya bahan yang terdaftar di sheet stok  -  dipisah per SKU`
               : "hasil muncul di sini setelah SKU dipilih"
           }
           accent="in"
@@ -300,7 +300,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                     <span className="tnum ml-2 text-[10px] text-ink-3">
                       {fmtNum(sku.nBatches, 0)} batch historis
                       {sku.latestBatch
-                        ? ` Â· batch terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})`
+                        ? `  -  batch terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})`
                         : ""}
                     </span>
                   </div>
@@ -421,7 +421,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                   </table>
                   <details className="border-t border-line bg-surface-2/40 px-3 py-2">
                     <summary className="cursor-pointer text-[11px] font-semibold text-ink-2 hover:text-ink">
-                      Riwayat pemakaian per batch ({sku.history.length} batch Â· terbaru dulu)
+                      Riwayat pemakaian per batch ({sku.history.length} batch  -  terbaru dulu)
                     </summary>
                     <div className="mt-2 max-h-72 overflow-auto rounded-lg border border-line bg-white">
                       <table className="w-full border-collapse">
@@ -429,7 +429,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                           <tr>
                             <Th>Tanggal produksi</Th>
                             <Th>Batch</Th>
-                            <Th>Bahan dipakai (kode Â· qty)</Th>
+                            <Th>Bahan dipakai (kode  -  qty)</Th>
                           </tr>
                         </thead>
                         <tbody>
@@ -441,8 +441,8 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                               <Td mono>{h.batch_no}</Td>
                               <td className="px-3 py-1.5 text-[11px] leading-relaxed text-ink-2">
                                 {h.items
-                                  .map((it) => `${it.kode} Â· ${fmtNum(it.qty, 1)}`)
-                                  .join("  Â·  ")}
+                                  .map((it) => `${it.nama} (${it.kode}) = ${fmtNum(it.qty, 1)}`)
+                                  .join(" | ")}
                               </td>
                             </tr>
                           ))}
@@ -458,7 +458,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
             Hanya bahan yang terdaftar di sheet stok yang ditampilkan. &ldquo;Qty saat
             ini&rdquo; = pemakaian bahan pada batch terakhir SKU tersebut; &ldquo;Qty
             historis&rdquo; = total seluruh batch. Stok GPU = stok produk jadi SKU itu di sheet
-            STOK GPU. Stok disegarkan tiap Â±10 menit.
+            STOK GPU. Stok disegarkan tiap +/-10 menit.
           </p>
         </Panel>
       </div>

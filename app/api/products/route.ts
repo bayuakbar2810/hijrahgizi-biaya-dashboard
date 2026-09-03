@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { readAdminAuth } from "@/lib/auth";
 import type { ProductMaster, ProductType } from "@/lib/types";

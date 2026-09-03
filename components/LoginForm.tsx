@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useState } from "react";
 
@@ -53,7 +53,7 @@ export default function LoginForm({
               <h1 className="text-base font-bold leading-tight text-ink">
                 Analisis Biaya & Yield Produksi
               </h1>
-              <p className="text-xs text-ink-2">Hijrah Gizi Hewani Â· masuk untuk mengakses</p>
+              <p className="text-xs text-ink-2">Hijrah Gizi Hewani  -  masuk untuk mengakses</p>
             </div>
           </div>
 
@@ -90,7 +90,7 @@ export default function LoginForm({
             disabled={busy}
             className="mt-4 w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {busy ? "Memeriksaâ€¦" : "Masuk"}
+            {busy ? "Memeriksa..." : "Masuk"}
           </button>
         </form>
       </div>

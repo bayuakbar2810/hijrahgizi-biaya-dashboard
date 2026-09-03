@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ProductType } from "@/lib/types";
@@ -79,7 +79,7 @@ export default function RawDataView({
         <div>
           <h2 className="text-sm font-semibold text-ink">Data mentah (raw)</h2>
           <p className="tnum mt-0.5 text-[11px] text-ink-3">
-            {fmtNum(total, 0)} baris cocok Â· tampil {fmtNum(rows.length, 0)}
+            {fmtNum(total, 0)} baris cocok  -  tampil {fmtNum(rows.length, 0)}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -88,7 +88,7 @@ export default function RawDataView({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && search()}
-            placeholder="Cari batch / bahan / kodeâ€¦"
+            placeholder="Cari batch / bahan / kode..."
             className="w-52 rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm text-ink placeholder:text-ink-3 focus:border-accent"
             aria-label="Cari data mentah"
           />
@@ -201,7 +201,7 @@ export default function RawDataView({
             disabled={loading}
             className="rounded-lg border border-line-strong px-3 py-1.5 text-sm font-medium text-ink-2 hover:border-accent hover:text-accent disabled:opacity-50"
           >
-            {loading ? "Memuatâ€¦" : `Muat lebih banyak (${fmtNum(total - rows.length, 0)} lagi)`}
+            {loading ? "Memuat..." : `Muat lebih banyak (${fmtNum(total - rows.length, 0)} lagi)`}
           </button>
         </div>
       )}

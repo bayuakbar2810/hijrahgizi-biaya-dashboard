@@ -9,7 +9,7 @@ const body = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Analisis Biaya Produksi â€” Hijrah Gizi Hewani",
+  title: "Analisis Biaya Produksi — Hijrah Gizi Hewani",
   description:
     "Dashboard analisis pembiayaan berdasarkan histori pekerjaan pesanan PT Hijrah Gizi Hewani",
 };

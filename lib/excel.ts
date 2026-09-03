@@ -1,4 +1,4 @@
-﻿import * as XLSX from "xlsx";
+import * as XLSX from "xlsx";
 import type { BahanStokSku } from "./types";
 import { fmtDate } from "./format";
 

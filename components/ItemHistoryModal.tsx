@@ -269,12 +269,12 @@ export default function ItemHistoryModal({
                     Bahan &amp; biaya yang pernah dipakai (historis)
                   </h4>
                   <p className="tnum text-[11px] text-ink-3">
-                    {bahan.length} bahan Â· dari {fmtNum(batches?.length ?? 0, 0)} batch produksi item ini
+                    {bahan.length} bahan  -  dari {fmtNum(batches?.length ?? 0, 0)} batch produksi item ini
                   </p>
                 </div>
                 <span className="tnum text-[10px] text-ink-3">
                   {stokAt
-                    ? `Stok dari Google Sheet Â· diperbarui ${new Date(stokAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+                    ? `Stok dari Google Sheet  -  diperbarui ${new Date(stokAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
                     : stokError
                       ? `Stok: ${stokError}`
                       : ""}
@@ -394,7 +394,7 @@ function SummaryGrid({ item }: { item: ItemSummary }) {
       label: "Rentang HPP",
       value:
         item.min_hpp != null && item.max_hpp != null
-          ? `${fmtIDR(item.min_hpp)} â€“ ${fmtIDR(item.max_hpp)}`
+          ? `${fmtIDR(item.min_hpp)} — ${fmtIDR(item.max_hpp)}`
           : "-",
       tone: "text-ink-2",
     },
