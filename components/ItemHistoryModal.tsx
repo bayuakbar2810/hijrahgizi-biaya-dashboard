@@ -5,6 +5,22 @@ import type { BatchAnalytics, ItemSummary } from "@/lib/types";
 import { fmtDate, fmtIDR, fmtNum } from "@/lib/format";
 import { SkeletonRows, StatusBadge, NoteBadge, Th, Td } from "./ui";
 
+type BahanRow = {
+  kode: string;
+  nama: string;
+  n_batch: number;
+  total_qty: number;
+  total_biaya: number;
+  last_date: string;
+};
+
+type StokItem = {
+  nama: string;
+  kode: string;
+  total: number;
+  gudang: Array<{ nama: string; qty: number }>;
+};
+
 type BatchWithSku = BatchAnalytics & {
   sku_qty: number;
   sku_hpp: number | null;
@@ -24,6 +40,10 @@ export default function ItemHistoryModal({
   noteMap: Map<string, boolean>;
 }) {
   const [batches, setBatches] = useState<BatchWithSku[] | null>(null);
+  const [bahan, setBahan] = useState<BahanRow[] | null>(null);
+  const [stok, setStok] = useState<Record<string, StokItem> | null>(null);
+  const [stokAt, setStokAt] = useState<string | null>(null);
+  const [stokError, setStokError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -54,10 +74,38 @@ export default function ItemHistoryModal({
     }
   }, [item.kode]);
 
+  const loadBahan = useCallback(async () => {
+    setBahan(null);
+    setStok(null);
+    setStokError(null);
+    try {
+      const res = await fetch(`/api/item-bahan?kode=${encodeURIComponent(item.kode)}`);
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? "Gagal memuat bahan");
+      const list = (d.bahan ?? []) as BahanRow[];
+      setBahan(list);
+      if (list.length > 0) {
+        const kodeParam = list.map((b) => b.kode).join(",");
+        const sres = await fetch(`/api/stok?kode=${encodeURIComponent(kodeParam)}`);
+        const sd = await sres.json();
+        if (sres.ok) {
+          setStok(sd.items ?? {});
+          setStokAt(sd.fetched_at ?? null);
+        } else {
+          setStokError(sd.error ?? "Gagal memuat stok");
+        }
+      }
+    } catch (e) {
+      setBahan([]);
+      setStokError(e instanceof Error ? e.message : "Gagal memuat bahan");
+    }
+  }, [item.kode]);
+
   useEffect(() => {
     load();
+    loadBahan();
     closeRef.current?.focus();
-  }, [load]);
+  }, [load, loadBahan]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -209,6 +257,117 @@ export default function ItemHistoryModal({
               <p className="border-t border-line px-4 py-2.5 text-[11px] text-ink-3">
                 Klik baris batch untuk membuka rincian lengkap (output, input, biaya proses, kemasan,
                 yield, perbandingan historis).
+              </p>
+            </div>
+          )}
+
+          {bahan && bahan.length > 0 && (
+            <div className="mt-3 overflow-hidden rounded-xl border border-line">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface-2/95 px-4 py-2.5">
+                <div>
+                  <h4 className="text-sm font-semibold text-ink">
+                    Bahan &amp; biaya yang pernah dipakai (historis)
+                  </h4>
+                  <p className="tnum text-[11px] text-ink-3">
+                    {bahan.length} bahan · dari {fmtNum(batches?.length ?? 0, 0)} batch produksi item ini
+                  </p>
+                </div>
+                <span className="tnum text-[10px] text-ink-3">
+                  {stokAt
+                    ? `Stok dari Google Sheet · diperbarui ${new Date(stokAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+                    : stokError
+                      ? `Stok: ${stokError}`
+                      : ""}
+                </span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead className="bg-surface-2/95">
+                    <tr>
+                      <Th>Kode</Th>
+                      <Th>Bahan &amp; biaya</Th>
+                      <Th align="right">Jml batch</Th>
+                      <Th align="right">Total qty</Th>
+                      <Th align="right">Total biaya</Th>
+                      <Th>Terakhir dipakai</Th>
+                      <Th align="right">Stok tersedia</Th>
+                      <Th>Letak gudang</Th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bahan.map((b) => {
+                      const s = stok?.[b.kode];
+                      return (
+                        <tr key={b.kode} className="border-t border-line/60">
+                          <Td mono muted>
+                            {b.kode}
+                          </Td>
+                          <td className="max-w-[220px] px-3 py-1.5">
+                            <span className="block truncate text-[13px] text-ink" title={b.nama}>
+                              {b.nama}
+                            </span>
+                          </td>
+                          <Td align="right">{fmtNum(b.n_batch, 0)}</Td>
+                          <Td align="right">{fmtNum(b.total_qty, 1)}</Td>
+                          <Td align="right" strong>
+                            {fmtIDR(b.total_biaya)}
+                          </Td>
+                          <Td mono muted>
+                            {fmtDate(b.last_date)}
+                          </Td>
+                          <td className="tnum px-3 py-1.5 text-right">
+                            {s ? (
+                              <span
+                                className={`text-[13px] font-semibold ${
+                                  s.total > 0 ? "text-out" : "text-red-600"
+                                }`}
+                              >
+                                {fmtNum(s.total, 0)}
+                              </span>
+                            ) : stok ? (
+                              <span className="text-[11px] text-ink-3">tidak ada di sheet</span>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+                          <td className="max-w-[260px] px-3 py-1.5">
+                            {s && s.gudang.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {s.gudang.slice(0, 3).map((g) => (
+                                  <span
+                                    key={g.nama}
+                                    className="tnum rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] text-ink-2"
+                                    title={g.nama}
+                                  >
+                                    {g.nama}: {fmtNum(g.qty, 0)}
+                                  </span>
+                                ))}
+                                {s.gudang.length > 3 && (
+                                  <span
+                                    className="text-[10px] text-ink-3"
+                                    title={s.gudang
+                                      .slice(3)
+                                      .map((g) => `${g.nama}: ${g.qty}`)
+                                      .join(", ")}
+                                  >
+                                    +{s.gudang.length - 3} gudang
+                                  </span>
+                                )}
+                              </div>
+                            ) : s ? (
+                              <span className="text-[11px] text-red-600">stok kosong semua</span>
+                            ) : (
+                              <span className="text-[11px] text-ink-3">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="border-t border-line px-4 py-2.5 text-[11px] text-ink-3">
+                Stok otomatis dicocokkan dari Google Sheet stok gudang berdasarkan kode barang.
               </p>
             </div>
           )}
