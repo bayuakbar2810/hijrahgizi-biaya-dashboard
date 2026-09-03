@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { BahanStokSku, ItemSummary } from "@/lib/types";
-import { fmtDate, fmtNum } from "@/lib/format";
+import { fmtDate, fmtIDR, fmtNum } from "@/lib/format";
 import { Panel, SkeletonRows, Th, Td } from "./ui";
 
 type BahanRow = {
@@ -116,7 +116,11 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
             kode: k,
             nama: h?.nama ?? String(currentMap.get(k) ?? ""),
             qtyTerakhir: currentMap.has(k) ? currentMap.get(k)! : null,
+            biayaTerakhir: currentMap.has(k)
+              ? Number((l.current ?? []).find((c: { kode: string; biaya?: number }) => c.kode === k)?.biaya) || 0
+              : null,
             qtyHistoris: h ? Number(h.total_qty) || 0 : 0,
+            biayaHistoris: h ? Number(h.total_biaya) || 0 : 0,
             nBatch: h?.n_batch ?? 0,
             lastDate: h?.last_date ?? "",
             stokGudang: sBahan.total,
@@ -318,14 +322,15 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                     <div className="overflow-x-auto px-1 pb-1">
                       <table className="w-full border-collapse">
                         <thead className="bg-surface-2/60">
-                          <tr>
-                            <Th>Bahan</Th>
-                            <Th>Kode</Th>
-                            <Th align="right">Qty dipakai</Th>
-                            <Th align="right">Stok gudang (kg)</Th>
-                            <Th>Letak gudang</Th>
-                            <Th align="right">Stok GPU (pcs)</Th>
-                          </tr>
+                        <tr>
+                          <Th>Bahan</Th>
+                          <Th>Kode</Th>
+                          <Th align="right">Qty dipakai</Th>
+                          <Th align="right">Biaya (Rp)</Th>
+                          <Th align="right">Stok gudang</Th>
+                          <Th>Letak gudang</Th>
+                          <Th align="right">Stok GPU</Th>
+                        </tr>
                         </thead>
                         <tbody>
                           {currentRows.map((r) => (
@@ -341,6 +346,11 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                               <td className="tnum px-3 py-1.5 text-right">
                                 <span className="text-[13px] font-semibold text-ink">
                                   {fmtNum(r.qtyTerakhir ?? 0, 1)}
+                                </span>
+                              </td>
+                              <td className="tnum px-3 py-1.5 text-right">
+                                <span className="text-[13px] text-ink">
+                                  {fmtIDR(r.biayaTerakhir ?? 0)}
                                 </span>
                               </td>
                               <td className="tnum px-3 py-1.5 text-right">
@@ -419,10 +429,11 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                                 <Th>Kode</Th>
                                 <Th align="right">Jml batch</Th>
                                 <Th align="right">Total qty dipakai</Th>
+                                <Th align="right">Total biaya (Rp)</Th>
                                 <Th>Terakhir dipakai</Th>
-                                <Th align="right">Stok gudang (kg)</Th>
+                                <Th align="right">Stok gudang</Th>
                                 <Th>Letak gudang</Th>
-                                <Th align="right">Stok GPU (pcs)</Th>
+                                <Th align="right">Stok GPU</Th>
                               </tr>
                             </thead>
                             <tbody>
@@ -441,6 +452,9 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                                   </Td>
                                   <Td align="right">{fmtNum(r.nBatch, 0)}</Td>
                                   <Td align="right">{fmtNum(r.qtyHistoris, 1)}</Td>
+                                  <td className="tnum px-3 py-1.5 text-right">
+                                    {fmtIDR(r.biayaHistoris)}
+                                  </td>
                                   <Td mono muted>
                                     {fmtDate(r.lastDate)}
                                   </Td>

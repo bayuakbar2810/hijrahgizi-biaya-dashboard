@@ -265,6 +265,8 @@ export type BahanStokSku = {
     nama: string;
     qtyTerakhir: number | null;
     qtyHistoris: number;
+    biayaTerakhir: number | null;
+    biayaHistoris: number;
     nBatch: number;
     lastDate: string;
     stokGudang: number;

@@ -657,16 +657,27 @@ export function generateBahanStokPdf(
     );
     y += 12;
 
-    /* tabel bahan utama */
+    /* 1. bahan dipakai di batch terakhir */
+    const currentRows = sku.rows.filter((r) => r.qtyTerakhir !== null);
+    const histRows = sku.rows.filter((r) => r.qtyTerakhir === null);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...GREEN);
+    doc.text(
+      `Dipakai di batch terakhir (resep saat ini)${sku.latestBatch ? ` - ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})` : ""}`,
+      14,
+      y + 3,
+    );
+    y += 6;
     autoTable(doc, {
       startY: y,
-      head: [["Bahan", "Kode", "Qty dipakai batch terakhir", "Total dipakai (semua batch)", "Terakhir dipakai", "Stok gudang (kg)", "Letak gudang", "Stok GPU (pcs)"]],
-      body: sku.rows.map((r) => [
+      head: [["Bahan", "Kode", "Qty dipakai", "Biaya (Rp)", "Stok gudang (kg)", "Letak gudang", "Stok GPU (pcs)"]],
+      body: currentRows.map((r) => [
         r.nama,
         r.kode,
-        r.qtyTerakhir !== null ? fmtNum(r.qtyTerakhir, 1) : "-",
-        fmtNum(r.qtyHistoris, 1),
-        fmtDate(r.lastDate),
+        fmtNum(r.qtyTerakhir ?? 0, 1),
+        fmtIDR(r.biayaTerakhir ?? 0),
         fmtNum(r.stokGudang, 0),
         r.gudang.map((g) => `${g.nama}: ${fmtNum(g.qty, 0)}`).join("; "),
         r.stokGpu !== null ? fmtNum(r.stokGpu, 0) : "-",
@@ -678,14 +689,14 @@ export function generateBahanStokPdf(
       columnStyles: {
         2: { halign: "right" },
         3: { halign: "right" },
-        5: { halign: "right" },
-        7: { halign: "right" },
+        4: { halign: "right" },
+        6: { halign: "right" },
       },
       didParseCell: (data) => {
-        if (data.section === "body" && (data.column.index === 5 || data.column.index === 7)) {
-          const r = sku.rows[data.row.index];
+        if (data.section === "body" && (data.column.index === 4 || data.column.index === 6)) {
+          const r = currentRows[data.row.index];
           if (r) {
-            const v = data.column.index === 5 ? r.stokGudang : (r.stokGpu ?? 0);
+            const v = data.column.index === 4 ? r.stokGudang : (r.stokGpu ?? 0);
             data.cell.styles.textColor = v > 0 ? GREEN : RED;
           }
         }
@@ -694,6 +705,54 @@ export function generateBahanStokPdf(
     });
     y = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y;
     y += 8;
+
+    /* 2. bahan historis (batch lain) */
+    if (histRows.length > 0) {
+      y = y > doc.internal.pageSize.getHeight() - 60 ? (doc.addPage(), 22) : y;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...INK);
+      doc.text("Pernah dipakai di batch lain (historis)", 14, y + 3);
+      y += 6;
+      autoTable(doc, {
+        startY: y,
+        head: [["Bahan", "Kode", "Jml batch", "Total qty dipakai", "Total biaya (Rp)", "Terakhir dipakai", "Stok gudang (kg)", "Letak gudang", "Stok GPU (pcs)"]],
+        body: histRows.map((r) => [
+          r.nama,
+          r.kode,
+          fmtNum(r.nBatch, 0),
+          fmtNum(r.qtyHistoris, 1),
+          fmtIDR(r.biayaHistoris),
+          fmtDate(r.lastDate),
+          fmtNum(r.stokGudang, 0),
+          r.gudang.map((g) => `${g.nama}: ${fmtNum(g.qty, 0)}`).join("; "),
+          r.stokGpu !== null ? fmtNum(r.stokGpu, 0) : "-",
+        ]),
+        theme: "grid",
+        styles: { fontSize: 8.5, cellPadding: 1.4, textColor: INK },
+        headStyles: { fillColor: BRAND, textColor: 255, fontSize: 9, fontStyle: "bold" },
+        alternateRowStyles: { fillColor: BAND },
+        columnStyles: {
+          2: { halign: "right" },
+          3: { halign: "right" },
+          4: { halign: "right" },
+          6: { halign: "right" },
+          8: { halign: "right" },
+        },
+        didParseCell: (data) => {
+          if (data.section === "body" && (data.column.index === 6 || data.column.index === 8)) {
+            const r = histRows[data.row.index];
+            if (r) {
+              const v = data.column.index === 6 ? r.stokGudang : (r.stokGpu ?? 0);
+              data.cell.styles.textColor = v > 0 ? GREEN : RED;
+            }
+          }
+        },
+        margin: { left: 14, right: 14, bottom: 16 },
+      });
+      y = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y;
+      y += 8;
+    }
 
     const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
     /* riwayat pemakaian per batch */

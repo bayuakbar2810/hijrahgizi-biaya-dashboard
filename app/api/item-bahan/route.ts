@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { readAuth } from "@/lib/auth";
 
@@ -37,7 +37,8 @@ export async function GET(request: Request) {
   const latest = latestRows[0] as { batch_no: string; tanggal: string } | undefined;
 
   const { rows: currentRows } = await db.query(
-    `SELECT t.kode, MAX(t.bahan_biaya) AS nama, SUM(t.pengeluaran_qty) AS qty
+    `SELECT t.kode, MAX(t.bahan_biaya) AS nama, SUM(t.pengeluaran_qty) AS qty,
+            SUM(t.pengeluaran_biaya) AS biaya
      FROM production_transactions t
      LEFT JOIN product_master pm ON pm.kode = t.kode
      WHERE t.batch_no = $1 AND t.kode <> ''
@@ -53,6 +54,7 @@ export async function GET(request: Request) {
             MAX(t.bahan_biaya) AS nama,
             COUNT(DISTINCT t.batch_no)::int AS n_batch,
             SUM(t.pengeluaran_qty) AS total_qty,
+            SUM(t.pengeluaran_biaya) AS total_biaya,
             MAX(t.tanggal) AS last_date
      FROM production_transactions t
      LEFT JOIN product_master pm ON pm.kode = t.kode
