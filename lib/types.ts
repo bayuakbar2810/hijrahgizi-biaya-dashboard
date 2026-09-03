@@ -255,11 +255,17 @@ export type BahanStokSku = {
   nBatches: number;
   latestBatch: string | null;
   latestTanggal: string | null;
+  history: Array<{
+    batch_no: string;
+    tanggal: string;
+    items: Array<{ kode: string; nama: string; qty: number }>;
+  }>;
   rows: Array<{
     kode: string;
     nama: string;
     qtySekarang: number | null;
     qtyHistoris: number;
+    lastDate: string;
     stokGudang: number;
     gudang: Array<{ nama: string; qty: number }>;
     stokGpu: number | null;

@@ -63,10 +63,35 @@ export async function GET(request: Request) {
      ORDER BY SUM(t.pengeluaran_qty) DESC`,
     [batches],
   );
+
+  /* Riwayat pemakaian per batch (untuk urutan terbaru di atas). */
+  const { rows: histRows } = await db.query(
+    `SELECT t.batch_no, t.tanggal, t.kode, MAX(t.bahan_biaya) AS nama, SUM(t.pengeluaran_qty) AS qty
+     FROM production_transactions t
+     LEFT JOIN product_master pm ON pm.kode = t.kode
+     WHERE t.batch_no = ANY($1::text[])
+       AND t.kode <> ''
+       AND (t.pengeluaran_qty > 0 OR t.pengeluaran_biaya > 0)
+       AND COALESCE(pm.product_type, 'OTHER') <> 'PACKAGING'
+     GROUP BY t.batch_no, t.tanggal, t.kode`,
+    [batches],
+  );
+  const byBatch = new Map<string, { batch_no: string; tanggal: string; items: Array<{ kode: string; nama: string; qty: number }> }>();
+  for (const h of histRows as Array<{ batch_no: string; tanggal: string; kode: string; nama: string; qty: string }>) {
+    let e = byBatch.get(h.batch_no);
+    if (!e) {
+      e = { batch_no: h.batch_no, tanggal: h.tanggal, items: [] };
+      byBatch.set(h.batch_no, e);
+    }
+    e.items.push({ kode: h.kode, nama: h.nama, qty: Number(h.qty) || 0 });
+  }
+  const history = [...byBatch.values()].sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+
   return NextResponse.json({
     n_batches: batches.length,
     latest: latest ?? null,
     current: currentRows,
     bahan: rows,
+    history,
   });
 }

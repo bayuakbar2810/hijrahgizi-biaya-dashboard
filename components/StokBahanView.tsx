@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import type { BahanStokSku, ItemSummary } from "@/lib/types";
@@ -84,6 +84,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
       );
       const kodeSet = new Set<string>();
       for (const l of lists) {
+        kodeSet.add(l.sku.kode); // untuk stok GPU (sheet GPU memakai kode tanpa awalan R)
         for (const b of l.bahan ?? []) kodeSet.add(b.kode);
         for (const c of l.current ?? []) kodeSet.add(c.kode);
       }
@@ -104,48 +105,53 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
         { nama: string; total: number; lokasi: Array<{ nama: string; qty: number }> }
       >;
 
-      const out: BahanStokSku[] = [];
-      for (const l of lists) {
-        const currentMap = new Map<string, number>();
-        for (const c of l.current ?? []) currentMap.set(c.kode, Number(c.qty) || 0);
-        const histMap = new Map<string, (typeof l.bahan)[number]>();
-        for (const b of l.bahan ?? []) histMap.set(b.kode, b);
+        const out: BahanStokSku[] = [];
+        for (const l of lists) {
+          const currentMap = new Map<string, number>();
+          for (const c of l.current ?? []) currentMap.set(c.kode, Number(c.qty) || 0);
+          const histMap = new Map<string, (typeof l.bahan)[number]>();
+          for (const b of l.bahan ?? []) histMap.set(b.kode, b);
 
-        const unionKodes = new Set<string>([...currentMap.keys(), ...histMap.keys()]);
-        const rows: BahanStokSku["rows"] = [];
-        for (const k of unionKodes) {
-          const sBahan = stokBahan[k];
-          if (!sBahan) continue; // hanya bahan yang terdaftar di sheet stok
-          const sGpu = stokGpu[l.sku.kode] ? stokGpu[l.sku.kode] : null;
-          const h = histMap.get(k);
-          rows.push({
-            kode: k,
-            nama: h?.nama ?? String(currentMap.get(k) ?? ""),
-            qtySekarang: currentMap.has(k) ? currentMap.get(k)! : null,
-            qtyHistoris: h ? Number(h.total_qty) || 0 : 0,
-            stokGudang: sBahan.total,
-            gudang: sBahan.gudang,
-            stokGpu: stokGpu[l.sku.kode] ? stokGpu[l.sku.kode].total : null,
-            gpu: sGpu ? stokGpu[l.sku.kode].lokasi : null,
-          });
+          const unionKodes = new Set<string>([...currentMap.keys(), ...histMap.keys()]);
+          const rows: BahanStokSku["rows"] = [];
+          for (const k of unionKodes) {
+            const sBahan = stokBahan[k];
+            if (!sBahan) continue; // hanya bahan yang terdaftar di sheet stok
+            const sGpu = stokGpu[l.sku.kode] ? stokGpu[l.sku.kode] : null;
+            const h = histMap.get(k);
+            rows.push({
+              kode: k,
+              nama: h?.nama ?? String(currentMap.get(k) ?? ""),
+              qtySekarang: currentMap.has(k) ? currentMap.get(k)! : null,
+              qtyHistoris: h ? Number(h.total_qty) || 0 : 0,
+              lastDate: h?.last_date ?? "",
+              stokGudang: sBahan.total,
+              gudang: sBahan.gudang,
+              stokGpu: stokGpu[l.sku.kode] ? stokGpu[l.sku.kode].total : null,
+              gpu: sGpu ? stokGpu[l.sku.kode].lokasi : null,
+            });
+          }
+          const dateOf = (r: BahanStokSku["rows"][number]) =>
+            r.qtySekarang !== null ? l.latestTanggal ?? "" : r.lastDate;
+          rows.sort(
+            (a, b) =>
+              dateOf(b).localeCompare(dateOf(a)) ||
+              (b.qtySekarang ?? -1) - (a.qtySekarang ?? -1) ||
+              b.qtyHistoris - a.qtyHistoris,
+          );
+          if (rows.length > 0) {
+            out.push({
+              skuKode: l.sku.kode,
+              skuNama: l.sku.nama,
+              nBatches: l.n_batches ?? 0,
+              latestBatch: l.latest?.batch_no ?? null,
+              latestTanggal: l.latest?.tanggal ?? null,
+              history: (l.history ?? []) as BahanStokSku["history"],
+              rows,
+            });
+          }
         }
-        rows.sort((a, b) => {
-          if (a.qtySekarang !== null && b.qtySekarang === null) return -1;
-          if (a.qtySekarang === null && b.qtySekarang !== null) return 1;
-          return b.qtyHistoris - a.qtyHistoris;
-        });
-        if (rows.length > 0) {
-          out.push({
-            skuKode: l.sku.kode,
-            skuNama: l.sku.nama,
-            nBatches: l.n_batches ?? 0,
-            latestBatch: l.latest?.batch_no ?? null,
-            latestTanggal: l.latest?.tanggal ?? null,
-            rows,
-          });
-        }
-      }
-      setSkus(out);
+        setSkus(out);
     } catch (e) {
       setStokError(e instanceof Error ? e.message : "Gagal memuat data");
     } finally {
@@ -170,13 +176,13 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
       {/* daftar SKU multi-pilih */}
       <Panel
         title="Pilih SKU RTL"
-        subtitle={`${checked.size} dipilih · ${fmtNum(filtered.length, 0)} item${q ? " (hasil cari)" : ""}`}
+        subtitle={`${checked.size} dipilih Â· ${fmtNum(filtered.length, 0)} item${q ? " (hasil cari)" : ""}`}
         accent="out"
       >
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Cari kode / nama SKU…"
+          placeholder="Cari kode / nama SKUâ€¦"
           className="mb-2 w-full rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm text-ink placeholder:text-ink-3 focus:border-accent"
           aria-label="Cari SKU"
         />
@@ -192,7 +198,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
         )}
         {items.length === 0 ? (
           <p className="py-4 text-center text-xs text-ink-3">
-            Data SKU belum termuat — terapkan analisis terlebih dahulu.
+            Data SKU belum termuat â€” terapkan analisis terlebih dahulu.
           </p>
         ) : (
           <ul className="max-h-[520px] space-y-1 overflow-auto pr-1">
@@ -216,7 +222,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                       {i.nama}
                     </span>
                     <span className="tnum block text-[10px] text-ink-3">
-                      {i.kode} · {fmtNum(i.n_batch, 0)} batch · {fmtNum(i.total_qty, 0)} kg
+                      {i.kode} Â· {fmtNum(i.n_batch, 0)} batch Â· {fmtNum(i.total_qty, 0)} kg
                     </span>
                   </span>
                 </label>
@@ -229,7 +235,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
           disabled={checked.size === 0 || loading}
           className="mt-2 w-full rounded-lg bg-accent py-2 text-sm font-semibold text-white hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Memuat…" : `Tampilkan bahan (${checked.size} SKU)`}
+          {loading ? "Memuatâ€¦" : `Tampilkan bahan (${checked.size} SKU)`}
         </button>
       </Panel>
 
@@ -239,7 +245,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
           title="Bahan per SKU & stok"
           subtitle={
             skus
-              ? `${skus.length} SKU · hanya bahan yang terdaftar di sheet stok · dipisah per SKU`
+              ? `${skus.length} SKU Â· hanya bahan yang terdaftar di sheet stok Â· dipisah per SKU`
               : "hasil muncul di sini setelah SKU dipilih"
           }
           accent="in"
@@ -294,7 +300,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                     <span className="tnum ml-2 text-[10px] text-ink-3">
                       {fmtNum(sku.nBatches, 0)} batch historis
                       {sku.latestBatch
-                        ? ` · batch terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})`
+                        ? ` Â· batch terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})`
                         : ""}
                     </span>
                   </div>
@@ -413,6 +419,37 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                       ))}
                     </tbody>
                   </table>
+                  <details className="border-t border-line bg-surface-2/40 px-3 py-2">
+                    <summary className="cursor-pointer text-[11px] font-semibold text-ink-2 hover:text-ink">
+                      Riwayat pemakaian per batch ({sku.history.length} batch Â· terbaru dulu)
+                    </summary>
+                    <div className="mt-2 max-h-72 overflow-auto rounded-lg border border-line bg-white">
+                      <table className="w-full border-collapse">
+                        <thead className="sticky top-0 bg-surface-2">
+                          <tr>
+                            <Th>Tanggal produksi</Th>
+                            <Th>Batch</Th>
+                            <Th>Bahan dipakai (kode Â· qty)</Th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sku.history.map((h) => (
+                            <tr key={h.batch_no} className="border-t border-line/60 align-top">
+                              <Td mono muted>
+                                {fmtDate(h.tanggal)}
+                              </Td>
+                              <Td mono>{h.batch_no}</Td>
+                              <td className="px-3 py-1.5 text-[11px] leading-relaxed text-ink-2">
+                                {h.items
+                                  .map((it) => `${it.kode} Â· ${fmtNum(it.qty, 1)}`)
+                                  .join("  Â·  ")}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </details>
                 </div>
               ))}
             </div>
@@ -421,7 +458,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
             Hanya bahan yang terdaftar di sheet stok yang ditampilkan. &ldquo;Qty saat
             ini&rdquo; = pemakaian bahan pada batch terakhir SKU tersebut; &ldquo;Qty
             historis&rdquo; = total seluruh batch. Stok GPU = stok produk jadi SKU itu di sheet
-            STOK GPU. Stok disegarkan tiap ±10 menit.
+            STOK GPU. Stok disegarkan tiap Â±10 menit.
           </p>
         </Panel>
       </div>

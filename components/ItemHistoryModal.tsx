@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BatchAnalytics, ItemSummary } from "@/lib/types";
@@ -143,7 +143,7 @@ export default function ItemHistoryModal({
             className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-ink-3 hover:bg-surface-2 hover:text-ink"
             aria-label="Tutup"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
@@ -269,12 +269,12 @@ export default function ItemHistoryModal({
                     Bahan &amp; biaya yang pernah dipakai (historis)
                   </h4>
                   <p className="tnum text-[11px] text-ink-3">
-                    {bahan.length} bahan · dari {fmtNum(batches?.length ?? 0, 0)} batch produksi item ini
+                    {bahan.length} bahan Â· dari {fmtNum(batches?.length ?? 0, 0)} batch produksi item ini
                   </p>
                 </div>
                 <span className="tnum text-[10px] text-ink-3">
                   {stokAt
-                    ? `Stok dari Google Sheet · diperbarui ${new Date(stokAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+                    ? `Stok dari Google Sheet Â· diperbarui ${new Date(stokAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
                     : stokError
                       ? `Stok: ${stokError}`
                       : ""}
@@ -367,7 +367,7 @@ export default function ItemHistoryModal({
                 </table>
               </div>
               <p className="border-t border-line px-4 py-2.5 text-[11px] text-ink-3">
-                Stok otomatis dicocokkan dari Google Sheet stok gudang berdasarkan kode barang.
+                Stok otomatis dicocokkan dari Google Sheet stok gudang berdasarkan kode barang (sinkron 2x sehari).
               </p>
             </div>
           )}
@@ -394,7 +394,7 @@ function SummaryGrid({ item }: { item: ItemSummary }) {
       label: "Rentang HPP",
       value:
         item.min_hpp != null && item.max_hpp != null
-          ? `${fmtIDR(item.min_hpp)} – ${fmtIDR(item.max_hpp)}`
+          ? `${fmtIDR(item.min_hpp)} â€“ ${fmtIDR(item.max_hpp)}`
           : "-",
       tone: "text-ink-2",
     },

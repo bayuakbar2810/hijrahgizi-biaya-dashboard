@@ -8,7 +8,8 @@ export const revalidate = 0;
 const SHEET_ID = "1BmxBt-OXkTDSKfoPv8jDBn70gsCGs_v6PFbJnOPBOII";
 const GID_BAHAN = "0";
 const GID_GPU = "143545477";
-const CACHE_MS = 10 * 60 * 1000;
+/* Sinkron stok 2x sehari (cache 12 jam) agar ringan. */
+const CACHE_MS = 12 * 60 * 60 * 1000;
 
 type GudangRow = { nama: string; qty: number };
 type StokItem = {
