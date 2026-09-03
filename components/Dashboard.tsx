@@ -14,8 +14,9 @@ import RawDataView from "./RawDataView";
 import ProductMaster from "./ProductMaster";
 import UploadPanel from "./UploadPanel";
 import NotesView, { type BatchNoteEntry } from "./NotesView";
+import StokBahanView from "./StokBahanView";
 
-type Tab = "batches" | "anomalies" | "notes" | "raw" | "products" | "upload";
+type Tab = "batches" | "anomalies" | "notes" | "stok" | "raw" | "products" | "upload";
 
 const ANOM_TYPES: { value: string; label: string }[] = [
   { value: "HIGH_CUTTING_COST", label: "Biaya potong tinggi" },
@@ -210,6 +211,8 @@ const applyFilters = useCallback(async () => {
 
       {tab === "notes" && <NotesView notes={notes} onOpenBatch={setOpenBatch} />}
 
+      {tab === "stok" && <StokBahanView items={analysis?.sku_hist ?? []} />}
+
       {tab === "raw" && <RawDataView onOpenBatch={setOpenBatch} noteMap={noteMap} />}
 
       {tab === "products" && <ProductMaster />}
@@ -267,6 +270,7 @@ function Header({
     { id: "batches", label: "Item RTL" },
     { id: "anomalies", label: "Anomali", count: analysis?.anomalies.length ?? 0 },
     { id: "notes", label: "Catatan", count: notes.length },
+    { id: "stok", label: "Stok Bahan" },
     { id: "raw", label: "Data mentah" },
     { id: "products", label: "Master produk" },
     ...(isViewer ? [] : [{ id: "upload" as Tab, label: "Upload", count: undefined as number | undefined }]),
