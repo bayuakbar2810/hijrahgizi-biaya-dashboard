@@ -234,3 +234,16 @@ export type UploadLogEntry = {
   new_batch: number;
   updated_batch: number;
 };
+
+export type BahanStokRow = {
+  skuKode: string;
+  skuNama: string;
+  kode: string;
+  nama: string;
+  nBatch: number;
+  qty: number;
+  biaya: number;
+  lastDate: string;
+  stokTotal: number;
+  gudang: Array<{ nama: string; qty: number }>;
+};

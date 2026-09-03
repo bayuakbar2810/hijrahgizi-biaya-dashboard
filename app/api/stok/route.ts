@@ -81,6 +81,20 @@ export async function GET(request: Request) {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+  return respond(wanted);
+}
+
+/* POST /api/stok { kode: string[] } — untuk daftar kode yang panjang. */
+export async function POST(request: Request) {
+  if (!readAuth(request)) {
+    return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
+  }
+  const body = (await request.json().catch(() => null)) as { kode?: string[] } | null;
+  const wanted = (body?.kode ?? []).map((s) => String(s).trim()).filter(Boolean);
+  return respond(wanted);
+}
+
+async function respond(wanted: string[]) {
   try {
     const items = await loadStok();
     const out: Record<string, StokItem> = {};

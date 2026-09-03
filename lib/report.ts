@@ -1,6 +1,6 @@
 ﻿import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import type { AnalysisResult, AnomalyRow, BatchDetail } from "./types";
+import type { AnalysisResult, AnomalyRow, BatchDetail, BahanStokRow } from "./types";
 import { fmtIDR, fmtNum, fmtDate } from "./format";
 
 /* Yield dari analisis sudah dalam satuan persen (mis. 100 = 100%) — jangan dikali lagi. */
@@ -603,4 +603,96 @@ export function generateReportPdf(
       ? `laporan-diskusi-top5-${(meta?.from ?? "awal").slice(0, 10)}-${(meta?.to ?? "akhir").slice(0, 10)}.pdf`
       : `laporan-lengkap-${(meta?.from ?? "awal").slice(0, 10)}-${(meta?.to ?? "akhir").slice(0, 10)}.pdf`;
   doc.save(fname);
+}
+/* Laporan bahan terpakai & stok gudang (hanya bahan yang ada di sheet stok). */
+export function generateBahanStokPdf(
+  rows: BahanStokRow[],
+  opts: { fetchedAt?: string | null } = {},
+) {
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const w = doc.internal.pageSize.getWidth();
+
+  doc.setFillColor(...BRAND);
+  doc.rect(0, 0, w, 26, "F");
+  doc.setFillColor(...BRAND_DARK);
+  doc.rect(0, 26, w, 1.4, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("LAPORAN BAHAN TERPAKAI & STOK GUDANG", 14, 12);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.text("Hijrah Gizi Hewani · hanya bahan yang terdaftar di sheet stok · dicocokkan per kode barang", 14, 19);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  const nSku = new Set(rows.map((r) => r.skuKode)).size;
+  doc.text(
+    `${nSku} SKU · ${rows.length} baris bahan` +
+      (opts.fetchedAt ? `\nStok per: ${new Date(opts.fetchedAt).toLocaleString("id-ID")}` : ""),
+    w - 14,
+    12,
+    { align: "right" },
+  );
+
+  const skuNama = (kode: string) =>
+    rows.find((r) => r.skuKode === kode)?.skuNama ?? "";
+
+  let prevSku = "";
+  const body = rows.map((r) => {
+    const firstOfGroup = r.skuKode !== prevSku;
+    prevSku = r.skuKode;
+    return [
+      firstOfGroup ? r.skuKode : "",
+      firstOfGroup ? skuNama(r.skuKode) : "",
+      r.kode,
+      r.nama,
+      r.nBatch,
+      r.qty,
+      r.biaya,
+      fmtDate(r.lastDate),
+      r.stokTotal,
+      r.gudang.map((g) => `${g.nama}: ${g.qty}`).join("; "),
+    ];
+  });
+
+  autoTable(doc, {
+    startY: 34,
+    head: [["SKU", "Nama SKU", "Kode Bahan", "Nama Bahan", "Batch", "Total Qty", "Total Biaya (Rp)", "Terakhir", "Stok", "Letak Gudang"]],
+    body,
+    theme: "grid",
+    styles: { fontSize: 7, cellPadding: 1.4, textColor: INK },
+    headStyles: { fillColor: BRAND, fontSize: 7.2, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: BAND },
+    columnStyles: {
+      0: { fontStyle: "bold" },
+      4: { halign: "right" },
+      5: { halign: "right" },
+      6: { halign: "right" },
+      7: { halign: "center" },
+      8: { halign: "right" },
+    },
+    didParseCell: (data) => {
+      if (data.section === "body" && data.column.index === 8) {
+        const r = rows[data.row.index];
+        if (r) data.cell.styles.textColor = r.stokTotal > 0 ? GREEN : RED;
+      }
+    },
+    margin: { left: 14, right: 14, bottom: 16 },
+  });
+
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(...LINE);
+    doc.setLineWidth(0.2);
+    doc.line(14, doc.internal.pageSize.getHeight() - 12, w - 14, doc.internal.pageSize.getHeight() - 12);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GRAY);
+    doc.text("Hijrah Gizi Hewani · Laporan Bahan Terpakai & Stok Gudang", 14, doc.internal.pageSize.getHeight() - 8);
+    doc.text(`Halaman ${i} dari ${pages} · Dicetak ${new Date().toLocaleString("id-ID")}`, w - 14, doc.internal.pageSize.getHeight() - 8, { align: "right" });
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  doc.save(`bahan-stok-${today}.pdf`);
 }
