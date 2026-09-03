@@ -37,27 +37,30 @@ export async function GET(request: Request) {
   const latest = latestRows[0] as { batch_no: string; tanggal: string } | undefined;
 
   const { rows: currentRows } = await db.query(
-    `SELECT kode, MAX(bahan_biaya) AS nama, SUM(pengeluaran_qty) AS qty
-     FROM production_transactions
-     WHERE batch_no = $1 AND kode <> ''
-       AND (pengeluaran_qty > 0 OR pengeluaran_biaya > 0)
-     GROUP BY kode`,
+    `SELECT t.kode, MAX(t.bahan_biaya) AS nama, SUM(t.pengeluaran_qty) AS qty
+     FROM production_transactions t
+     LEFT JOIN product_master pm ON pm.kode = t.kode
+     WHERE t.batch_no = $1 AND t.kode <> ''
+       AND (t.pengeluaran_qty > 0 OR t.pengeluaran_biaya > 0)
+       AND COALESCE(pm.product_type, 'OTHER') <> 'PACKAGING'
+     GROUP BY t.kode`,
     [latest?.batch_no ?? ""],
   );
 
   const { rows } = await db.query(
-    `SELECT kode,
-            MAX(bahan_biaya) AS nama,
-            COUNT(DISTINCT batch_no)::int AS n_batch,
-            SUM(pengeluaran_qty) AS total_qty,
-            SUM(pengeluaran_biaya) AS total_biaya,
-            MAX(tanggal) AS last_date
-     FROM production_transactions
-     WHERE batch_no = ANY($1::text[])
-       AND kode <> ''
-       AND (pengeluaran_qty > 0 OR pengeluaran_biaya > 0)
-     GROUP BY kode
-     ORDER BY SUM(pengeluaran_qty) DESC`,
+    `SELECT t.kode,
+            MAX(t.bahan_biaya) AS nama,
+            COUNT(DISTINCT t.batch_no)::int AS n_batch,
+            SUM(t.pengeluaran_qty) AS total_qty,
+            MAX(t.tanggal) AS last_date
+     FROM production_transactions t
+     LEFT JOIN product_master pm ON pm.kode = t.kode
+     WHERE t.batch_no = ANY($1::text[])
+       AND t.kode <> ''
+       AND (t.pengeluaran_qty > 0 OR t.pengeluaran_biaya > 0)
+       AND COALESCE(pm.product_type, 'OTHER') <> 'PACKAGING'
+     GROUP BY t.kode
+     ORDER BY SUM(t.pengeluaran_qty) DESC`,
     [batches],
   );
   return NextResponse.json({
