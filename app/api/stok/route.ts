@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { readAuth } from "@/lib/auth";
 
@@ -40,7 +40,7 @@ async function fetchCsv(gid: string): Promise<string> {
   );
   if (!res.ok) {
     throw new Error(
-      `Gagal mengambil sheet stok gid ${gid} (HTTP ${res.status}) — pastikan sheet dibagikan "siapa saja yang memiliki link".`,
+      `Gagal mengambil sheet stok gid ${gid} (HTTP ${res.status}) â€” pastikan sheet dibagikan "siapa saja yang memiliki link".`,
     );
   }
   return res.text();
@@ -132,7 +132,7 @@ async function loadStok(): Promise<{ items: Map<string, StokItem>; gpu: Map<stri
   return cache;
 }
 
-/* GET /api/stok?kode=100929,R102253 — stok bahan & stok GPU untuk kode tertentu. */
+/* GET /api/stok?kode=100929,R102253 â€” stok bahan & stok GPU untuk kode tertentu. */
 export async function GET(request: Request) {
   if (!readAuth(request)) {
     return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
@@ -145,7 +145,7 @@ export async function GET(request: Request) {
   return respond(wanted);
 }
 
-/* POST /api/stok { kode: string[] } — untuk daftar kode yang panjang. */
+/* POST /api/stok { kode: string[] } â€” untuk daftar kode yang panjang. */
 export async function POST(request: Request) {
   if (!readAuth(request)) {
     return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
@@ -165,6 +165,14 @@ async function respond(wanted: string[]) {
     const { items, gpu } = await loadStok();
     const out: Record<string, StokItem> = {};
     const outGpu: Record<string, GpuItem> = {};
+    if (wanted.length === 0) {
+      // tanpa filter: kembalikan seluruh isi sheet (untuk lookup di sisi klien)
+      return NextResponse.json({
+        fetched_at: new Date(cache!.at).toISOString(),
+        items: Object.fromEntries(items),
+        gpu: Object.fromEntries(gpu),
+      });
+    }
     for (const k of wanted) {
       const it = items.get(k) ?? items.get(normKode(k));
       if (it) out[k] = it;

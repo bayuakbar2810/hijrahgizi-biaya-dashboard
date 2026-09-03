@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import type { BahanStokSku, ItemSummary } from "@/lib/types";
@@ -68,32 +68,50 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
     setStokAt(null);
     try {
       const chosen = items.filter((i) => checked.has(i.kode));
-      const lists = await Promise.all(
-        chosen.map(async (i) => {
-          const r = await fetch(`/api/item-bahan?kode=${encodeURIComponent(i.kode)}`);
+      const kodes = chosen.map((i) => i.kode);
+
+      /* Dua request DIJALANKAN BERSAMAAN (stok sekali ambil semua, cache 12 jam) */
+      const [rd, sd] = await Promise.all([
+        fetch("/api/item-bahan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ kodes }),
+        }).then(async (r) => {
           const d = await r.json();
-          return { sku: i, ...d };
+          if (!r.ok) throw new Error(d.error ?? "Gagal memuat bahan");
+          return d;
         }),
-      );
-      const kodeSet = new Set<string>();
-      for (const l of lists) {
-        kodeSet.add(l.sku.kode); // untuk stok GPU (sheet GPU memakai kode tanpa awalan R)
-        for (const b of l.bahan ?? []) kodeSet.add(b.kode);
-        for (const c of l.current ?? []) kodeSet.add(c.kode);
-      }
-      const sres = await fetch("/api/stok", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kode: [...kodeSet] }),
-      });
-      const sd = await sres.json();
-      if (!sres.ok) throw new Error(sd.error ?? "Gagal memuat stok");
-      setStokAt(sd.fetched_at ?? null);
-      const stokBahan = (sd.items ?? {}) as Record<
+        fetch("/api/stok", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ kode: [] }),
+        })
+          .then(async (r) => {
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.error ?? "Gagal memuat stok");
+            setStokAt(d.fetched_at ?? null);
+            return d;
+          })
+          .catch(() => null),
+      ]);
+      const results = (rd.results ?? {}) as Record<
+        string,
+        {
+          n_batches: number;
+          latest: { batch_no: string; tanggal: string } | null;
+          current: Array<{ kode: string; nama: string; qty: number; biaya: number }>;
+          bahan: BahanRow[];
+          history: BahanStokSku["history"];
+        }
+      >;
+      const lists = chosen
+        .filter((i) => results[i.kode])
+        .map((i) => ({ sku: i, ...results[i.kode] }));
+      const stokBahan = (sd?.items ?? {}) as Record<
         string,
         { nama: string; total: number; gudang: Array<{ nama: string; qty: number }> }
       >;
-      const stokGpu = (sd.gpu ?? {}) as Record<
+      const stokGpu = (sd?.gpu ?? {}) as Record<
         string,
         { nama: string; total: number; lokasi: Array<{ nama: string; qty: number }> }
       >;
@@ -117,7 +135,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
             nama: h?.nama ?? String(currentMap.get(k) ?? ""),
             qtyTerakhir: currentMap.has(k) ? currentMap.get(k)! : null,
             biayaTerakhir: currentMap.has(k)
-              ? Number((l.current ?? []).find((c: { kode: string; biaya?: number }) => c.kode === k)?.biaya) || 0
+              ? Number((l.current ?? []).find((c: { kode: string; biaya: number }) => c.kode === k)?.biaya) || 0
               : null,
             qtyHistoris: h ? Number(h.total_qty) || 0 : 0,
             biayaHistoris: h ? Number(h.total_biaya) || 0 : 0,
@@ -129,7 +147,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
           });
         }
         const dateOf = (r: BahanStokSku["rows"][number]) =>
-          r.qtyTerakhir !== null ? l.latestTanggal ?? "" : r.lastDate;
+          r.qtyTerakhir !== null ? l.latest?.tanggal ?? "" : r.lastDate;
         rows.sort(
           (a, b) =>
             dateOf(b).localeCompare(dateOf(a)) ||
