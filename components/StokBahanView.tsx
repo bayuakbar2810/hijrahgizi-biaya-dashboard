@@ -28,6 +28,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
   const [stokAt, setStokAt] = useState<string | null>(null);
   const [stokError, setStokError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [withHistory, setWithHistory] = useState(true);
 
   const filtered = useMemo(() => {
     const ql = q.trim().toLowerCase();
@@ -154,13 +155,13 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
   const exportPdf = async () => {
     if (!skus || skus.length === 0) return;
     const { generateBahanStokPdf } = await import("@/lib/report");
-    generateBahanStokPdf(skus, { fetchedAt: stokAt });
+    generateBahanStokPdf(skus, { fetchedAt: stokAt, includeHistory: withHistory });
   };
 
   const exportExcel = async () => {
     if (!skus || skus.length === 0) return;
     const { downloadBahanStokExcel } = await import("@/lib/excel");
-    downloadBahanStokExcel(skus, { fetchedAt: stokAt });
+    downloadBahanStokExcel(skus, { fetchedAt: stokAt, includeHistory: withHistory });
   };
 
   return (
@@ -248,6 +249,15 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                   Stok per {new Date(stokAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
                 </span>
               )}
+              <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] font-medium text-ink">
+                <input
+                  type="checkbox"
+                  checked={withHistory}
+                  onChange={(e) => setWithHistory(e.target.checked)}
+                  className="h-3.5 w-3.5 cursor-pointer accent-accent"
+                />
+                Sertakan riwayat per batch
+              </label>
               <button
                 onClick={exportPdf}
                 disabled={!skus || skus.length === 0}

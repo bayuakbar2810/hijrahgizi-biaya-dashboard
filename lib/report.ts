@@ -609,8 +609,9 @@ export function generateReportPdf(
 /* Laporan bahan terpakai & stok (gudang + GPU), dipisah per SKU terpilih. */
 export function generateBahanStokPdf(
   skus: BahanStokSku[],
-  opts: { fetchedAt?: string | null } = {},
+  opts: { fetchedAt?: string | null; includeHistory?: boolean } = {},
 ) {
+  const includeHistory = opts.includeHistory !== false;
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const w = doc.internal.pageSize.getWidth();
 
@@ -696,6 +697,7 @@ export function generateBahanStokPdf(
 
     const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
     /* riwayat pemakaian per batch */
+    if (includeHistory) {
     y = y > doc.internal.pageSize.getHeight() - 50 ? (doc.addPage(), 22) : y;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8.5);
@@ -720,6 +722,7 @@ export function generateBahanStokPdf(
     });
     y = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y;
     y += 10;
+    }
   }
 
   const pages = doc.getNumberOfPages();

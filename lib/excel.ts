@@ -5,18 +5,19 @@ import { fmtDate } from "./format";
 /* Workbook bahan & stok per SKU terpilih (dipisah per SKU). */
 export function downloadBahanStokExcel(
   skus: BahanStokSku[],
-  opts: { fetchedAt?: string | null } = {},
+  opts: { fetchedAt?: string | null; includeHistory?: boolean } = {},
 ) {
+  const includeHistory = opts.includeHistory !== false;
   const wb = XLSX.utils.book_new();
   const aoa: (string | number)[][] = [
-    ["LAPORAN BAHAN TERPAKAI & STOK (GUDANG + GPU) â€” HIJRAH GIZI HEWANI"],
+    ["LAPORAN BAHAN TERPAKAI & STOK (GUDANG + GPU) - HIJRAH GIZI HEWANI"],
     ["Dicetak", new Date().toLocaleString("id-ID")],
     ["Stok per", opts.fetchedAt ? new Date(opts.fetchedAt).toLocaleString("id-ID") : "-"],
     [],
   ];
   for (const sku of skus) {
     aoa.push([
-      `SKU ${sku.skuKode} â€” ${sku.skuNama}`,
+      `SKU ${sku.skuKode} - ${sku.skuNama}`,
       `${sku.nBatches} batch historis`,
       sku.latestBatch ? `Batch terakhir: ${sku.latestBatch} (${sku.latestTanggal ?? ""})` : "",
     ]);
@@ -42,20 +43,21 @@ export function downloadBahanStokExcel(
         r.stokGpu !== null ? r.stokGpu : "-",
       ]);
     }
-    aoa.push([]);
-    const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
-    aoa.push(['Riwayat pemakaian per batch (terbaru dulu)']);
-    aoa.push(["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang"]);
-    for (const h of sku.history) {
-      aoa.push([
-        fmtDate(h.tanggal),
-        h.batch_no,
-        h.items.length,
-        h.items.map((it) => `${it.nama} (${it.kode}) = ${it.qty.toFixed(1)}`).join(" | "),
-        h.items.map((it) => `${it.kode}: ${stokOf.get(it.kode) ?? "-"}`).join(" | "),
-      ]);
+    if (includeHistory) {
+      const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
+      aoa.push(["Riwayat pemakaian per batch (terbaru dulu)"]);
+      aoa.push(["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang"]);
+      for (const h of sku.history) {
+        aoa.push([
+          fmtDate(h.tanggal),
+          h.batch_no,
+          h.items.length,
+          h.items.map((it) => `${it.nama} (${it.kode}) = ${it.qty.toFixed(1)}`).join(" | "),
+          h.items.map((it) => `${it.kode}: ${stokOf.get(it.kode) ?? "-"}`).join(" | "),
+        ]);
+      }
+      aoa.push([]);
     }
-    aoa.push([]);
   }
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   XLSX.utils.book_append_sheet(wb, ws, "Bahan & Stok");
