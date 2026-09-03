@@ -94,6 +94,18 @@ CREATE TABLE IF NOT EXISTS batch_history (
 );
 CREATE INDEX IF NOT EXISTS idx_batch_history_batch ON batch_history(batch_no);
 CREATE INDEX IF NOT EXISTS idx_batch_history_time ON batch_history(changed_at);
+
+CREATE TABLE IF NOT EXISTS competitor_survey (
+  id TEXT PRIMARY KEY,
+  tanggal TEXT NOT NULL,
+  kompetitor TEXT NOT NULL,
+  produk TEXT NOT NULL,
+  harga_kompetitor DOUBLE PRECISION NOT NULL,
+  harga_hijrah DOUBLE PRECISION NOT NULL,
+  created_by TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_survey_tanggal ON competitor_survey(tanggal);
 `;
 
 const DEFAULT_SETTINGS: Record<string, string> = {
