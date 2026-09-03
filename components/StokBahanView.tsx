@@ -290,7 +290,9 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
             </p>
           ) : (
             <div className="max-h-[640px] space-y-4 overflow-auto pr-1">
-              {skus.map((sku) => (
+              {skus.map((sku) => {
+                const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
+                return (
                 <div key={sku.skuKode} className="overflow-hidden rounded-xl border border-line">
                   <div className="border-b border-line bg-surface-2/95 px-3 py-2">
                     <span className="tnum font-mono text-[12px] font-semibold text-accent">
@@ -304,18 +306,18 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                         : ""}
                     </span>
                   </div>
-                  <table className="w-full border-collapse">
-                    <thead className="bg-surface-2/60">
-                      <tr>
-                        <Th>Bahan (hanya di sheet stok)</Th>
-                        <Th align="right">Qty dipakai batch terakhir</Th>
-                        <Th align="right">Total dipakai (semua batch)</Th>
-                        <Th align="right">Stok gudang</Th>
-                        <Th>Letak gudang</Th>
-                        <Th align="right">Stok GPU</Th>
-                        
-                      </tr>
-                    </thead>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead className="bg-surface-2/60">
+                        <tr>
+                          <Th>Bahan (hanya di sheet stok)</Th>
+                          <Th align="right">Qty dipakai batch terakhir</Th>
+                          <Th align="right">Total dipakai (semua batch)</Th>
+                          <Th align="right">Stok gudang</Th>
+                          <Th>Letak gudang</Th>
+                          <Th align="right">Stok GPU</Th>
+                        </tr>
+                      </thead>
                     <tbody>
                       {sku.rows.map((r) => (
                         <tr key={r.kode} className="border-t border-line/60">
@@ -391,6 +393,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                       ))}
                     </tbody>
                   </table>
+                </div>
                   <details className="border-t border-line bg-surface-2/40 px-3 py-2">
                     <summary className="cursor-pointer text-[11px] font-semibold text-ink-2 hover:text-ink">
                       Riwayat pemakaian per batch ({sku.history.length} batch  -  terbaru dulu)
@@ -401,7 +404,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                           <tr>
                             <Th>Tanggal produksi</Th>
                             <Th>Batch</Th>
-                            <Th>Bahan dipakai (kode  -  qty)</Th>
+                            <Th>Bahan dipakai (nama (kode) = qty, sisa stok)</Th>
                           </tr>
                         </thead>
                         <tbody>
@@ -413,7 +416,12 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                               <Td mono>{h.batch_no}</Td>
                               <td className="px-3 py-1.5 text-[11px] leading-relaxed text-ink-2">
                                 {h.items
-                                  .map((it) => `${it.nama} (${it.kode}) = ${fmtNum(it.qty, 1)}`)
+                                  .map((it) => {
+                                    const sisa = stokOf.get(it.kode);
+                                    return `${it.nama} (${it.kode}) = ${fmtNum(it.qty, 1)}${
+                                      sisa != null ? ` [sisa stok: ${fmtNum(sisa, 0)}]` : ""
+                                    }`;
+                                  })
                                   .join(" | ")}
                               </td>
                             </tr>
@@ -423,14 +431,15 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                     </div>
                   </details>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
           <p className="mt-2 text-[11px] text-ink-3">
-            Hanya bahan yang terdaftar di sheet stok yang ditampilkan. &ldquo;Qty saat
-            ini&rdquo; = pemakaian bahan pada batch terakhir SKU tersebut; &ldquo;Qty
-            historis&rdquo; = total seluruh batch. Stok GPU = stok produk jadi SKU itu di sheet
-            STOK GPU. Stok disegarkan tiap +/-10 menit.
+            Hanya bahan yang terdaftar di sheet stok yang ditampilkan. &ldquo;Qty dipakai batch
+            terakhir&rdquo; = pemakaian bahan pada batch terakhir SKU tersebut; &ldquo;Total
+            dipakai (semua batch)&rdquo; = total seluruh batch. Stok GPU = stok produk jadi SKU
+            itu di sheet STOK GPU. Stok disinkronkan 2x sehari.
           </p>
         </Panel>
       </div>
