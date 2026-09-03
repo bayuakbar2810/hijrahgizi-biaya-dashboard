@@ -27,9 +27,9 @@ export function downloadBahanStokExcel(
       "Qty dipakai batch terakhir",
       "Total dipakai (semua batch)",
       "Terakhir dipakai",
-      "Stok gudang",
+      "Stok gudang (kg)",
       "Letak gudang",
-      "Stok GPU",
+      "Stok GPU (pcs)",
     ]);
     for (const r of sku.rows) {
       aoa.push([
@@ -46,7 +46,7 @@ export function downloadBahanStokExcel(
     if (includeHistory) {
       const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
       aoa.push(["Riwayat pemakaian per batch (terbaru dulu)"]);
-      aoa.push(["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang"]);
+      aoa.push(["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang (kg)"]);
       for (const h of sku.history) {
         aoa.push([
           fmtDate(h.tanggal),

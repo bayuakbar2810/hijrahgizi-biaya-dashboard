@@ -322,9 +322,9 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                             <Th>Bahan</Th>
                             <Th>Kode</Th>
                             <Th align="right">Qty dipakai</Th>
-                            <Th align="right">Stok gudang</Th>
+                            <Th align="right">Stok gudang (kg)</Th>
                             <Th>Letak gudang</Th>
-                            <Th align="right">Stok GPU</Th>
+                            <Th align="right">Stok GPU (pcs)</Th>
                           </tr>
                         </thead>
                         <tbody>
@@ -420,9 +420,9 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                                 <Th align="right">Jml batch</Th>
                                 <Th align="right">Total qty dipakai</Th>
                                 <Th>Terakhir dipakai</Th>
-                                <Th align="right">Stok gudang</Th>
+                                <Th align="right">Stok gudang (kg)</Th>
                                 <Th>Letak gudang</Th>
-                                <Th align="right">Stok GPU</Th>
+                                <Th align="right">Stok GPU (pcs)</Th>
                               </tr>
                             </thead>
                             <tbody>

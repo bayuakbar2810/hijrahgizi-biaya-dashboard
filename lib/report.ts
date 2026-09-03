@@ -660,7 +660,7 @@ export function generateBahanStokPdf(
     /* tabel bahan utama */
     autoTable(doc, {
       startY: y,
-      head: [["Bahan", "Kode", "Qty dipakai batch terakhir", "Total dipakai (semua batch)", "Terakhir dipakai", "Stok gudang", "Letak gudang", "Stok GPU"]],
+      head: [["Bahan", "Kode", "Qty dipakai batch terakhir", "Total dipakai (semua batch)", "Terakhir dipakai", "Stok gudang (kg)", "Letak gudang", "Stok GPU (pcs)"]],
       body: sku.rows.map((r) => [
         r.nama,
         r.kode,
@@ -706,7 +706,7 @@ export function generateBahanStokPdf(
     y += 4;
     autoTable(doc, {
       startY: y,
-      head: [["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang"]],
+      head: [["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang (kg)"]],
       body: sku.history.map((h) => [
         fmtDate(h.tanggal),
         h.batch_no,
