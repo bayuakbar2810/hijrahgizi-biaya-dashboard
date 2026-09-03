@@ -28,7 +28,10 @@ function penyebab(a: AnomalyRow): string {
   return `HPP sekarang ${a.current}, rata-rata biasanya ${a.historical}${devAbs ? ` - lebih mahal ${devAbs}` : ""}.`;
 }
 
-export function buildWorkbook(result: AnalysisResult, survey: SurveyEntry[] = []): XLSX.WorkBook {
+export function buildWorkbook(
+  result: AnalysisResult,
+  survey: SurveyEntry[] = [],
+): { wb: XLSX.WorkBook; fname: string } {
   const wb = XLSX.utils.book_new();
   const { meta, kpi } = result;
   const rangeLabel = `${meta?.from ?? "awal"} s/d ${meta?.to ?? "akhir"}`;
