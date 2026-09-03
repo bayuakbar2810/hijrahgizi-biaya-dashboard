@@ -24,8 +24,26 @@ export async function GET(request: Request) {
   );
   const batches = (batchRows as Array<{ batch_no: string }>).map((r) => r.batch_no);
   if (batches.length === 0) {
-    return NextResponse.json({ bahan: [], n_batches: 0 });
+    return NextResponse.json({ bahan: [], current: [], latest: null, n_batches: 0 });
   }
+
+  /* Batch terakhir yang memproduksi SKU ini (resep "saat ini"). */
+  const { rows: latestRows } = await db.query(
+    `SELECT batch_no, tanggal FROM production_transactions
+     WHERE kode = $1 AND penyelesaian_qty > 0
+     ORDER BY tanggal DESC, batch_no DESC LIMIT 1`,
+    [kode],
+  );
+  const latest = latestRows[0] as { batch_no: string; tanggal: string } | undefined;
+
+  const { rows: currentRows } = await db.query(
+    `SELECT kode, MAX(bahan_biaya) AS nama, SUM(pengeluaran_qty) AS qty
+     FROM production_transactions
+     WHERE batch_no = $1 AND kode <> ''
+       AND (pengeluaran_qty > 0 OR pengeluaran_biaya > 0)
+     GROUP BY kode`,
+    [latest?.batch_no ?? ""],
+  );
 
   const { rows } = await db.query(
     `SELECT kode,
@@ -39,11 +57,13 @@ export async function GET(request: Request) {
        AND kode <> ''
        AND (pengeluaran_qty > 0 OR pengeluaran_biaya > 0)
      GROUP BY kode
-     ORDER BY SUM(pengeluaran_biaya) DESC`,
+     ORDER BY SUM(pengeluaran_qty) DESC`,
     [batches],
   );
   return NextResponse.json({
     n_batches: batches.length,
+    latest: latest ?? null,
+    current: currentRows,
     bahan: rows,
   });
 }

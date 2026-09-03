@@ -1,6 +1,6 @@
 ﻿import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import type { AnalysisResult, AnomalyRow, BatchDetail, BahanStokRow } from "./types";
+import type { AnalysisResult, AnomalyRow, BatchDetail, BahanStokSku } from "./types";
 import { fmtIDR, fmtNum, fmtDate } from "./format";
 
 /* Yield dari analisis sudah dalam satuan persen (mis. 100 = 100%) — jangan dikali lagi. */
@@ -604,9 +604,10 @@ export function generateReportPdf(
       : `laporan-lengkap-${(meta?.from ?? "awal").slice(0, 10)}-${(meta?.to ?? "akhir").slice(0, 10)}.pdf`;
   doc.save(fname);
 }
-/* Laporan bahan terpakai & stok gudang (hanya bahan yang ada di sheet stok). */
+
+/* Laporan bahan terpakai & stok (gudang + GPU), dipisah per SKU terpilih. */
 export function generateBahanStokPdf(
-  rows: BahanStokRow[],
+  skus: BahanStokSku[],
   opts: { fetchedAt?: string | null } = {},
 ) {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
@@ -619,66 +620,78 @@ export function generateBahanStokPdf(
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text("LAPORAN BAHAN TERPAKAI & STOK GUDANG", 14, 12);
+  doc.text("LAPORAN BAHAN TERPAKAI & STOK (GUDANG + GPU)", 14, 12);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
-  doc.text("Hijrah Gizi Hewani · hanya bahan yang terdaftar di sheet stok · dicocokkan per kode barang", 14, 19);
+  doc.text("Hijrah Gizi Hewani · hanya bahan yang terdaftar di sheet stok · dipisah per SKU", 14, 19);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
-  const nSku = new Set(rows.map((r) => r.skuKode)).size;
+  const totalRows = skus.reduce((s, x) => s + x.rows.length, 0);
   doc.text(
-    `${nSku} SKU · ${rows.length} baris bahan` +
+    `${skus.length} SKU · ${totalRows} baris bahan` +
       (opts.fetchedAt ? `\nStok per: ${new Date(opts.fetchedAt).toLocaleString("id-ID")}` : ""),
     w - 14,
     12,
     { align: "right" },
   );
 
-  const skuNama = (kode: string) =>
-    rows.find((r) => r.skuKode === kode)?.skuNama ?? "";
+  let y = 34;
+  for (const sku of skus) {
+    /* header SKU */
+    y = y > doc.internal.pageSize.getHeight() - 60 ? (doc.addPage(), 22) : y;
+    doc.setFillColor(...BRAND_DARK);
+    doc.roundedRect(14, y, w - 28, 8.5, 1.2, 1.2, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.text(`${sku.skuKode} — ${sku.skuNama}`, 17, y + 5.7);
+    doc.setFontSize(7.5);
+    doc.text(
+      `${sku.nBatches} batch historis` +
+        (sku.latestBatch ? ` · batch terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})` : ""),
+      w - 17,
+      y + 5.7,
+      { align: "right" },
+    );
+    y += 12;
 
-  let prevSku = "";
-  const body = rows.map((r) => {
-    const firstOfGroup = r.skuKode !== prevSku;
-    prevSku = r.skuKode;
-    return [
-      firstOfGroup ? r.skuKode : "",
-      firstOfGroup ? skuNama(r.skuKode) : "",
-      r.kode,
-      r.nama,
-      r.nBatch,
-      r.qty,
-      r.biaya,
-      fmtDate(r.lastDate),
-      r.stokTotal,
-      r.gudang.map((g) => `${g.nama}: ${g.qty}`).join("; "),
-    ];
-  });
-
-  autoTable(doc, {
-    startY: 34,
-    head: [["SKU", "Nama SKU", "Kode Bahan", "Nama Bahan", "Batch", "Total Qty", "Total Biaya (Rp)", "Terakhir", "Stok", "Letak Gudang"]],
-    body,
-    theme: "grid",
-    styles: { fontSize: 7, cellPadding: 1.4, textColor: INK },
-    headStyles: { fillColor: BRAND, fontSize: 7.2, fontStyle: "bold" },
-    alternateRowStyles: { fillColor: BAND },
-    columnStyles: {
-      0: { fontStyle: "bold" },
-      4: { halign: "right" },
-      5: { halign: "right" },
-      6: { halign: "right" },
-      7: { halign: "center" },
-      8: { halign: "right" },
-    },
-    didParseCell: (data) => {
-      if (data.section === "body" && data.column.index === 8) {
-        const r = rows[data.row.index];
-        if (r) data.cell.styles.textColor = r.stokTotal > 0 ? GREEN : RED;
-      }
-    },
-    margin: { left: 14, right: 14, bottom: 16 },
-  });
+    autoTable(doc, {
+      startY: y,
+      head: [["Bahan", "Kode", "Qty saat ini", "Qty historis", "Stok gudang", "Letak gudang", "Stok GPU", "Letak GPU"]],
+      body: sku.rows.map((r) => [
+        r.nama,
+        r.kode,
+        r.qtySekarang !== null ? fmtNum(r.qtySekarang, 1) : "-",
+        fmtNum(r.qtyHistoris, 1),
+        fmtNum(r.stokGudang, 0),
+        r.gudang.map((g) => `${g.nama}: ${fmtNum(g.qty, 0)}`).join("; "),
+        r.stokGpu !== null ? fmtNum(r.stokGpu, 0) : "-",
+        r.gpu && r.gpu.length > 0 ? r.gpu.map((g) => `${g.nama}: ${fmtNum(g.qty, 0)}`).join("; ") : "kosong",
+      ]),
+      theme: "grid",
+      styles: { fontSize: 7, cellPadding: 1.4, textColor: INK },
+      headStyles: { fillColor: BRAND, fontSize: 7.2, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: BAND },
+      columnStyles: {
+        2: { halign: "right" },
+        3: { halign: "right" },
+        4: { halign: "right" },
+        6: { halign: "right" },
+      },
+      didParseCell: (data) => {
+        if (data.section === "body" && (data.column.index === 4 || data.column.index === 6)) {
+          const r = sku.rows[data.row.index];
+          if (r) {
+            const v = data.column.index === 4 ? r.stokGudang : (r.stokGpu ?? 0);
+            data.cell.styles.textColor = v > 0 ? GREEN : RED;
+          }
+        }
+      },
+      margin: { left: 14, right: 14, bottom: 16 },
+    });
+    y = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y;
+    y += 10;
+  }
 
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
@@ -689,10 +702,9 @@ export function generateBahanStokPdf(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(...GRAY);
-    doc.text("Hijrah Gizi Hewani · Laporan Bahan Terpakai & Stok Gudang", 14, doc.internal.pageSize.getHeight() - 8);
+    doc.text("Hijrah Gizi Hewani · Laporan Bahan Terpakai & Stok (Gudang + GPU)", 14, doc.internal.pageSize.getHeight() - 8);
     doc.text(`Halaman ${i} dari ${pages} · Dicetak ${new Date().toLocaleString("id-ID")}`, w - 14, doc.internal.pageSize.getHeight() - 8, { align: "right" });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  doc.save(`bahan-stok-${today}.pdf`);
+  doc.save(`bahan-stok-${new Date().toISOString().slice(0, 10)}.pdf`);
 }

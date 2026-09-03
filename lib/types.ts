@@ -247,3 +247,22 @@ export type BahanStokRow = {
   stokTotal: number;
   gudang: Array<{ nama: string; qty: number }>;
 };
+
+/* Satu SKU terpilih: bahan saat ini (batch terakhir), histori, stok gudang & stok GPU. */
+export type BahanStokSku = {
+  skuKode: string;
+  skuNama: string;
+  nBatches: number;
+  latestBatch: string | null;
+  latestTanggal: string | null;
+  rows: Array<{
+    kode: string;
+    nama: string;
+    qtySekarang: number | null;
+    qtyHistoris: number;
+    stokGudang: number;
+    gudang: Array<{ nama: string; qty: number }>;
+    stokGpu: number | null;
+    gpu: Array<{ nama: string; qty: number }> | null;
+  }>;
+};
