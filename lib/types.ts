@@ -258,7 +258,7 @@ export type BahanStokSku = {
   history: Array<{
     batch_no: string;
     tanggal: string;
-    items: Array<{ kode: string; nama: string; qty: number }>;
+    items: Array<{ kode: string; nama: string; qty: number; biaya: number }>;
   }>;
   rows: Array<{
     kode: string;

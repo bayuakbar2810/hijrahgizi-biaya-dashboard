@@ -765,14 +765,21 @@ export function generateBahanStokPdf(
     y += 4;
     autoTable(doc, {
       startY: y,
-      head: [["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang (kg)"]],
-      body: sku.history.map((h) => [
-        fmtDate(h.tanggal),
-        h.batch_no,
-        String(h.items.length),
-        h.items.map((it) => `${it.nama} (${it.kode}) = ${it.qty.toFixed(1)}`).join(" | "),
-        h.items.map((it) => `${it.kode}: ${stokOf.get(it.kode) ?? "-"}`).join(" | "),
-      ]),
+      head: [["Tanggal produksi", "Batch", "Bahan", "Qty dipakai", "Biaya (Rp)", "Biaya satuan (Rp)", "Sisa stok (kg)"]],
+      body: sku.history.flatMap((h) =>
+        h.items.map((it, idx) => {
+          const satuan = it.qty > 0 ? it.biaya / it.qty : null;
+          return [
+            idx === 0 ? fmtDate(h.tanggal) : "",
+            idx === 0 ? h.batch_no : "",
+            `${it.nama} (${it.kode})`,
+            String(Number(it.qty.toFixed(6))),
+            fmtIDR(it.biaya),
+            satuan != null ? `Rp${fmtNum(satuan, 2)}` : "-",
+            stokOf.get(it.kode) != null ? fmtNum(stokOf.get(it.kode)!, 0) : "-",
+          ];
+        }),
+      ),
       theme: "grid",
       styles: { fontSize: 8.5, cellPadding: 1.2, textColor: INK },
       headStyles: { fillColor: BRAND_DARK, textColor: 255, fontSize: 8.5, fontStyle: "bold" },

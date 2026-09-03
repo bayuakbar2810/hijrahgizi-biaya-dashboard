@@ -25,7 +25,9 @@ export function downloadBahanStokExcel(
       "Bahan",
       "Kode",
       "Qty dipakai batch terakhir",
+      "Biaya batch terakhir (Rp)",
       "Total dipakai (semua batch)",
+      "Total biaya (Rp)",
       "Terakhir dipakai",
       "Stok gudang (kg)",
       "Letak gudang",
@@ -35,8 +37,10 @@ export function downloadBahanStokExcel(
       aoa.push([
         r.nama,
         r.kode,
-        r.qtyTerakhir !== null ? Number(r.qtyTerakhir.toFixed(2)) : "-",
-        Number(r.qtyHistoris.toFixed(2)),
+        r.qtyTerakhir !== null ? Number(r.qtyTerakhir.toFixed(6)) : "-",
+        r.biayaTerakhir !== null ? r.biayaTerakhir : "-",
+        Number(r.qtyHistoris.toFixed(6)),
+        r.biayaHistoris,
         fmtDate(r.lastDate),
         r.stokGudang,
         r.gudang.map((g) => `${g.nama}: ${g.qty}`).join("; "),
@@ -45,16 +49,32 @@ export function downloadBahanStokExcel(
     }
     if (includeHistory) {
       const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
+      aoa.push([]);
       aoa.push(["Riwayat pemakaian per batch (terbaru dulu)"]);
-      aoa.push(["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang (kg)"]);
+      aoa.push([
+        "Tanggal produksi",
+        "Batch",
+        "Bahan",
+        "Kode bahan",
+        "Qty dipakai",
+        "Biaya (Rp)",
+        "Biaya satuan (Rp)",
+        "Sisa stok (kg)",
+      ]);
       for (const h of sku.history) {
-        aoa.push([
-          fmtDate(h.tanggal),
-          h.batch_no,
-          h.items.length,
-          h.items.map((it) => `${it.nama} (${it.kode}) = ${it.qty.toFixed(1)}`).join(" | "),
-          h.items.map((it) => `${it.kode}: ${stokOf.get(it.kode) ?? "-"}`).join(" | "),
-        ]);
+        for (const it of h.items) {
+          const satuan = it.qty > 0 ? it.biaya / it.qty : null;
+          aoa.push([
+            fmtDate(h.tanggal),
+            h.batch_no,
+            it.nama,
+            it.kode,
+            Number(it.qty.toFixed(6)),
+            it.biaya,
+            satuan != null ? Number(satuan.toFixed(2)) : "-",
+            stokOf.get(it.kode) ?? "-",
+          ]);
+        }
       }
       aoa.push([]);
     }

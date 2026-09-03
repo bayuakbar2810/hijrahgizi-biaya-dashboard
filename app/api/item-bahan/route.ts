@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { readAuth } from "@/lib/auth";
 
@@ -18,7 +18,16 @@ export async function GET(request: Request) {
   if (!kode) {
     return NextResponse.json({ error: "kode wajib diisi" }, { status: 400 });
   }
-  return respond([kode], { [kode]: null });
+  const res = await respond([kode]);
+  const j = (await res.json()) as { results?: Record<string, unknown> };
+  const entry = (j.results?.[kode] ?? {
+    bahan: [],
+    current: [],
+    latest: null,
+    n_batches: 0,
+    history: [],
+  }) as Record<string, unknown>;
+  return NextResponse.json(entry);
 }
 
 export async function POST(request: Request) {
@@ -33,7 +42,7 @@ export async function POST(request: Request) {
   return respond(kodes, {});
 }
 
-async function respond(kodes: string[], empty: Record<string, unknown>) {
+async function respond(kodes: string[], empty: Record<string, unknown> = {}) {
   const db = await getDb();
 
   /* 1. Semua batch produksi per SKU (sekaligus tanggal utk batch terakhir) - 1 query */
@@ -73,7 +82,7 @@ async function respond(kodes: string[], empty: Record<string, unknown>) {
 
   /* 2. Riwayat pemakaian per batch (tanpa kemasan & biaya proses & item RTL) - 1 query */
   const { rows: histRows } = await db.query(
-    `SELECT t.batch_no, t.tanggal, t.kode, MAX(t.bahan_biaya) AS nama, SUM(t.pengeluaran_qty) AS qty
+    `SELECT t.batch_no, t.tanggal, t.kode, MAX(t.bahan_biaya) AS nama, SUM(t.pengeluaran_qty) AS qty, SUM(t.pengeluaran_biaya) AS biaya
      FROM production_transactions t
      LEFT JOIN product_master pm ON pm.kode = t.kode
      WHERE t.batch_no = ANY($1::text[])
@@ -84,14 +93,14 @@ async function respond(kodes: string[], empty: Record<string, unknown>) {
      GROUP BY t.batch_no, t.tanggal, t.kode`,
     [batchList],
   );
-  const histByBatch = new Map<string, { batch_no: string; tanggal: string; items: Array<{ kode: string; nama: string; qty: number }> }>();
-  for (const h of histRows as Array<{ batch_no: string; tanggal: string; kode: string; nama: string; qty: string }>) {
+  const histByBatch = new Map<string, { batch_no: string; tanggal: string; items: Array<{ kode: string; nama: string; qty: number; biaya: number }> }>();
+  for (const h of histRows as Array<{ batch_no: string; tanggal: string; kode: string; nama: string; qty: string; biaya: string }>) {
     let e = histByBatch.get(h.batch_no);
     if (!e) {
       e = { batch_no: h.batch_no, tanggal: h.tanggal, items: [] };
       histByBatch.set(h.batch_no, e);
     }
-    e.items.push({ kode: h.kode, nama: h.nama, qty: Number(h.qty) || 0 });
+    e.items.push({ kode: h.kode, nama: h.nama, qty: Number(h.qty) || 0, biaya: Number(h.biaya) || 0 });
   }
   const history = [...histByBatch.values()].sort((a, b) => b.tanggal.localeCompare(a.tanggal));
 

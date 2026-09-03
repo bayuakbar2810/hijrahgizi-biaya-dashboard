@@ -538,42 +538,59 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                       <summary className="cursor-pointer text-[11px] font-semibold text-ink-2 hover:text-ink">
                         Riwayat pemakaian per batch ({sku.history.length} batch - terbaru dulu)
                       </summary>
-                      <div className="mt-2 max-h-72 overflow-auto rounded-lg border border-line bg-white">
-                      <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-surface-2">
-                          <tr>
-                            <Th>Tanggal produksi</Th>
-                            <Th>Batch</Th>
-                            <Th align="right">Jml bahan</Th>
-                            <Th>Bahan dipakai</Th>
-                            <Th>Sisa stok di gudang</Th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sku.history.map((h) => (
-                            <tr key={h.batch_no} className="border-t border-line/60 align-top">
-                              <Td mono muted>
-                                {fmtDate(h.tanggal)}
-                              </Td>
-                              <Td mono>{h.batch_no}</Td>
-                              <Td align="right">{fmtNum(h.items.length, 0)}</Td>
-                              <td className="max-w-[340px] px-3 py-1.5 text-[11px] leading-relaxed text-ink-2">
-                                {h.items
-                                  .map((it) => `${it.nama} (${it.kode}) = ${fmtNum(it.qty, 1)}`)
-                                  .join(" | ")}
-                              </td>
-                              <td className="max-w-[220px] px-3 py-1.5 text-[11px] leading-relaxed">
-                                {h.items
-                                  .map((it) => {
-                                    const sisa = stokOf.get(it.kode);
-                                    return `${it.kode}: ${sisa != null ? fmtNum(sisa, 0) : "-"}`;
-                                  })
-                                  .join(" | ")}
-                              </td>
+                      <div className="mt-2 max-h-96 overflow-auto rounded-lg border border-line bg-white">
+                        <table className="w-full border-collapse">
+                          <thead className="sticky top-0 bg-surface-2">
+                            <tr>
+                              <Th>Tanggal produksi</Th>
+                              <Th>Batch</Th>
+                              <Th>Bahan</Th>
+                              <Th align="right">Qty dipakai</Th>
+                              <Th align="right">Biaya (Rp)</Th>
+                              <Th align="right">Biaya satuan (Rp)</Th>
+                              <Th align="right">Sisa stok (kg)</Th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {sku.history.flatMap((h) =>
+                              h.items.map((it, idx) => {
+                                const satuan = it.qty > 0 ? it.biaya / it.qty : null;
+                                const sisa = stokOf.get(it.kode);
+                                return (
+                                  <tr
+                                    key={`${h.batch_no}-${it.kode}-${idx}`}
+                                    className="border-t border-line/60"
+                                  >
+                                    <Td mono muted>
+                                      {idx === 0 ? fmtDate(h.tanggal) : ""}
+                                    </Td>
+                                    <Td mono muted>
+                                      {idx === 0 ? h.batch_no : ""}
+                                    </Td>
+                                    <td className="px-3 py-1.5 text-[12px] text-ink">
+                                      <span className="block truncate" title={`${it.nama} (${it.kode})`}>
+                                        {it.nama}{" "}
+                                        <span className="tnum text-[10px] text-ink-3">({it.kode})</span>
+                                      </span>
+                                    </td>
+                                    <td className="tnum px-3 py-1.5 text-right text-[12px] text-ink">
+                                      {String(Number(it.qty.toFixed(6)))}
+                                    </td>
+                                    <td className="tnum px-3 py-1.5 text-right text-[12px]">
+                                      {fmtIDR(it.biaya)}
+                                    </td>
+                                    <td className="tnum px-3 py-1.5 text-right text-[12px]">
+                                      {satuan != null ? fmtIDR(satuan, true) : "-"}
+                                    </td>
+                                    <td className="tnum px-3 py-1.5 text-right text-[12px]">
+                                      {sisa != null ? fmtNum(sisa, 0) : "-"}
+                                    </td>
+                                  </tr>
+                                );
+                              }),
+                            )}
+                          </tbody>
+                        </table>
                       </div>
                     </details>
                   </div>
