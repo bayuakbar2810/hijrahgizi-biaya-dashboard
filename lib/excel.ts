@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+﻿import * as XLSX from "xlsx";
 import type { BahanStokSku } from "./types";
 import { fmtDate } from "./format";
 
@@ -9,14 +9,14 @@ export function downloadBahanStokExcel(
 ) {
   const wb = XLSX.utils.book_new();
   const aoa: (string | number)[][] = [
-    ["LAPORAN BAHAN TERPAKAI & STOK (GUDANG + GPU) — HIJRAH GIZI HEWANI"],
+    ["LAPORAN BAHAN TERPAKAI & STOK (GUDANG + GPU) â€” HIJRAH GIZI HEWANI"],
     ["Dicetak", new Date().toLocaleString("id-ID")],
     ["Stok per", opts.fetchedAt ? new Date(opts.fetchedAt).toLocaleString("id-ID") : "-"],
     [],
   ];
   for (const sku of skus) {
     aoa.push([
-      `SKU ${sku.skuKode} — ${sku.skuNama}`,
+      `SKU ${sku.skuKode} â€” ${sku.skuNama}`,
       `${sku.nBatches} batch historis`,
       sku.latestBatch ? `Batch terakhir: ${sku.latestBatch} (${sku.latestTanggal ?? ""})` : "",
     ]);
@@ -43,13 +43,16 @@ export function downloadBahanStokExcel(
       ]);
     }
     aoa.push([]);
-    aoa.push(["Riwayat pemakaian per batch (terbaru dulu)"]);
-    aoa.push(["Tanggal produksi", "Batch", "Bahan dipakai (nama (kode) = qty)"]);
+    const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
+    aoa.push(['Riwayat pemakaian per batch (terbaru dulu)']);
+    aoa.push(["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang"]);
     for (const h of sku.history) {
       aoa.push([
         fmtDate(h.tanggal),
         h.batch_no,
+        h.items.length,
         h.items.map((it) => `${it.nama} (${it.kode}) = ${it.qty.toFixed(1)}`).join(" | "),
+        h.items.map((it) => `${it.kode}: ${stokOf.get(it.kode) ?? "-"}`).join(" | "),
       ]);
     }
     aoa.push([]);

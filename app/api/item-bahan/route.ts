@@ -43,6 +43,7 @@ export async function GET(request: Request) {
      WHERE t.batch_no = $1 AND t.kode <> ''
        AND (t.pengeluaran_qty > 0 OR t.pengeluaran_biaya > 0)
        AND COALESCE(pm.product_type, 'OTHER') NOT IN ('PACKAGING', 'PROCESS_COST')
+       AND t.bahan_biaya NOT ILIKE 'rtl%'
      GROUP BY t.kode`,
     [latest?.batch_no ?? ""],
   );
@@ -59,6 +60,7 @@ export async function GET(request: Request) {
        AND t.kode <> ''
        AND (t.pengeluaran_qty > 0 OR t.pengeluaran_biaya > 0)
        AND COALESCE(pm.product_type, 'OTHER') NOT IN ('PACKAGING', 'PROCESS_COST')
+       AND t.bahan_biaya NOT ILIKE 'rtl%'
      GROUP BY t.kode
      ORDER BY SUM(t.pengeluaran_qty) DESC`,
     [batches],
@@ -73,6 +75,7 @@ export async function GET(request: Request) {
        AND t.kode <> ''
        AND (t.pengeluaran_qty > 0 OR t.pengeluaran_biaya > 0)
        AND COALESCE(pm.product_type, 'OTHER') NOT IN ('PACKAGING', 'PROCESS_COST')
+       AND t.bahan_biaya NOT ILIKE 'rtl%'
      GROUP BY t.batch_no, t.tanggal, t.kode`,
     [batches],
   );

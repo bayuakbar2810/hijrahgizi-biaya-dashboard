@@ -497,35 +497,41 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                         Riwayat pemakaian per batch ({sku.history.length} batch - terbaru dulu)
                       </summary>
                       <div className="mt-2 max-h-72 overflow-auto rounded-lg border border-line bg-white">
-                        <table className="w-full border-collapse">
-                          <thead className="sticky top-0 bg-surface-2">
-                            <tr>
-                              <Th>Tanggal produksi</Th>
-                              <Th>Batch</Th>
-                              <Th>Bahan dipakai (nama (kode) = qty, sisa stok)</Th>
+                      <table className="w-full border-collapse">
+                        <thead className="sticky top-0 bg-surface-2">
+                          <tr>
+                            <Th>Tanggal produksi</Th>
+                            <Th>Batch</Th>
+                            <Th align="right">Jml bahan</Th>
+                            <Th>Bahan dipakai</Th>
+                            <Th>Sisa stok di gudang</Th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sku.history.map((h) => (
+                            <tr key={h.batch_no} className="border-t border-line/60 align-top">
+                              <Td mono muted>
+                                {fmtDate(h.tanggal)}
+                              </Td>
+                              <Td mono>{h.batch_no}</Td>
+                              <Td align="right">{fmtNum(h.items.length, 0)}</Td>
+                              <td className="max-w-[340px] px-3 py-1.5 text-[11px] leading-relaxed text-ink-2">
+                                {h.items
+                                  .map((it) => `${it.nama} (${it.kode}) = ${fmtNum(it.qty, 1)}`)
+                                  .join(" | ")}
+                              </td>
+                              <td className="max-w-[220px] px-3 py-1.5 text-[11px] leading-relaxed">
+                                {h.items
+                                  .map((it) => {
+                                    const sisa = stokOf.get(it.kode);
+                                    return `${it.kode}: ${sisa != null ? fmtNum(sisa, 0) : "-"}`;
+                                  })
+                                  .join(" | ")}
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {sku.history.map((h) => (
-                              <tr key={h.batch_no} className="border-t border-line/60 align-top">
-                                <Td mono muted>
-                                  {fmtDate(h.tanggal)}
-                                </Td>
-                                <Td mono>{h.batch_no}</Td>
-                                <td className="px-3 py-1.5 text-[11px] leading-relaxed text-ink-2">
-                                  {h.items
-                                    .map((it) => {
-                                      const sisa = stokOf.get(it.kode);
-                                      return `${it.nama} (${it.kode}) = ${fmtNum(it.qty, 1)}${
-                                        sisa != null ? ` [sisa stok: ${fmtNum(sisa, 0)}]` : ""
-                                      }`;
-                                    })
-                                    .join(" | ")}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                          ))}
+                        </tbody>
+                      </table>
                       </div>
                     </details>
                   </div>

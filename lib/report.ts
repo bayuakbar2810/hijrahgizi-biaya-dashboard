@@ -694,6 +694,7 @@ export function generateBahanStokPdf(
     y = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y;
     y += 8;
 
+    const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
     /* riwayat pemakaian per batch */
     y = y > doc.internal.pageSize.getHeight() - 50 ? (doc.addPage(), 22) : y;
     doc.setFont("helvetica", "bold");
@@ -703,11 +704,13 @@ export function generateBahanStokPdf(
     y += 4;
     autoTable(doc, {
       startY: y,
-      head: [["Tanggal produksi", "Batch", "Bahan dipakai (nama (kode) = qty)"]],
+      head: [["Tanggal produksi", "Batch", "Jml bahan", "Bahan dipakai", "Sisa stok di gudang"]],
       body: sku.history.map((h) => [
         fmtDate(h.tanggal),
         h.batch_no,
+        String(h.items.length),
         h.items.map((it) => `${it.nama} (${it.kode}) = ${it.qty.toFixed(1)}`).join(" | "),
+        h.items.map((it) => `${it.kode}: ${stokOf.get(it.kode) ?? "-"}`).join(" | "),
       ]),
       theme: "grid",
       styles: { fontSize: 6.8, cellPadding: 1.2, textColor: INK },
