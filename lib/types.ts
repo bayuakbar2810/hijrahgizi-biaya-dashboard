@@ -263,12 +263,11 @@ export type BahanStokSku = {
   rows: Array<{
     kode: string;
     nama: string;
-    qtySekarang: number | null;
+    qtyTerakhir: number | null;
     qtyHistoris: number;
     lastDate: string;
     stokGudang: number;
     gudang: Array<{ nama: string; qty: number }>;
     stokGpu: number | null;
-    gpu: Array<{ nama: string; qty: number }> | null;
   }>;
 };

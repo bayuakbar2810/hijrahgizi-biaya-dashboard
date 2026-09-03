@@ -2,8 +2,6 @@ import * as XLSX from "xlsx";
 import type { BahanStokSku } from "./types";
 import { fmtDate } from "./format";
 
-/* Workbook bahan terpakai & stok untuk SKU terpilih. */
-
 /* Workbook bahan & stok per SKU terpilih (dipisah per SKU). */
 export function downloadBahanStokExcel(
   skus: BahanStokSku[],
@@ -23,19 +21,35 @@ export function downloadBahanStokExcel(
       sku.latestBatch ? `Batch terakhir: ${sku.latestBatch} (${sku.latestTanggal ?? ""})` : "",
     ]);
     aoa.push([
-      "Bahan", "Kode", "Qty saat ini", "Qty historis",
-      "Stok gudang", "Letak gudang", "Stok GPU", "Letak GPU",
+      "Bahan",
+      "Kode",
+      "Qty dipakai batch terakhir",
+      "Total dipakai (semua batch)",
+      "Terakhir dipakai",
+      "Stok gudang",
+      "Letak gudang",
+      "Stok GPU",
     ]);
     for (const r of sku.rows) {
       aoa.push([
         r.nama,
         r.kode,
-        r.qtySekarang !== null ? Number(r.qtySekarang.toFixed(2)) : "-",
+        r.qtyTerakhir !== null ? Number(r.qtyTerakhir.toFixed(2)) : "-",
         Number(r.qtyHistoris.toFixed(2)),
+        fmtDate(r.lastDate),
         r.stokGudang,
         r.gudang.map((g) => `${g.nama}: ${g.qty}`).join("; "),
         r.stokGpu !== null ? r.stokGpu : "-",
-        r.gpu && r.gpu.length > 0 ? r.gpu.map((g) => `${g.nama}: ${g.qty}`).join("; ") : "kosong",
+      ]);
+    }
+    aoa.push([]);
+    aoa.push(["Riwayat pemakaian per batch (terbaru dulu)"]);
+    aoa.push(["Tanggal produksi", "Batch", "Bahan dipakai (nama (kode) = qty)"]);
+    for (const h of sku.history) {
+      aoa.push([
+        fmtDate(h.tanggal),
+        h.batch_no,
+        h.items.map((it) => `${it.nama} (${it.kode}) = ${it.qty.toFixed(1)}`).join(" | "),
       ]);
     }
     aoa.push([]);

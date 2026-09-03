@@ -122,21 +122,21 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
             rows.push({
               kode: k,
               nama: h?.nama ?? String(currentMap.get(k) ?? ""),
-              qtySekarang: currentMap.has(k) ? currentMap.get(k)! : null,
+              qtyTerakhir: currentMap.has(k) ? currentMap.get(k)! : null,
               qtyHistoris: h ? Number(h.total_qty) || 0 : 0,
               lastDate: h?.last_date ?? "",
               stokGudang: sBahan.total,
               gudang: sBahan.gudang,
               stokGpu: stokGpu[l.sku.kode] ? stokGpu[l.sku.kode].total : null,
-              gpu: sGpu ? stokGpu[l.sku.kode].lokasi : null,
+              
             });
           }
           const dateOf = (r: BahanStokSku["rows"][number]) =>
-            r.qtySekarang !== null ? l.latestTanggal ?? "" : r.lastDate;
+            r.qtyTerakhir !== null ? l.latestTanggal ?? "" : r.lastDate;
           rows.sort(
             (a, b) =>
               dateOf(b).localeCompare(dateOf(a)) ||
-              (b.qtySekarang ?? -1) - (a.qtySekarang ?? -1) ||
+              (b.qtyTerakhir ?? -1) - (a.qtyTerakhir ?? -1) ||
               b.qtyHistoris - a.qtyHistoris,
           );
           if (rows.length > 0) {
@@ -308,12 +308,12 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                     <thead className="bg-surface-2/60">
                       <tr>
                         <Th>Bahan (hanya di sheet stok)</Th>
-                        <Th align="right">Qty saat ini</Th>
-                        <Th align="right">Qty historis</Th>
+                        <Th align="right">Qty dipakai batch terakhir</Th>
+                        <Th align="right">Total dipakai (semua batch)</Th>
                         <Th align="right">Stok gudang</Th>
                         <Th>Letak gudang</Th>
                         <Th align="right">Stok GPU</Th>
-                        <Th>Letak GPU</Th>
+                        
                       </tr>
                     </thead>
                     <tbody>
@@ -328,9 +328,9 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                             </span>
                           </td>
                           <td className="tnum px-3 py-1.5 text-right">
-                            {r.qtySekarang !== null ? (
+                            {r.qtyTerakhir !== null ? (
                               <span className="text-[13px] font-semibold text-ink">
-                                {fmtNum(r.qtySekarang, 1)}
+                                {fmtNum(r.qtyTerakhir, 1)}
                               </span>
                             ) : (
                               <span className="text-[11px] text-ink-3">-</span>
@@ -385,34 +385,6 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                               </span>
                             ) : (
                               <span className="text-[11px] text-ink-3">-</span>
-                            )}
-                          </td>
-                          <td className="max-w-[220px] px-3 py-1.5">
-                            {r.gpu && r.gpu.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {r.gpu.slice(0, 3).map((g) => (
-                                  <span
-                                    key={g.nama}
-                                    className="tnum rounded-md bg-in-soft px-1.5 py-0.5 text-[10px] text-in"
-                                    title={g.nama}
-                                  >
-                                    {g.nama}: {fmtNum(g.qty, 0)}
-                                  </span>
-                                ))}
-                                {r.gpu.length > 3 && (
-                                  <span
-                                    className="text-[10px] text-ink-3"
-                                    title={r.gpu
-                                      .slice(3)
-                                      .map((g) => `${g.nama}: ${g.qty}`)
-                                      .join(", ")}
-                                  >
-                                    +{r.gpu.length - 3} lokasi
-                                  </span>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-[11px] text-red-600">kosong semua</span>
                             )}
                           </td>
                         </tr>
