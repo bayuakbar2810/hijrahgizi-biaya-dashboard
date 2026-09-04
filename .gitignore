@@ -54,3 +54,4 @@ next-env.d.ts
 .tmp-test/
 scripts/trace3726.mjs
 scripts/v3726.mjs
+scripts/scan2.mjs
