@@ -1,4 +1,4 @@
-﻿import { jsPDF } from "jspdf";
+import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { AnalysisResult, AnomalyRow, BatchDetail, BahanStokSku } from "./types";
 import { fmtIDR, fmtNum, fmtDate } from "./format";
@@ -202,9 +202,9 @@ function drawFooter(doc: jsPDF) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GRAY);
-    doc.text("Hijrah Gizi Hewani Â· Laporan Temuan Anomali Produksi", 14, h - 8);
+    doc.text("Hijrah Gizi Hewani - Laporan Temuan Anomali Produksi", 14, h - 8);
     doc.text(
-      `Halaman ${i} dari ${pages} Â· Dicetak ${new Date().toLocaleString("id-ID")}`,
+      `Halaman ${i} dari ${pages} - Dicetak ${new Date().toLocaleString("id-ID")}`,
       w - 14,
       h - 8,
       { align: "right" },
@@ -303,7 +303,7 @@ function drawEvidence(
   y =
     drawWrapped(
       doc,
-      `Batch ${a.batch_no} Â· ${fmtDate(a.tanggal)} Â· Produk: ${a.sku ?? "-"} ' ${a.nama ?? "-"}`,
+      `Batch ${a.batch_no} - ${fmtDate(a.tanggal)} - Produk: ${a.sku ?? "-"} ' ${a.nama ?? "-"}`,
       14,
       y,
       w - 28,
@@ -434,13 +434,13 @@ function drawEvidence(
           s.qty > 0 ? ` (${fmtNum(s.qty, 1)})` : ""
         }`,
     )
-    .join("   Â·   ");
+    .join("  -  ");
   y = drawWrapped(doc, jenisLine, 14, y + 2, w - 28) + 3;
 
   const hppGabungan =
     detail.total_rtl_output_kg > 0 ? totalInputBiaya / detail.total_rtl_output_kg : null;
   const hppText =
-    `Asal angka HPP: total biaya bahan & proses ${fmtIDR(totalInputBiaya)} Ã· hasil produksi ` +
+    `Asal angka HPP: total biaya bahan & proses ${fmtIDR(totalInputBiaya)}  /  hasil produksi ` +
     `${fmtNum(detail.total_rtl_output_kg, 1)} kg = ${hppGabungan != null ? fmtIDR(hppGabungan) : "-"} per kg ` +
     `(HPP gabungan seluruh produk batch ini; HPP tiap produk ada di Rincian 1).`;
   doc.setFont("helvetica", "bold");
@@ -471,7 +471,7 @@ export function generateReportPdf(
   drawBand(
     doc,
     "LAPORAN TEMUAN ANOMALI PRODUKSI",
-    "Hijrah Gizi Hewani Â· Ringkasan + 5 temuan utama dengan bukti Â· bahan diskusi",
+    "Hijrah Gizi Hewani - Ringkasan + 5 temuan utama dengan bukti - bahan diskusi",
     `Periode: ${rangeLabel}`,
     `Dicetak: ${now}`,
   );
@@ -507,14 +507,14 @@ export function generateReportPdf(
     "Biaya potong tinggi = biaya potong per kg pada batch ini lebih mahal dari rata-rata biasanya.",
     "Yield rendah = hasil produksi (kg) batch ini lebih kecil dari biasanya bila dibanding input dagingnya.",
     "HPP tinggi = harga pokok produksi per kg produk lebih mahal dari rata-rata biasanya.",
-    "Status: ANOMALI = penyimpangan besar Â· PERLU DICERMATI = sedikit menyimpang Â· NORMAL = masih wajar.",
+    "Status: ANOMALI = penyimpangan besar - PERLU DICERMATI = sedikit menyimpang - NORMAL = masih wajar.",
   ];
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...INK);
   for (const l of legend) {
     y = ensureSpace(doc, y, 10);
-    y = drawWrapped(doc, `â€¢  ${l}`, 14, y + 2, w - 28) + 2;
+    y = drawWrapped(doc, ` -   ${l}`, 14, y + 2, w - 28) + 2;
   }
 
   /* ---- 5 temuan utama + bukti ---- */
@@ -586,7 +586,7 @@ export function generateReportPdf(
   const notes = [
     "1. Rata-rata biasanya dihitung dari batch produksi RTL sebelumnya untuk produk yang sama.",
     "2. Selisih = beda nilai sekarang terhadap rata-rata biasanya, dalam persen.",
-    "3. HPP gabungan = total biaya bahan & proses batch Ã· total hasil produksi (kg).",
+    "3. HPP gabungan = total biaya bahan & proses batch  /  total hasil produksi (kg).",
     mode === "diskusi"
       ? "4. Daftar lengkap semua temuan tersedia pada versi lengkap laporan atau di aplikasi dashboard."
       : "4. Rincian interaktif per batch tersedia di aplikasi dashboard.",
@@ -625,12 +625,12 @@ export function generateBahanStokPdf(
   doc.text("LAPORAN BAHAN TERPAKAI & STOK (GUDANG + GPU)", 14, 12);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  doc.text("Hijrah Gizi Hewani Â· hanya bahan yang terdaftar di sheet stok Â· dipisah per SKU", 14, 19);
+  doc.text("Hijrah Gizi Hewani - hanya bahan yang terdaftar di sheet stok - dipisah per SKU", 14, 19);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   const totalRows = skus.reduce((s, x) => s + x.rows.length, 0);
   doc.text(
-    `${skus.length} SKU Â· ${totalRows} baris bahan` +
+    `${skus.length} SKU - ${totalRows} baris bahan` +
       (opts.fetchedAt ? `\nStok per: ${new Date(opts.fetchedAt).toLocaleString("id-ID")}` : ""),
     w - 14,
     12,
@@ -649,7 +649,7 @@ export function generateBahanStokPdf(
     doc.setFontSize(11);
     doc.text(
       `${sku.skuKode} - ${sku.skuNama}` +
-        (gpuTop !== null ? `  -  STOK GPU ${fmtNum(gpuTop, 0)} PCS` : ""),
+        (gpuTop !== null ? ` - STOK GPU ${fmtNum(gpuTop, 0)} PCS` : ""),
       17,
       y + 5.7,
     );
@@ -803,8 +803,8 @@ export function generateBahanStokPdf(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GRAY);
-    doc.text("Hijrah Gizi Hewani Â· Laporan Bahan Terpakai & Stok (Gudang + GPU)", 14, doc.internal.pageSize.getHeight() - 8);
-    doc.text(`Halaman ${i} dari ${pages} Â· Dicetak ${new Date().toLocaleString("id-ID")}`, w - 14, doc.internal.pageSize.getHeight() - 8, { align: "right" });
+    doc.text("Hijrah Gizi Hewani - Laporan Bahan Terpakai & Stok (Gudang + GPU)", 14, doc.internal.pageSize.getHeight() - 8);
+    doc.text(`Halaman ${i} dari ${pages} - Dicetak ${new Date().toLocaleString("id-ID")}`, w - 14, doc.internal.pageSize.getHeight() - 8, { align: "right" });
   }
 
   doc.save(`bahan-stok-${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -829,12 +829,12 @@ export function generateBahanDetailPdf(
   doc.text("LAPORAN DETAIL BAHAN PER SKU RTL", 14, 12);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
-  doc.text("Hijrah Gizi Hewani Â· bahan terakhir dipakai Â· frekuensi pemakaian Â· biaya & biaya satuan Â· stok", 14, 19);
+  doc.text("Hijrah Gizi Hewani - bahan terakhir dipakai - frekuensi pemakaian - biaya & biaya satuan - stok", 14, 19);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   const totalRows = skus.reduce((s, x) => s + x.rows.length, 0);
   doc.text(
-    `${skus.length} SKU Â· ${totalRows} baris bahan` +
+    `${skus.length} SKU - ${totalRows} baris bahan` +
       (opts.fetchedAt ? `\nStok per: ${new Date(opts.fetchedAt).toLocaleString("id-ID")}` : ""),
     w - 14,
     12,
@@ -852,11 +852,15 @@ export function generateBahanDetailPdf(
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10.5);
-    doc.text(`${sku.skuKode} â€” ${sku.skuNama}`, 17, y + 6.3);
+    doc.text(
+      `${sku.skuNama} ( STOK GPU : ${gpuTotal !== null ? fmtNum(gpuTotal, 0) : "-"} PCS )`,
+      17,
+      y + 6.3,
+    );
     doc.setFontSize(8);
     const gpuText = gpuTotal !== null ? `Stok GPU: ${fmtNum(gpuTotal, 0)} pcs` : "";
     doc.text(
-      `${sku.nBatches} batch produksi Â· terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})${gpuText ? " Â· " + gpuText : ""}`,
+      `${sku.nBatches} batch produksi - terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})${gpuText ? " - " + gpuText : ""}`,
       17,
       y + 13,
     );
@@ -940,8 +944,8 @@ export function generateBahanDetailPdf(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...GRAY);
-    doc.text("Hijrah Gizi Hewani Â· Laporan Detail Bahan per SKU RTL", 14, doc.internal.pageSize.getHeight() - 8);
-    doc.text(`Halaman ${i} dari ${pages} Â· Dicetak ${new Date().toLocaleString("id-ID")}`, w - 14, doc.internal.pageSize.getHeight() - 8, { align: "right" });
+    doc.text("Hijrah Gizi Hewani - Laporan Detail Bahan per SKU RTL", 14, doc.internal.pageSize.getHeight() - 8);
+    doc.text(`Halaman ${i} dari ${pages} - Dicetak ${new Date().toLocaleString("id-ID")}`, w - 14, doc.internal.pageSize.getHeight() - 8, { align: "right" });
   }
 
   doc.save(`bahan-detail-${new Date().toISOString().slice(0, 10)}.pdf`);
