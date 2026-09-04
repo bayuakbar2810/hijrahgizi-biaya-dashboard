@@ -173,6 +173,7 @@ async function respond(kodes: string[], empty: Record<string, unknown> = {}) {
         }
         agg.n_batch += 1;
         agg.total_qty += it.qty;
+        agg.total_biaya += it.biaya;
         if (h.tanggal > agg.last_date) agg.last_date = h.tanggal;
         if (it.qty !== 0) agg.nama = it.nama;
       }
