@@ -806,3 +806,138 @@ export function generateBahanStokPdf(
 
   doc.save(`bahan-stok-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
+
+/* PDF detail per SKU: bahan terakhir dipakai, kapan terakhir produksi,
+   bahan yang sering dipakai (berapa kali), biaya & biaya satuan, stok. */
+export function generateBahanDetailPdf(
+  skus: BahanStokSku[],
+  opts: { fetchedAt?: string | null } = {},
+) {
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const w = doc.internal.pageSize.getWidth();
+
+  doc.setFillColor(...BRAND);
+  doc.rect(0, 0, w, 26, "F");
+  doc.setFillColor(...BRAND_DARK);
+  doc.rect(0, 26, w, 1.4, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  doc.text("LAPORAN DETAIL BAHAN PER SKU RTL", 14, 12);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.text("Hijrah Gizi Hewani · bahan terakhir dipakai · frekuensi pemakaian · biaya & biaya satuan · stok", 14, 19);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  const totalRows = skus.reduce((s, x) => s + x.rows.length, 0);
+  doc.text(
+    `${skus.length} SKU · ${totalRows} baris bahan` +
+      (opts.fetchedAt ? `\nStok per: ${new Date(opts.fetchedAt).toLocaleString("id-ID")}` : ""),
+    w - 14,
+    12,
+    { align: "right" },
+  );
+
+  let y = 34;
+  for (const sku of skus) {
+    const gpuTotal = sku.rows.find((r) => r.stokGpu !== null)?.stokGpu ?? null;
+
+    /* header SKU */
+    y = y > doc.internal.pageSize.getHeight() - 80 ? (doc.addPage(), 22) : y;
+    doc.setFillColor(...BRAND_DARK);
+    doc.roundedRect(14, y, w - 28, 9.5, 1.2, 1.2, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.text(`${sku.skuKode} — ${sku.skuNama}`, 17, y + 6.3);
+    doc.setFontSize(8);
+    const gpuText = gpuTotal !== null ? `Stok GPU: ${fmtNum(gpuTotal, 0)} pcs` : "";
+    doc.text(
+      `${sku.nBatches} batch produksi · terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})${gpuText ? " · " + gpuText : ""}`,
+      17,
+      y + 13,
+    );
+    y += 19;
+
+    /* A. bahan terakhir dipakai (batch terakhir) */
+    const currentRows = sku.rows.filter((r) => r.qtyTerakhir !== null);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...GREEN);
+    doc.text(
+      `Bahan terakhir dipakai${sku.latestBatch ? ` (batch ${sku.latestBatch}, ${fmtDate(sku.latestTanggal)})` : ""}`,
+      14,
+      y + 3,
+    );
+    y += 6;
+    autoTable(doc, {
+      startY: y,
+      head: [["Bahan", "Kode", "Qty dipakai", "Biaya (Rp)", "Biaya satuan (Rp)"]],
+      body: currentRows.map((r) => [
+        r.nama,
+        r.kode,
+        fmtNum(r.qtyTerakhir ?? 0, 1),
+        fmtIDR(r.biayaTerakhir ?? 0),
+        r.qtyTerakhir ? `Rp${fmtNum((r.biayaTerakhir ?? 0) / r.qtyTerakhir, 2)}` : "-",
+      ]),
+      theme: "grid",
+      styles: { fontSize: 8.5, cellPadding: 1.4, textColor: INK },
+      headStyles: { fillColor: BRAND, textColor: 255, fontSize: 8.5, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: BAND },
+      columnStyles: { 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
+      margin: { left: 14, right: 14, bottom: 16 },
+    });
+    y = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y;
+    y += 8;
+
+    /* B. bahan yang sering dipakai */
+    y = y > doc.internal.pageSize.getHeight() - 60 ? (doc.addPage(), 22) : y;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...INK);
+    doc.text("Bahan yang sering dipakai selama produksi (semua batch)", 14, y + 3);
+    y += 6;
+    autoTable(doc, {
+      startY: y,
+      head: [["Bahan", "Kode", "Berapa kali dipakai (batch)", "Total qty", "Total biaya (Rp)", "Biaya satuan rata2 (Rp)", "Terakhir dipakai"]],
+      body: sku.rows.map((r) => [
+        r.nama,
+        r.kode,
+        fmtNum(r.nBatch, 0),
+        fmtNum(r.qtyHistoris, 1),
+        fmtIDR(r.biayaHistoris),
+        r.qtyHistoris > 0 ? `Rp${fmtNum(r.biayaHistoris / r.qtyHistoris, 2)}` : "-",
+        fmtDate(r.lastDate),
+      ]),
+      theme: "grid",
+      styles: { fontSize: 8.5, cellPadding: 1.4, textColor: INK },
+      headStyles: { fillColor: BRAND, textColor: 255, fontSize: 8.5, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: BAND },
+      columnStyles: {
+        2: { halign: "right" },
+        3: { halign: "right" },
+        4: { halign: "right" },
+        5: { halign: "right" },
+        6: { halign: "center" },
+      },
+      margin: { left: 14, right: 14, bottom: 16 },
+    });
+    y = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y;
+    y += 12;
+  }
+
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(...LINE);
+    doc.setLineWidth(0.2);
+    doc.line(14, doc.internal.pageSize.getHeight() - 12, w - 14, doc.internal.pageSize.getHeight() - 12);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...GRAY);
+    doc.text("Hijrah Gizi Hewani · Laporan Detail Bahan per SKU RTL", 14, doc.internal.pageSize.getHeight() - 8);
+    doc.text(`Halaman ${i} dari ${pages} · Dicetak ${new Date().toLocaleString("id-ID")}`, w - 14, doc.internal.pageSize.getHeight() - 8, { align: "right" });
+  }
+
+  doc.save(`bahan-detail-${new Date().toISOString().slice(0, 10)}.pdf`);
+}
