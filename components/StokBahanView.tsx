@@ -70,7 +70,26 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
       const chosen = items.filter((i) => checked.has(i.kode));
       const kodes = chosen.map((i) => i.kode);
 
-      /* Dua request DIJALANKAN BERSAMAAN (stok sekali ambil semua, cache 12 jam) */
+      /* Dua request DIJALANKAN BERSAMAAN (stok sekali ambil semua, sinkron 2x sehari) + retry stok */
+      const fetchStok = async (): Promise<unknown | null> => {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            const r = await fetch("/api/stok", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ kode: [] }),
+            });
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.error ?? "Gagal memuat stok");
+            setStokAt(d.fetched_at ?? null);
+            return d;
+          } catch {
+            if (attempt === 1) return null;
+            await new Promise((r2) => setTimeout(r2, 600));
+          }
+        }
+        return null;
+      };
       const [rd, sd] = await Promise.all([
         fetch("/api/item-bahan", {
           method: "POST",
@@ -81,18 +100,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
           if (!r.ok) throw new Error(d.error ?? "Gagal memuat bahan");
           return d;
         }),
-        fetch("/api/stok", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ kode: [] }),
-        })
-          .then(async (r) => {
-            const d = await r.json();
-            if (!r.ok) throw new Error(d.error ?? "Gagal memuat stok");
-            setStokAt(d.fetched_at ?? null);
-            return d;
-          })
-          .catch(() => null),
+        fetchStok(),
       ]);
       const results = (rd.results ?? {}) as Record<
         string,
@@ -130,9 +138,10 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
 
         const unionKodes = new Set<string>([...currentMap.keys(), ...histMap.keys()]);
         const rows: BahanStokSku["rows"] = [];
+        const stokOk = sd !== null; // bila stok gagal dimuat, bahan tetap tampil tanpa info stok
         for (const k of unionKodes) {
           const sBahan = getStokBahan(k);
-          if (!sBahan) continue; // hanya bahan yang terdaftar di sheet stok
+          if (!sBahan && stokOk) continue; // hanya bahan yang terdaftar di sheet stok
           const sGpu = getStokGpu(l.sku.kode);
           const h = histMap.get(k);
           rows.push({
@@ -367,6 +376,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                           <Th align="right">Biaya satuan (Rp)</Th>
                           <Th align="right">Stok gudang (kg)</Th>
                           <Th>Letak gudang</Th>
+                          <Th align="right">Stok GPU (pcs)</Th>
                         </tr>
                         </thead>
                         <tbody>
