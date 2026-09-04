@@ -57,3 +57,5 @@ scripts/v3726.mjs
 scripts/scan2.mjs
 bahan-*.pdf
 bahan-*.xlsx
+scripts/*.mts
+scripts/vb*.mjs
