@@ -348,6 +348,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
             <div className="max-h-[680px] space-y-4 overflow-auto pr-1">
               {skus.map((sku) => {
                 const stokOf = new Map(sku.rows.map((r) => [r.kode, r.stokGudang]));
+                const gpuTop = sku.rows.find((r) => r.stokGpu !== null)?.stokGpu ?? null;
                 const currentRows = sku.rows.filter((r) => r.qtyTerakhir !== null);
                 const histRows = sku.rows.filter((r) => r.qtyTerakhir === null);
                 return (
