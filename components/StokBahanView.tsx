@@ -352,18 +352,23 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                 const histRows = sku.rows.filter((r) => r.qtyTerakhir === null);
                 return (
                   <div key={sku.skuKode} className="overflow-hidden rounded-xl border border-line">
-                    <div className="border-b border-line bg-surface-2/95 px-3 py-2">
-                      <span className="tnum font-mono text-[12px] font-semibold text-accent">
-                        {sku.skuKode}
+                  <div className="border-b border-line bg-surface-2/95 px-3 py-2">
+                    <span className="tnum font-mono text-[12px] font-semibold text-accent">
+                      {sku.skuKode}
+                    </span>
+                    <span className="ml-2 text-[13px] font-bold text-ink">{sku.skuNama}</span>
+                    {gpuTop !== null && (
+                      <span className="tnum ml-2 rounded-md bg-in-soft px-1.5 py-0.5 text-[10px] font-semibold text-in">
+                        STOK GPU : {fmtNum(gpuTop, 0)} PCS
                       </span>
-                      <span className="ml-2 text-[13px] font-bold text-ink">{sku.skuNama}</span>
-                      <span className="tnum ml-2 text-[10px] text-ink-3">
-                        {fmtNum(sku.nBatches, 0)} batch historis
-                        {sku.latestBatch
-                          ? ` - batch terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})`
-                          : ""}
-                      </span>
-                    </div>
+                    )}
+                    <span className="tnum ml-2 text-[10px] text-ink-3">
+                      {fmtNum(sku.nBatches, 0)} batch historis
+                      {sku.latestBatch
+                        ? ` - batch terakhir ${sku.latestBatch} (${fmtDate(sku.latestTanggal)})`
+                        : ""}
+                    </span>
+                  </div>
 
                     <div className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-out">
                       1. Dipakai di batch terakhir (resep saat ini)
@@ -380,7 +385,6 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                           <Th align="right">Biaya satuan (Rp)</Th>
                           <Th align="right">Stok gudang (kg)</Th>
                           <Th>Letak gudang</Th>
-                          <Th align="right">Stok GPU (pcs)</Th>
                         </tr>
                         </thead>
                         <tbody>
