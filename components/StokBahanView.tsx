@@ -115,14 +115,18 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
       const lists = chosen
         .filter((i) => results[i.kode])
         .map((i) => ({ sku: i, ...results[i.kode] }));
-      const stokBahan = (sd?.items ?? {}) as Record<
-        string,
-        { nama: string; total: number; gudang: Array<{ nama: string; qty: number }> }
-      >;
-      const stokGpu = (sd?.gpu ?? {}) as Record<
-        string,
-        { nama: string; total: number; lokasi: Array<{ nama: string; qty: number }> }
-      >;
+      const stokData = (sd ?? {}) as {
+        items?: Record<
+          string,
+          { nama: string; total: number; gudang: Array<{ nama: string; qty: number }> }
+        >;
+        gpu?: Record<
+          string,
+          { nama: string; total: number; lokasi: Array<{ nama: string; qty: number }> }
+        >;
+      };
+      const stokBahan = stokData.items ?? {};
+      const stokGpu = stokData.gpu ?? {};
       /* Kode di sheet tanpa awalan "R" (mis. R102045 -> 102045); cocokkan keduanya */
       const normKode = (k: string) => k.replace(/^R(?=\d)/i, "").trim();
       const getStokBahan = (kode: string) =>
