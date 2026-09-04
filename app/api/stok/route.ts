@@ -34,16 +34,25 @@ let cache: {
 } | null = null;
 
 async function fetchCsv(gid: string): Promise<string> {
-  const res = await fetch(
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) {
-    throw new Error(
-      `Gagal mengambil sheet stok gid ${gid} (HTTP ${res.status}) â€” pastikan sheet dibagikan "siapa saja yang memiliki link".`,
-    );
+  let lastErr: unknown = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(
+        `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`,
+        { cache: "no-store" },
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const txt = await res.text();
+      if (!txt || txt.length < 100) throw new Error("CSV terpotong/kosong");
+      return txt;
+    } catch (e) {
+      lastErr = e;
+      await new Promise((r) => setTimeout(r, 800));
+    }
   }
-  return res.text();
+  throw new Error(
+    `Gagal mengambil sheet stok (gid ${gid}): ${lastErr instanceof Error ? lastErr.message : "unknown"}`,
+  );
 }
 
 function parseCsvRows(csv: string): string[][] {
