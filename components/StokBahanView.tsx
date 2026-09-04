@@ -367,7 +367,6 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                           <Th align="right">Biaya satuan (Rp)</Th>
                           <Th align="right">Stok gudang (kg)</Th>
                           <Th>Letak gudang</Th>
-                          <Th align="right">Stok GPU (pcs)</Th>
                         </tr>
                         </thead>
                         <tbody>
@@ -431,19 +430,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                                   <span className="text-[11px] text-red-600">kosong semua</span>
                                 )}
                               </td>
-                              <td className="tnum px-3 py-1.5 text-right">
-                                {r.stokGpu !== null ? (
-                                  <span
-                                    className={`text-[13px] font-semibold ${
-                                      r.stokGpu > 0 ? "text-in" : "text-red-600"
-                                    }`}
-                                  >
-                                    {fmtNum(r.stokGpu, 0)}
-                                  </span>
-                                ) : (
-                                  <span className="text-[11px] text-ink-3">-</span>
-                                )}
-                              </td>
+
                             </tr>
                           ))}
                           {currentRows.length === 0 && (
@@ -535,26 +522,13 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                                           </span>
                                         )}
                                       </div>
-                                    ) : (
-                                      <span className="text-[11px] text-red-600">kosong semua</span>
-                                    )}
-                                  </td>
-                                  <td className="tnum px-3 py-1.5 text-right">
-                                    {r.stokGpu !== null ? (
-                                      <span
-                                        className={`text-[13px] font-semibold ${
-                                          r.stokGpu > 0 ? "text-in" : "text-red-600"
-                                        }`}
-                                      >
-                                        {fmtNum(r.stokGpu, 0)}
-                                      </span>
-                                    ) : (
-                                      <span className="text-[11px] text-ink-3">-</span>
-                                    )}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
+                                     ) : (
+                                       <span className="text-[11px] text-red-600">kosong semua</span>
+                                     )}
+                                   </td>
+                                 </tr>
+                               ))}
+                             </tbody>
                           </table>
                         </div>
                       </>

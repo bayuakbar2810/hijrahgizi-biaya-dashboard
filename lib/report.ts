@@ -1,4 +1,4 @@
-import { jsPDF } from "jspdf";
+﻿import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { AnalysisResult, AnomalyRow, BatchDetail, BahanStokSku } from "./types";
 import { fmtIDR, fmtNum, fmtDate } from "./format";
@@ -879,7 +879,7 @@ export function generateBahanDetailPdf(
     y += 6;
     autoTable(doc, {
       startY: y,
-      head: [["Bahan", "Kode", "Qty dipakai", "Biaya (Rp)", "Biaya satuan (Rp)"]],
+      head: [["Bahan", "Kode", "Qty dipakai", "Biaya (Rp)", "Biaya satuan (Rp)", "Stok gudang (kg)", "Letak gudang"]],
       body: currentRows.map((r) => [
         r.nama,
         r.kode,
