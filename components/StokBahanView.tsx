@@ -115,6 +115,11 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
         string,
         { nama: string; total: number; lokasi: Array<{ nama: string; qty: number }> }
       >;
+      /* Kode di sheet tanpa awalan "R" (mis. R102045 -> 102045); cocokkan keduanya */
+      const normKode = (k: string) => k.replace(/^R(?=\d)/i, "").trim();
+      const getStokBahan = (kode: string) =>
+        stokBahan[kode] ?? stokBahan[normKode(kode)];
+      const getStokGpu = (kode: string) => stokGpu[kode] ?? stokGpu[normKode(kode)];
 
       const out: BahanStokSku[] = [];
       for (const l of lists) {
@@ -126,9 +131,9 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
         const unionKodes = new Set<string>([...currentMap.keys(), ...histMap.keys()]);
         const rows: BahanStokSku["rows"] = [];
         for (const k of unionKodes) {
-          const sBahan = stokBahan[k];
+          const sBahan = getStokBahan(k);
           if (!sBahan) continue; // hanya bahan yang terdaftar di sheet stok
-          const sGpu = stokGpu[l.sku.kode] ? stokGpu[l.sku.kode] : null;
+          const sGpu = getStokGpu(l.sku.kode);
           const h = histMap.get(k);
           rows.push({
             kode: k,
@@ -143,7 +148,7 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
             lastDate: h?.last_date ?? "",
             stokGudang: sBahan.total,
             gudang: sBahan.gudang,
-            stokGpu: stokGpu[l.sku.kode] ? stokGpu[l.sku.kode].total : null,
+            stokGpu: sGpu ? sGpu.total : null,
           });
         }
         const dateOf = (r: BahanStokSku["rows"][number]) =>
