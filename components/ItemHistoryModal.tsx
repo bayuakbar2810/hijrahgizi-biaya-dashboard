@@ -143,7 +143,7 @@ export default function ItemHistoryModal({
             className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-ink-3 hover:bg-surface-2 hover:text-ink"
             aria-label="Tutup"
           >
-            âœ•
+            ✕
           </button>
         </div>
 

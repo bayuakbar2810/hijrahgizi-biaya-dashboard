@@ -364,10 +364,11 @@ export default function StokBahanView({ items }: { items: ItemSummary[] }) {
                           <Th>Kode</Th>
                           <Th align="right">Qty dipakai</Th>
                           <Th align="right">Biaya (Rp)</Th>
-                                <Th align="right">Biaya satuan (Rp)</Th>
-                                <Th align="right">Stok gudang (kg)</Th>
-                                <Th>Letak gudang</Th>
-                              </tr>
+                          <Th align="right">Biaya satuan (Rp)</Th>
+                          <Th align="right">Stok gudang (kg)</Th>
+                          <Th>Letak gudang</Th>
+                          <Th align="right">Stok GPU (pcs)</Th>
+                        </tr>
                         </thead>
                         <tbody>
                           {currentRows.map((r) => (
