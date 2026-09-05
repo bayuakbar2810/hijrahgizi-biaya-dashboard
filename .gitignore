@@ -59,3 +59,4 @@ bahan-*.pdf
 bahan-*.xlsx
 scripts/*.mts
 scripts/vb*.mjs
+scripts/v*.mjs
