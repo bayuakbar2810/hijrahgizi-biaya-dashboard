@@ -906,7 +906,7 @@ export function generateBahanDetailPdf(
     y += 6;
     autoTable(doc, {
       startY: y,
-      head: [["Bahan", "Kode", "Berapa kali dipakai (batch)", "Total qty", "Total biaya (Rp)", "Biaya satuan rata2 (Rp)", "Terakhir dipakai", "Stok GPU (pcs)"]],
+      head: [["Bahan", "Kode", "Berapa kali dipakai (batch)", "Total qty", "Total biaya (Rp)", "Biaya satuan rata2 (Rp)", "Terakhir dipakai", "Stok gudang (kg)", "Letak gudang"]],
       body: sku.rows.map((r) => [
         r.nama,
         r.kode,
@@ -915,7 +915,8 @@ export function generateBahanDetailPdf(
         fmtIDR(r.biayaHistoris),
         r.qtyHistoris > 0 ? `Rp${fmtNum(r.biayaHistoris / r.qtyHistoris, 2)}` : "-",
         fmtDate(r.lastDate),
-        r.stokGpu !== null ? fmtNum(r.stokGpu, 0) : "-",
+        fmtNum(r.stokGudang, 0),
+        r.gudang.map((g) => `${g.nama}: ${fmtNum(g.qty, 0)}`).join("; "),
       ]),
       theme: "grid",
       styles: { fontSize: 8.5, cellPadding: 1.4, textColor: INK },
